@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-12T21:11:11Z",
-    "commit": "3209c9eb2dce66b4a4708e5573391d98e6b79613",
-    "dirty": true,
+    "generated_at": "2026-07-12T21:12:00Z",
+    "commit": "0662fe0083b79c3fbaea03ab5f0c73a18c380300",
+    "dirty": false,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
     "evidence": {
