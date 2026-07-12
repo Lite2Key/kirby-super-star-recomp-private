@@ -1,0 +1,804 @@
+{
+  "blocks": [
+    {
+      "first_cycle": 1454,
+      "hits": 1,
+      "last_cycle": 1454,
+      "mode": {
+        "emulation": true,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35828,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1456,
+      "hits": 1,
+      "last_cycle": 1456,
+      "mode": {
+        "emulation": true,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35829,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1459,
+      "hits": 1,
+      "last_cycle": 1459,
+      "mode": {
+        "emulation": true,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35830,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1462,
+      "hits": 1,
+      "last_cycle": 1462,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35831,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1467,
+      "hits": 1,
+      "last_cycle": 1467,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35833,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1475,
+      "hits": 1,
+      "last_cycle": 1475,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35836,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1482,
+      "hits": 1,
+      "last_cycle": 1482,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35839,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1484,
+      "hits": 1,
+      "last_cycle": 1484,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35841,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1488,
+      "hits": 1,
+      "last_cycle": 1488,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35844,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1495,
+      "hits": 1,
+      "last_cycle": 1495,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35847,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1498,
+      "hits": 1,
+      "last_cycle": 1498,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35849,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1506,
+      "hits": 1,
+      "last_cycle": 1506,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35852,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1513,
+      "hits": 1,
+      "last_cycle": 1513,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35855,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1520,
+      "hits": 1,
+      "last_cycle": 1520,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35858,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1527,
+      "hits": 1,
+      "last_cycle": 1527,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": true
+      },
+      "pc": 35861,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1532,
+      "hits": 1,
+      "last_cycle": 1532,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35863,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1538,
+      "hits": 1,
+      "last_cycle": 1538,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35866,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1544,
+      "hits": 1,
+      "last_cycle": 1544,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35869,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 1550,
+      "hits": 2047,
+      "last_cycle": 22001,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35872,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 22011,
+      "hits": 1,
+      "last_cycle": 22011,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35875,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 22016,
+      "hits": 1,
+      "last_cycle": 22016,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35878,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 22022,
+      "hits": 1,
+      "last_cycle": 22022,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35881,
+      "processor": "sa1"
+    },
+    {
+      "first_cycle": 22028,
+      "hits": 2932,
+      "last_cycle": 56021,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "pc": 35884,
+      "processor": "sa1"
+    }
+  ],
+  "capture": {
+    "bounded": true,
+    "end_reason": "limit",
+    "event_count": 5000,
+    "limit": 5000
+  },
+  "edges": [
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": true,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35828,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": true,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35829,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": true,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35829,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": true,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35830,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": true,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35830,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35831,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35831,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35833,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35833,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35836,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35836,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35839,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35839,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35841,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35841,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35844,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35844,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35847,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35847,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35849,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35849,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35852,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35852,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35855,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35855,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35858,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35858,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35861,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": true,
+          "x8": true
+        },
+        "pc": 35861,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35863,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35863,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35866,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35866,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35869,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35869,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35872,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 2046,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35872,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35872,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35872,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35875,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35875,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35878,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35878,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35881,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 1,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35881,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35884,
+        "processor": "sa1"
+      }
+    },
+    {
+      "hits": 2931,
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35884,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35884,
+        "processor": "sa1"
+      }
+    }
+  ],
+  "processors": {
+    "sa1": {
+      "events": 5000,
+      "unique_blocks": 23
+    },
+    "scpu": {
+      "events": 0,
+      "unique_blocks": 0
+    }
+  },
+  "schema_version": 1,
+  "source_format": "mesen-ce-kss-trace-v1"
+}

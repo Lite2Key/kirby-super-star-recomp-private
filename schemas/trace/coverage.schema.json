@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/trace/coverage.schema.json",
+  "title": "ROM-free dual-CPU execution coverage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "capture", "processors", "blocks", "edges"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_format": { "const": "mesen-ce-kss-trace-v1" },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["limit", "event_count", "end_reason", "bounded"],
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "event_count": { "type": "integer", "minimum": 1 },
+        "end_reason": { "enum": ["limit", "complete", "missing_end_marker"] },
+        "bounded": { "const": true }
+      }
+    },
+    "processors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scpu", "sa1"],
+      "properties": {
+        "scpu": { "$ref": "#/$defs/processorCoverage" },
+        "sa1": { "$ref": "#/$defs/processorCoverage" }
+      }
+    },
+    "blocks": { "type": "array", "items": { "$ref": "#/$defs/blockCoverage" } },
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/edgeCoverage" } }
+  },
+  "$defs": {
+    "mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emulation", "m8", "x8"],
+      "properties": {
+        "emulation": { "type": "boolean" },
+        "m8": { "type": "boolean" },
+        "x8": { "type": "boolean" }
+      }
+    },
+    "blockIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "pc", "mode"],
+      "properties": {
+        "processor": { "enum": ["scpu", "sa1"] },
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "mode": { "$ref": "#/$defs/mode" }
+      }
+    },
+    "processorCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["events", "unique_blocks"],
+      "properties": {
+        "events": { "type": "integer", "minimum": 0 },
+        "unique_blocks": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "blockCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "pc", "mode", "hits", "first_cycle", "last_cycle"],
+      "properties": {
+        "processor": { "enum": ["scpu", "sa1"] },
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "mode": { "$ref": "#/$defs/mode" },
+        "hits": { "type": "integer", "minimum": 1 },
+        "first_cycle": { "type": "integer", "minimum": 0 },
+        "last_cycle": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "edgeCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "target", "hits"],
+      "properties": {
+        "source": { "$ref": "#/$defs/blockIdentity" },
+        "target": { "$ref": "#/$defs/blockIdentity" },
+        "hits": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

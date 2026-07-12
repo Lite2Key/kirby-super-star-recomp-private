@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kss-recomp-tools"
+version = "0.1.0"
+description = "ROM-free analysis and evidence tooling for the Kirby Super Star static recompilation project"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3", "jsonschema>=4.23"]
+analysis = ["numpy>=2.1", "Pillow>=11", "pydantic>=2.10", "zstandard>=0.23"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.setuptools.packages.find]
+where = ["tools"]
+include = ["recompiler*", "progress*"]

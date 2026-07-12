@@ -1,0 +1,41 @@
+# Private copyrighted/reference material
+*.sfc
+*.smc
+*.srm
+*.sav
+*.state
+*.mss
+*.spc
+*.bps
+*.ips
+.private/
+generated/
+ghidra-projects/
+traces/
+captures/
+extracted/
+
+# Build and tool state
+build/
+out/
+.cache/
+.venv/
+.tools/
+MesenCE/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+.idea/
+.vscode/
+CMakeUserPresets.json
+
+# Platform output
+*.exe
+*.dll
+*.pdb
+*.obj
+*.lib
+*.so
+*.dylib

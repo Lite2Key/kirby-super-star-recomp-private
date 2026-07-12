@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/recompiler/rom-inspection.schema.json",
+  "title": "ROM-safe inspection result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["identity", "header"],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "required": ["size", "payload_size", "copier_header", "crc32", "md5", "sha1", "sha256"],
+      "properties": {
+        "size": { "type": "integer", "minimum": 1 },
+        "payload_size": { "type": "integer", "minimum": 32768 },
+        "copier_header": { "type": "boolean" },
+        "crc32": { "type": "string", "pattern": "^[0-9A-F]{8}$" },
+        "md5": { "type": "string", "pattern": "^[0-9A-F]{32}$" },
+        "sha1": { "type": "string", "pattern": "^[0-9A-F]{40}$" },
+        "sha256": { "type": "string", "pattern": "^[0-9A-F]{64}$" }
+      }
+    },
+    "header": {
+      "type": "object",
+      "required": ["file_offset", "title", "map_mode", "cartridge_type", "rom_size_code", "ram_size_code", "destination_code", "version", "checksum_complement", "checksum", "checksum_pair_valid", "reset_vector"],
+      "properties": {
+        "file_offset": { "type": "integer", "minimum": 0 },
+        "title": { "type": "string" },
+        "map_mode": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "cartridge_type": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "rom_size_code": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "ram_size_code": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "destination_code": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "version": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "checksum_complement": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "checksum": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "checksum_pair_valid": { "type": "boolean" },
+        "reset_vector": { "type": "integer", "minimum": 0, "maximum": 65535 }
+      }
+    }
+  }
+}

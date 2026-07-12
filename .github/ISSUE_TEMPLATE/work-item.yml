@@ -1,0 +1,25 @@
+name: Recompilation work item
+description: A bounded analysis, implementation, tooling, or release proof.
+title: "[work] "
+labels: ["work-item"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Work type
+      options: [Analysis discovery, Lifter/runtime implementation, Tooling, Validation, Release/portability]
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      placeholder: M0-M11
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Machine-checkable acceptance evidence
+    validations:
+      required: true

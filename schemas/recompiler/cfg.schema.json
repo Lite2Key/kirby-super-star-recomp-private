@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/recompiler/cfg.schema.json",
+  "title": "KSS Recompiler Control Flow Graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "blocks"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "blocks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/block" }
+    }
+  },
+  "$defs": {
+    "mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emulation", "m8", "x8"],
+      "properties": {
+        "emulation": { "type": "boolean" },
+        "m8": { "type": "boolean" },
+        "x8": { "type": "boolean" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "pc", "mode"],
+      "properties": {
+        "processor": { "enum": ["scpu", "sa1"] },
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "mode": { "$ref": "#/$defs/mode" }
+      }
+    },
+    "instruction": {
+      "type": "object",
+      "required": ["pc", "opcode", "mnemonic", "addressing", "operand_hex", "size", "flow", "target", "mode_after"],
+      "properties": {
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "opcode": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "mnemonic": { "type": "string" },
+        "addressing": { "type": "string" },
+        "operand_hex": { "type": "string", "pattern": "^[0-9A-F]*$" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "flow": { "type": "string" },
+        "target": { "type": ["integer", "null"] },
+        "mode_after": { "type": "string", "pattern": "^e[01]m[01]x[01]$" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["kind", "source", "target", "evidence_id"],
+      "properties": {
+        "kind": { "enum": ["fallthrough", "branch_taken", "call", "jump", "dynamic"] },
+        "source": { "$ref": "#/$defs/identity" },
+        "target": { "oneOf": [{ "$ref": "#/$defs/identity" }, { "type": "null" }] },
+        "evidence_id": { "type": ["string", "null"] }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "instructions", "edges"],
+      "properties": {
+        "identity": { "$ref": "#/$defs/identity" },
+        "instructions": { "type": "array", "items": { "$ref": "#/$defs/instruction" } },
+        "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } }
+      }
+    }
+  }
+}

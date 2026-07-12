@@ -1,0 +1,31 @@
+name: Differential divergence
+description: Record an observed mismatch between reference and native execution.
+title: "[divergence] "
+labels: ["divergence", "needs-evidence"]
+body:
+  - type: input
+    id: scenario
+    attributes:
+      label: Scenario ID
+    validations:
+      required: true
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Subsystem
+      options: [S-CPU, SA-1, Scheduler, Bus, PPU, DMA/HDMA, APU/DSP, Input/Save, Host]
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence IDs and sanitized observations
+      description: Never attach ROM bytes, full traces, screenshots, or extracted assets.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true

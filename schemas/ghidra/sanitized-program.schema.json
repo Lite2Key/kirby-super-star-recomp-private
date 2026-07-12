@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/ghidra/sanitized-program.schema.json",
+  "title": "ROM-free Ghidra program metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "program_id", "language_id", "compiler_spec_id", "image_base", "memory_blocks", "entry_points", "functions", "symbols"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "program_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "language_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "compiler_spec_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "image_base": { "$ref": "#/$defs/address" },
+    "memory_blocks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/memory_block" }
+    },
+    "entry_points": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/address" }
+    },
+    "functions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/function" }
+    },
+    "symbols": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/symbol" }
+    }
+  },
+  "$defs": {
+    "address": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["space", "offset"],
+      "properties": {
+        "space": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]+$", "maxLength": 128 },
+        "offset": { "type": "string", "pattern": "^0x[0-9A-F]+$" }
+      }
+    },
+    "memory_block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "permissions"],
+      "properties": {
+        "start": { "$ref": "#/$defs/address" },
+        "end": { "$ref": "#/$defs/address" },
+        "permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["read", "write", "execute"],
+          "properties": {
+            "read": { "type": "boolean" },
+            "write": { "type": "boolean" },
+            "execute": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "function": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry", "name"],
+      "properties": {
+        "entry": { "$ref": "#/$defs/address" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 1024 }
+      }
+    },
+    "symbol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "type"],
+      "properties": {
+        "address": { "$ref": "#/$defs/address" },
+        "type": { "type": "string", "enum": ["Label", "Function", "Parameter", "Local Var", "Global Var", "External", "Library", "Class", "Namespace"] }
+      }
+    }
+  }
+}

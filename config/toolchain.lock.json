@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "tools": {
+    "gh": {
+      "version": "2.96.0",
+      "source": "official GitHub portable release",
+      "installed": true
+    },
+    "ghidra": {
+      "version": "12.1.2",
+      "release_asset_sha256": "b62e81a0390618466c019c60d8c2f796ced2509c4c1aea4a37644a77272cf99d",
+      "installed": true
+    },
+    "ghidra_snes": {
+      "version": "1.3.0",
+      "installed": true,
+      "local_manifest_fix": "removed invalid module-name and dependency lines"
+    },
+    "java": {
+      "distribution": "Eclipse Temurin",
+      "version": "21.0.11+10",
+      "installed": true
+    },
+    "mesen_ce": {
+      "version": "2.2.1",
+      "installed": true,
+      "role": "external trace oracle"
+    },
+    "ares": {
+      "version": "148",
+      "commit": "0aafd85789215e84e1e43415c07d4c88461b7899",
+      "installed": true,
+      "role": "license-audited hardware backend source"
+    },
+    "sdl": {
+      "version": "3.4.8",
+      "commit": "d9d5536704d585616d4db3c8ba3c4ff6fc2757e1",
+      "installed": true
+    },
+    "msvc": "19.50.35729.0",
+    "cmake": "4.2.3-msvc3",
+    "ninja": "Visual Studio 2026 bundled",
+    "python_minimum": "3.11",
+    "python_active": "3.14.4"
+  }
+}
