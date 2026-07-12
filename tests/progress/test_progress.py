@@ -32,7 +32,38 @@ class ProgressTests(unittest.TestCase):
             self.assertNotIn("__PROGRESS_DATA__", page)
             self.assertIn("Kirby Super Star recompilation map", page)
             self.assertIn('\"denominator\":\"evolving\"', page)
-            self.assertEqual(json.loads((out / "progress.json").read_text(encoding="utf-8"))["schema_version"], 1)
+            machine = json.loads((out / "progress.json").read_text(encoding="utf-8"))
+            self.assertEqual(machine["schema_version"], 1)
+            self.assertEqual(len(machine["block_map"]["processors"]["scpu"]["blocks"]), 214)
+            self.assertEqual(len(machine["block_map"]["processors"]["sa1"]["blocks"]), 40)
+
+    def test_block_map_is_derived_from_sanitized_first_frame_artifacts(self):
+        block_map = progress_build.load_block_map(ROOT)
+        self.assertEqual(block_map["boundary"], "first-snes-end-frame")
+        scpu = block_map["processors"]["scpu"]
+        sa1 = block_map["processors"]["sa1"]
+        self.assertEqual(scpu["counts"], {
+            "observed": 214, "lifted": 214, "generated": 214,
+            "executed": 160, "reference_verified": 160,
+        })
+        self.assertEqual(sa1["counts"], {
+            "observed": 40, "lifted": 40, "generated": 40,
+            "executed": 20, "reference_verified": 20,
+        })
+        self.assertEqual((scpu["evolving"], sa1["evolving"]), (54, 17))
+        self.assertEqual((scpu["frontier"], sa1["frontier"]), (33, 1))
+        rendered = json.dumps(block_map)
+        for forbidden in ("bytes_hex", "rom_offset", "opcode", "mnemonic", "operand"):
+            self.assertNotIn(forbidden, rendered)
+
+    def test_block_map_template_has_keyboard_detail_and_frontier_filters(self):
+        template = (ROOT / "progress" / "template.html").read_text(encoding="utf-8")
+        for required in (
+            'id="block-map"', 'aria-label="Filter block tiles"',
+            'role="listitem"', "focusin", 'aria-live="polite"',
+            'data-map-filter="frontier"', 'data-map-filter="evolving"',
+        ):
+            self.assertIn(required, template)
 
     def test_markdown_calls_out_evolving_denominators(self):
         output = progress_build.render_markdown(self.manifest)

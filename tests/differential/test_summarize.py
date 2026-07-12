@@ -17,6 +17,9 @@ def private_log() -> str:
         "KSS_DIFF_START_V1|4",
         "KSS_DIFF_STATE_V1|1|scpu|0|008004|0|0|0|0|511|0|52|1",
         "KSS_DIFF_WRITE_V1|scpu|1|1|000100|7",
+        "KSS_DIFF_WRITE_V1|scpu|1|1|00420B|2",
+        "KSS_DIFF_WRITE_V1|scpu|2|2|002180|44",
+        "KSS_DIFF_WRITE_V1|scpu|2|2|7E0010|44",
         "KSS_DIFF_STATE_V1|2|scpu|3|008170|0|0|0|0|511|0|0|0",
         "KSS_DIFF_STATE_V1|3|scpu|6|00816D|0|0|0|0|511|0|0|0",
         "KSS_DIFF_STATE_V1|4|sa1|10|008BF4|0|0|0|0|511|0|52|1",
@@ -34,8 +37,18 @@ def test_summary_is_value_free_deterministic_and_schema_valid(tmp_path: Path) ->
     result = summarize_reset_blocks(source)
     assert result == summarize_reset_blocks(source)
     assert [(block["processor"], block["instruction_records"], block["write_records"]) for block in result["blocks"]] == [
-        ("scpu", 2, 1), ("sa1", 2, 1)
+        ("scpu", 2, 4), ("sa1", 2, 1)
     ]
+    assert result["dma_groups"] == [{
+        "trigger_instruction_ordinal": 1,
+        "callback_instruction_ordinal": 2,
+        "trigger_pc": 0x008004,
+        "port_write_records": 1,
+        "wram_write_records": 1,
+        "wram_first_address": 0x7E0010,
+        "wram_last_address": 0x7E0010,
+        "write_chain_sha256": result["dma_groups"][0]["write_chain_sha256"],
+    }]
     rendered = json.dumps(result)
     assert "register" not in rendered and "000100" not in rendered
     schema = json.loads((ROOT / "schemas/differential/reset-block-summary.schema.json").read_text())

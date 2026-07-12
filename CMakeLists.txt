@@ -15,6 +15,7 @@ add_library(kss_runtime
     src/runtime/rom_validation.cpp
     src/runtime/sa1_timing.cpp
     src/recompiled/reset_blocks.cpp
+    src/recompiled/first_frame_blocks.cpp
 )
 target_include_directories(kss_runtime PUBLIC include)
 target_compile_features(kss_runtime PUBLIC cxx_std_20)
@@ -49,4 +50,8 @@ if(BUILD_TESTING)
     add_executable(kss-mvn-tests tests/runtime/mvn_execution_tests.cpp)
     target_link_libraries(kss-mvn-tests PRIVATE kss_runtime)
     add_test(NAME mvn-semantics COMMAND kss-mvn-tests)
+
+    add_executable(kss-snes-dma-tests tests/runtime/snes_dma_tests.cpp)
+    target_link_libraries(kss-snes-dma-tests PRIVATE kss_runtime)
+    add_test(NAME snes-dma-registers COMMAND kss-snes-dma-tests)
 endif()

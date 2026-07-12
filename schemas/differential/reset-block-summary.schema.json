@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "source_format", "source_sha256", "blocks"],
+  "required": ["schema_version", "source_format", "source_sha256", "blocks", "dma_groups"],
   "properties": {
     "schema_version": { "const": 1 },
     "source_format": { "const": "kss-differential-v1" },
@@ -24,6 +24,23 @@
           "cycle_delta": { "type": "integer", "minimum": 1 },
           "write_records": { "type": "integer", "minimum": 0 },
           "state_chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "write_chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "dma_groups": {
+      "type": "array", "maxItems": 8,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["trigger_instruction_ordinal", "callback_instruction_ordinal", "trigger_pc", "port_write_records", "wram_write_records", "wram_first_address", "wram_last_address", "write_chain_sha256"],
+        "properties": {
+          "trigger_instruction_ordinal": { "type": "integer", "minimum": 1 },
+          "callback_instruction_ordinal": { "type": "integer", "minimum": 2 },
+          "trigger_pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+          "port_write_records": { "type": "integer", "minimum": 1 },
+          "wram_write_records": { "type": "integer", "minimum": 1 },
+          "wram_first_address": { "type": "integer", "minimum": 8257536, "maximum": 8388607 },
+          "wram_last_address": { "type": "integer", "minimum": 8257536, "maximum": 8388607 },
           "write_chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
         }
       }

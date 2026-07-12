@@ -11,6 +11,7 @@ from typing import Any
 
 STATUSES = {"not_started", "in_progress", "blocked", "passed", "failed"}
 DENOMINATORS = {"fixed", "evolving"}
+BLOCK_STAGES = ("observed", "lifted", "generated", "executed", "reference_verified")
 
 
 class ManifestError(ValueError):
@@ -90,6 +91,132 @@ def validate_manifest(data: dict[str, Any]) -> None:
         raise ManifestError("next_proof requires title and non-empty acceptance criteria")
 
 
+def _read_artifact(path: Path) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ManifestError(f"cannot read block-map artifact {path}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise ManifestError(f"block-map artifact root must be an object: {path}")
+    return value
+
+
+def _identity_key(identity: dict[str, Any]) -> tuple[str, int, bool, bool, bool]:
+    try:
+        mode = identity["mode"]
+        result = (
+            identity["processor"], identity["pc"], mode["emulation"], mode["m8"], mode["x8"]
+        )
+    except (KeyError, TypeError) as exc:
+        raise ManifestError("block-map artifact contains a malformed identity") from exc
+    if result[0] not in {"scpu", "sa1"} or not isinstance(result[1], int):
+        raise ManifestError("block-map identity has an invalid processor or PC")
+    if not all(isinstance(flag, bool) for flag in result[2:]):
+        raise ManifestError("block-map identity mode flags must be booleans")
+    return result
+
+
+def load_block_map(root: Path) -> dict[str, Any]:
+    """Derive a ROM-byte-free tile map from committed sanitized artifacts."""
+    cfg_root = root / "analysis" / "cfg"
+    trace = _read_artifact(cfg_root / "first-frame-dual.trace-cfg.json")
+    lifted = _read_artifact(cfg_root / "first-frame-dual.lifted.json")
+    generated = _read_artifact(cfg_root / "first-frame-dual.generated-blocks.json")
+    frontier = _read_artifact(cfg_root / "first-frame-dual.frontier.json")
+    bootstrap = _read_artifact(cfg_root / "bootstrap-dual.trace-cfg.json")
+    reference = _read_artifact(root / "analysis" / "differential" / "reset-block-reference.json")
+
+    try:
+        observations = trace["observations"]["blocks"]
+        lifted_blocks = lifted["blocks"]
+        bootstrap_blocks = bootstrap["cfg"]["blocks"]
+        generated_counts = generated["processors"]
+        frontier_processors = frontier["processors"]
+        references = reference["blocks"]
+    except (KeyError, TypeError) as exc:
+        raise ManifestError("block-map artifact is missing a required collection") from exc
+    if not all(isinstance(items, list) for items in (observations, lifted_blocks, bootstrap_blocks, references)):
+        raise ManifestError("block-map artifact collections must be arrays")
+
+    observed = {_identity_key(item["identity"]): item for item in observations}
+    lifted_by_key = {_identity_key(item["identity"]): item for item in lifted_blocks}
+    if len(observed) != len(observations) or len(lifted_by_key) != len(lifted_blocks):
+        raise ManifestError("block-map artifacts contain duplicate identities")
+    if set(observed) != set(lifted_by_key):
+        raise ManifestError("first-frame trace and lift inventories disagree")
+    bootstrap_keys = {_identity_key(item["identity"]) for item in bootstrap_blocks}
+    reference_windows = {
+        item["processor"]: (item["cycle_start"], item["cycle_end"])
+        for item in references
+    }
+    if set(reference_windows) != {"scpu", "sa1"}:
+        raise ManifestError("reset reference must cover both processors")
+
+    unsupported: dict[str, set[int]] = {}
+    for processor in ("scpu", "sa1"):
+        try:
+            unsupported[processor] = {
+                item["opcode"] for item in frontier_processors[processor]["unsupported_opcodes"]
+            }
+        except (KeyError, TypeError) as exc:
+            raise ManifestError("frontier artifact lacks unsupported-opcode inventory") from exc
+
+    processors: dict[str, Any] = {}
+    for processor in ("scpu", "sa1"):
+        blocks = []
+        for key, observation in observed.items():
+            if key[0] != processor:
+                continue
+            lifted_item = lifted_by_key[key]
+            first_cycle = observation.get("first_cycle")
+            hits = observation.get("hits")
+            if not isinstance(first_cycle, int) or not isinstance(hits, int) or hits < 1:
+                raise ManifestError("trace observation has invalid cycle or hit counts")
+            stage = "generated"
+            start_cycle, end_cycle = reference_windows[processor]
+            if start_cycle <= first_cycle <= end_cycle:
+                stage = "reference_verified"
+            mode = {"emulation": key[2], "m8": key[3], "x8": key[4]}
+            blocks.append({
+                "pc": key[1],
+                "mode": mode,
+                "stage": stage,
+                "hits": hits,
+                "first_cycle": first_cycle,
+                "evolving": key not in bootstrap_keys,
+                "frontier": lifted_item["instruction"]["opcode"] in unsupported[processor],
+            })
+        blocks.sort(key=lambda item: (item["first_cycle"], item["pc"], tuple(item["mode"].values())))
+        if generated_counts.get(processor) != len(blocks):
+            raise ManifestError(f"generated {processor} count disagrees with trace inventory")
+        cumulative = {
+            "observed": len(blocks),
+            "lifted": len(blocks),
+            "generated": len(blocks),
+            "executed": sum(item["stage"] == "reference_verified" for item in blocks),
+            "reference_verified": sum(item["stage"] == "reference_verified" for item in blocks),
+        }
+        processors[processor] = {
+            "blocks": blocks,
+            "counts": cumulative,
+            "evolving": sum(item["evolving"] for item in blocks),
+            "frontier": sum(item["frontier"] for item in blocks),
+        }
+
+    return {
+        "boundary": frontier.get("boundary"),
+        "stages": list(BLOCK_STAGES),
+        "processors": processors,
+        "sources": [
+            "analysis/cfg/first-frame-dual.trace-cfg.json",
+            "analysis/cfg/first-frame-dual.lifted.json",
+            "analysis/cfg/first-frame-dual.generated-blocks.json",
+            "analysis/cfg/first-frame-dual.frontier.json",
+            "analysis/differential/reset-block-reference.json",
+        ],
+    }
+
+
 def render_dashboard(data: dict[str, Any], template_path: Path) -> str:
     template = template_path.read_text(encoding="utf-8")
     marker = "__PROGRESS_DATA__"
@@ -151,9 +278,12 @@ def build(
     check: bool = False,
 ) -> None:
     data = load_manifest(evidence)
+    root = evidence.resolve().parent.parent
+    site_data = dict(data)
+    site_data["block_map"] = load_block_map(root)
     outputs = {
-        out_dir / "index.html": render_dashboard(data, template),
-        out_dir / "progress.json": json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+        out_dir / "index.html": render_dashboard(site_data, template),
+        out_dir / "progress.json": json.dumps(site_data, indent=2, ensure_ascii=False) + "\n",
     }
     if markdown is not None:
         outputs[markdown] = render_markdown(data)

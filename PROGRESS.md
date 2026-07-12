@@ -28,13 +28,13 @@ Snapshot: `2026-07-12T22:24:45Z` | commit `dae1e4264ab0e635e9329f01f66b5e2ad2fa4
 | ROM and address map | classified banks | 0 / 64 | `fixed` |
 | S-CPU control flow | observed mode-aware blocks | 214 / 214 | `evolving` |
 | S-CPU control flow | verified blocks | 1 / 214 | `evolving` |
-| SA-1 control flow | observed mode-aware blocks | 23 / 23 | `evolving` |
-| SA-1 control flow | verified blocks | 1 / 23 | `evolving` |
+| SA-1 control flow | observed mode-aware blocks | 40 / 40 | `evolving` |
+| SA-1 control flow | verified blocks | 1 / 40 | `evolving` |
 | 65C816 decoder and lifter | opcode definitions | 256 / 256 | `fixed` |
 | 65C816 decoder and lifter | reference-verified semantics | 30 / 256 | `fixed` |
 | Deterministic scheduler | synchronization classes | 0 / 8 | `fixed` |
 | S-CPU and SA-1 address spaces | synthetic mapping groups | 7 / 7 | `fixed` |
-| PPU, DMA, APU, input, and save | validated subsystems | 0 / 5 | `fixed` |
+| PPU, DMA, APU, input, and save | validated subsystems | 1 / 5 | `fixed` |
 | Differential validator | passing required scenarios | 0 / 14 | `evolving` |
 | Windows package | release gates | 1 / 7 | `fixed` |
 | Linux portability | delivery formats | 0 / 2 | `fixed` |
@@ -49,6 +49,7 @@ Snapshot: `2026-07-12T22:24:45Z` | commit `dae1e4264ab0e635e9329f01f66b5e2ad2fa4
 - `m1m2.verification` [M1/M2 Python and artifact verification](progress/evidence/m1-m2-verification.md)
 - `m2.complete-reset-blocks` [Complete generated S-CPU and SA-1 reset-block proof](progress/evidence/m2-complete-reset-blocks.md)
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
+- `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -62,8 +63,9 @@ Snapshot: `2026-07-12T22:24:45Z` | commit `dae1e4264ab0e635e9329f01f66b5e2ad2fa4
 
 **Execute translated reset code through the first rendered frame** - owner: `analysis/recompiler`
 
-- [ ] Implement the DMA, PPU-register, SA-1 shared-memory, and scheduler effects exercised after the reset blocks
-- [ ] Continue generated dispatch with no unknown executed target through the first frame boundary
+- [ ] Implement the 20 observed unsupported opcode kinds, beginning with JSL at 00:8172 and TCD at 00:8C36
+- [ ] Implement the PPU-register, SA-1 shared-memory, and explicit CPU/master-clock scheduler effects exercised before endFrame
+- [ ] Continue generated dispatch with no unsupported executed identity through the first-frame boundary
 - [ ] Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE
 - [ ] Keep presentation output optional until the compatibility checkpoint is green
 

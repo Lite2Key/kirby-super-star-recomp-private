@@ -62,6 +62,43 @@ def _block(log: PrivateLog, processor: str, spec: dict[str, int]) -> dict[str, A
     }
 
 
+def _dma_groups(log: PrivateLog) -> list[dict[str, Any]]:
+    scpu_states = [state for state in log.states if state[1] == "scpu"]
+    triggers = [
+        write for write in log.writes
+        if write[0] == "scpu" and write[1] is not None
+        and write[3] == 0x00420B and write[4] != 0
+    ]
+    groups: list[dict[str, Any]] = []
+    for trigger in triggers:
+        trigger_ordinal = int(trigger[1])
+        if not 1 <= trigger_ordinal <= len(scpu_states):
+            raise ValueError("DMA trigger ordinal has no matching S-CPU state")
+        callback_ordinal = trigger_ordinal + 1
+        writes = [
+            write for write in log.writes
+            if write[0] == "scpu" and write[1] == callback_ordinal
+            and (write[3] == 0x002180 or 0x7E0000 <= write[3] <= 0x7FFFFF)
+        ]
+        port_writes = [write for write in writes if write[3] == 0x002180]
+        wram_writes = [write for write in writes if 0x7E0000 <= write[3] <= 0x7FFFFF]
+        if not port_writes or len(port_writes) != len(wram_writes):
+            raise ValueError("DMA callback group lacks paired WMDATA/WRAM writes")
+        groups.append({
+            "trigger_instruction_ordinal": trigger_ordinal,
+            "callback_instruction_ordinal": callback_ordinal,
+            "trigger_pc": scpu_states[trigger_ordinal - 1][3],
+            "port_write_records": len(port_writes),
+            "wram_write_records": len(wram_writes),
+            "wram_first_address": wram_writes[0][3],
+            "wram_last_address": wram_writes[-1][3],
+            # Values remain private. This digest proves ordering and content
+            # without exporting the transferred reset data.
+            "write_chain_sha256": _digest(writes),
+        })
+    return groups
+
+
 def summarize_reset_blocks(path: Path) -> dict[str, Any]:
     log = parse_log(path)
     return {
@@ -69,6 +106,7 @@ def summarize_reset_blocks(path: Path) -> dict[str, Any]:
         "source_format": "kss-differential-v1",
         "source_sha256": log.digest,
         "blocks": [_block(log, processor, spec) for processor, spec in BLOCKS.items()],
+        "dma_groups": _dma_groups(log),
     }
 
 

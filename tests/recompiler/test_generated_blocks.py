@@ -47,5 +47,5 @@ def test_cross_processor_edges_and_duplicates_fail_closed() -> None:
 
 
 def test_limit_is_validated() -> None:
-    with pytest.raises(GeneratedBlocksError, match="between 1 and 256"):
+    with pytest.raises(GeneratedBlocksError, match="between 1 and 4096"):
         render(_document(), max_blocks_per_processor=0)

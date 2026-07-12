@@ -44,6 +44,11 @@
           "path": "progress/evidence/m2-reset-prefix.md"
         },
         {
+          "id": "m3.first-frame-frontier",
+          "label": "First-frame oracle, generated frontier, and reset DMA proof",
+          "path": "progress/evidence/m3-first-frame-frontier.md"
+        },
+        {
           "id": "recompiler.opcode-matrix",
           "label": "Complete opcode metadata tests",
           "path": "progress/evidence/recompiler-tests.md"
@@ -130,8 +135,15 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "Execute translated code through the first rendered frame.",
-      "gate": "Hardware events and the fixed first-frame checkpoint match."
+      "summary": "The first-frame reference, generated inventory, and reset DMA model exist; native execution is at the explicit semantics frontier.",
+      "gate": "Hardware events and the fixed first-frame checkpoint match.",
+      "evidence": [
+        {
+          "id": "m3.first-frame-frontier",
+          "label": "First-frame discovery, frontier, and DMA checkpoint",
+          "path": "progress/evidence/m3-first-frame-frontier.md"
+        }
+      ]
     },
     {
       "id": "M4",
@@ -212,7 +224,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The 10,000-event bootstrap trace observed 214 unique mode-aware blocks; the complete first reset block is semantics-verified.",
+      "summary": "The first-frame trace contains 214 unique mode-aware S-CPU identities; all lift and generate, with an explicit unsupported-semantics frontier.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -234,6 +246,11 @@
           "id": "analysis.bootstrap-dual-cpu-traces",
           "label": "Bootstrap dual-CPU trace counts and interpretation",
           "path": "progress/evidence/bootstrap-dual-cpu-traces.md"
+        },
+        {
+          "id": "m3.first-frame-frontier",
+          "label": "First-frame generated inventory and frontier",
+          "path": "progress/evidence/m3-first-frame-frontier.md"
         }
       ]
     },
@@ -242,19 +259,19 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The 5,000-event bootstrap trace observed 23 unique mode-aware blocks; the complete first reset/MVN block is semantics-verified.",
+      "summary": "The first-frame trace grows the SA-1 inventory to 40 unique mode-aware identities; all lift and generate.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
-          "value": 23,
-          "total": 23,
+          "value": 40,
+          "total": 40,
           "denominator": "evolving",
           "note": "Current bounded trace inventory; the denominator grows when new routes reveal additional blocks."
         },
         {
           "label": "verified blocks",
           "value": 1,
-          "total": 23,
+          "total": 40,
           "denominator": "evolving",
           "note": "The reset block from 00:8BF4 through MVN exit at 00:8C23 passed generated state, ordered-write, and evidence-bound cycle verification."
         }
@@ -264,6 +281,11 @@
           "id": "analysis.bootstrap-dual-cpu-traces",
           "label": "Bootstrap dual-CPU trace counts and interpretation",
           "path": "progress/evidence/bootstrap-dual-cpu-traces.md"
+        },
+        {
+          "id": "m3.first-frame-frontier",
+          "label": "First-frame generated inventory and frontier",
+          "path": "progress/evidence/m3-first-frame-frontier.md"
         }
       ]
     },
@@ -326,12 +348,12 @@
       "id": "hardware",
       "name": "PPU, DMA, APU, input, and save",
       "group": "runtime",
-      "status": "not_started",
-      "summary": "Hardware backend integration has not started.",
+      "status": "in_progress",
+      "summary": "Reset-time general DMA and WRAM ports are implemented and tested; PPU, APU, input, and save integration remain.",
       "metrics": [
         {
           "label": "validated subsystems",
-          "value": 0,
+          "value": 1,
           "total": 5,
           "denominator": "fixed"
         }
@@ -342,7 +364,7 @@
       "name": "Differential validator",
       "group": "validation",
       "status": "in_progress",
-      "summary": "Both complete first reset blocks pass generated state/write/cycle proofs; first-frame hardware side effects are the next validation boundary.",
+      "summary": "Reset blocks pass and the deterministic first-frame oracle is captured; native first-frame state/event comparison remains the active gate.",
       "metrics": [
         {
           "label": "passing required scenarios",
@@ -489,8 +511,9 @@
   "next_proof": {
     "title": "Execute translated reset code through the first rendered frame",
     "acceptance": [
-      "Implement the DMA, PPU-register, SA-1 shared-memory, and scheduler effects exercised after the reset blocks",
-      "Continue generated dispatch with no unknown executed target through the first frame boundary",
+      "Implement the 20 observed unsupported opcode kinds, beginning with JSL at 00:8172 and TCD at 00:8C36",
+      "Implement the PPU-register, SA-1 shared-memory, and explicit CPU/master-clock scheduler effects exercised before endFrame",
+      "Continue generated dispatch with no unsupported executed identity through the first-frame boundary",
       "Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE",
       "Keep presentation output optional until the compatibility checkpoint is green"
     ],
@@ -523,6 +546,18 @@
       "observed_scpu_blocks": 214,
       "observed_sa1_blocks": 23,
       "generated_blocks": 183
+    },
+    {
+      "at": "2026-07-12T23:59:00Z",
+      "verified_blocks": 2,
+      "passing_scenarios": 0,
+      "open_divergences": 0,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "trace_events": 25087,
+      "generated_blocks": 254,
+      "unsupported_frontier_identities": 34
     }
   ]
 }

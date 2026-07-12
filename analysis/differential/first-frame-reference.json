@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "source_format": "kss-first-frame-v1",
+  "source_sha256": "b895c3cc948ebb8c3ca81fce9d26b820ab909aa2db600290a8c4d64c2a700c35",
+  "termination": "first_end_frame",
+  "frame_number": 1,
+  "clocks": {
+    "master": 306900,
+    "processors": {
+      "scpu": 31780,
+      "sa1": 153450
+    }
+  },
+  "final_states": [
+    {
+      "processor": "scpu",
+      "cycle": 31780,
+      "architectural_state_sha256": "98e8f2a52b1e498c5faaf195b63a0562df902f17df8fec7b2e7264c4ef8c8344"
+    },
+    {
+      "processor": "sa1",
+      "cycle": 153450,
+      "architectural_state_sha256": "1232394440f6521dabe0cce2e0952b1c22ff9153053fcc13c39235338f5e8e1d"
+    }
+  ],
+  "writes": {
+    "total_records": 26906,
+    "chain_sha256": "d92ed13ac930089c88ebbb945311f413ccddba7eeef4d26df8d3adb35740894c",
+    "processors": [
+      {
+        "processor": "scpu",
+        "records": 16902,
+        "chain_sha256": "112ea05852789e664b40f0a0998fe63703e78fb13979caa459c00a732bc6c098"
+      },
+      {
+        "processor": "sa1",
+        "records": 10004,
+        "chain_sha256": "9535b70e30c283b96522032701f278cc2fa4ae3e84e82642833f99ca65fc54e0"
+      }
+    ]
+  },
+  "register_events": [
+    {
+      "kind": "ppu_register",
+      "records": 54,
+      "chain_sha256": "c1aef4ef534bfbd499ed84e3334a85afcb46f45a067f34d3e154d9f682cf4e66"
+    },
+    {
+      "kind": "dma_register",
+      "records": 23,
+      "chain_sha256": "0e96ccb5a9c739a514d6f66455736ce2157903f5915ef1afa1870e4d23747977"
+    }
+  ]
+}

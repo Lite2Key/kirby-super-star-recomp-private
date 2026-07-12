@@ -8,8 +8,8 @@
     "schema_version": {"const": 1},
     "generator": {"const": "kssrecomp.generated_blocks-v1"},
     "input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "max_blocks_per_processor": {"type": "integer", "minimum": 1, "maximum": 256},
-    "registered_blocks": {"type": "integer", "minimum": 0, "maximum": 512},
+    "max_blocks_per_processor": {"type": "integer", "minimum": 1, "maximum": 4096},
+    "registered_blocks": {"type": "integer", "minimum": 0, "maximum": 8192},
     "processors": {
       "type": "object", "additionalProperties": false, "required": ["scpu", "sa1"],
       "properties": {"scpu": {"type": "integer", "minimum": 0}, "sa1": {"type": "integer", "minimum": 0}}

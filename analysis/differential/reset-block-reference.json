@@ -31,5 +31,37 @@
       "state_chain_sha256": "30ff7ec32e1d682493bfa92169963d090297efcf215f2d88854a901c78567881",
       "write_chain_sha256": "df384d135c6b62d97e2b70b4a3c779d8e91b0e895e272354a510116cf7fc3b56"
     }
+  ],
+  "dma_groups": [
+    {
+      "trigger_instruction_ordinal": 129,
+      "callback_instruction_ordinal": 130,
+      "trigger_pc": 33050,
+      "port_write_records": 8192,
+      "wram_write_records": 8192,
+      "wram_first_address": 8257536,
+      "wram_last_address": 8265727,
+      "write_chain_sha256": "1ec858625984f13a519b76290523b1d52e5e95742c631922f93fd32becfb8e03"
+    },
+    {
+      "trigger_instruction_ordinal": 142,
+      "callback_instruction_ordinal": 143,
+      "trigger_pc": 33087,
+      "port_write_records": 23,
+      "wram_write_records": 23,
+      "wram_first_address": 8257550,
+      "wram_last_address": 8257572,
+      "write_chain_sha256": "9643aaca67e5d441bfa2a67e545b1053c330ef97527bf99ccc0bdffa37207268"
+    },
+    {
+      "trigger_instruction_ordinal": 150,
+      "callback_instruction_ordinal": 151,
+      "trigger_pc": 33110,
+      "port_write_records": 14,
+      "wram_write_records": 14,
+      "wram_first_address": 8257574,
+      "wram_last_address": 8257587,
+      "write_chain_sha256": "3b1180d22404d5d966a25c0dbda60c03ae4d113c95c3c9ad82f6ce4d091c7240"
+    }
   ]
 }

@@ -1,5 +1,6 @@
 #include "kss/deterministic_scheduler.hpp"
 #include "kss/generated_block_runner.hpp"
+#include "kss/generated_first_frame_blocks.hpp"
 #include "kss/generated_reset_blocks.hpp"
 
 #include <array>
@@ -164,6 +165,37 @@ void test_wrong_identity_and_bounds_fail_closed() {
     assert(bounded.completed_blocks == 3U && cpu.pc == 0x8007);
 }
 
+void test_first_frame_frontier_registers_and_fails_closed() {
+    RecordingBus bus;
+    kss::DeterministicScheduler scheduler;
+    kss::CheckedDispatcher dispatcher;
+    assert(kss::generated::first_frame_block_count() == 254U);
+    assert(kss::generated::register_first_frame_blocks(dispatcher));
+    assert(dispatcher.size() == 254U);
+
+    kss::CpuContext scpu;
+    scpu.processor = kss::ProcessorId::snes_cpu;
+    scpu.pc = 0x8172;
+    scpu.emulation = false;
+    scpu.status = 0;
+    const auto scpu_result = kss::run_generated_until(
+        scpu, bus, scheduler, dispatcher,
+        kss::BlockKey::make(kss::ProcessorId::snes_cpu, 0x00d559, false, false, false), 1);
+    assert(scpu_result.status == kss::GeneratedRunStatus::generated_block_failed_closed);
+    assert(scpu.address() == 0x008172 && scpu.cycles == 0);
+
+    kss::CpuContext sa1;
+    sa1.processor = kss::ProcessorId::sa1;
+    sa1.pc = 0x8c36;
+    sa1.emulation = false;
+    sa1.status = 0;
+    const auto sa1_result = kss::run_generated_until(
+        sa1, bus, scheduler, dispatcher,
+        kss::BlockKey::make(kss::ProcessorId::sa1, 0x008c37, false, false, false), 1);
+    assert(sa1_result.status == kss::GeneratedRunStatus::generated_block_failed_closed);
+    assert(sa1.address() == 0x008c36 && sa1.cycles == 0);
+}
+
 } // namespace
 
 int main() {
@@ -177,4 +209,5 @@ int main() {
     test_sa1_complete_prefix_checkpoint();
     test_sa1_full_reset_block_checkpoint();
     test_wrong_identity_and_bounds_fail_closed();
+    test_first_frame_frontier_registers_and_fails_closed();
 }

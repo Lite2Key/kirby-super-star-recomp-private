@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "boundary", "capture", "generated_nodes", "processors", "unresolved", "failure_policy"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "boundary": {"const": "first-snes-end-frame"},
+    "capture": {"type": "object", "required": ["event_count", "scpu_events", "sa1_events"], "additionalProperties": false,
+      "properties": {"event_count": {"type": "integer", "minimum": 1}, "scpu_events": {"type": "integer", "minimum": 0}, "sa1_events": {"type": "integer", "minimum": 0}}},
+    "generated_nodes": {"type": "integer", "minimum": 0},
+    "processors": {"type": "object", "required": ["scpu", "sa1"], "additionalProperties": false,
+      "properties": {"scpu": {"$ref": "#/$defs/processor"}, "sa1": {"$ref": "#/$defs/processor"}}},
+    "unresolved": {"type": "object", "required": ["scpu", "sa1"], "additionalProperties": false,
+      "properties": {"scpu": {"type": "array"}, "sa1": {"type": "array"}}},
+    "failure_policy": {"const": "generated-dispatch-stops-on-first-unsupported-or-unobserved-identity"}
+  },
+  "$defs": {"processor": {"type": "object", "required": ["reachable_nodes", "new_nodes", "unresolved_nodes", "first_unsupported", "unsupported_opcodes"], "additionalProperties": false,
+    "properties": {"reachable_nodes": {"type": "integer", "minimum": 0}, "new_nodes": {"type": "integer", "minimum": 0}, "unresolved_nodes": {"type": "integer", "minimum": 0}, "first_unsupported": {"type": ["object", "null"]}, "unsupported_opcodes": {"type": "array"}}}}
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "source_sha256", "termination", "frame_number", "clocks", "final_states", "writes", "register_events"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_format": { "const": "kss-first-frame-v1" },
+    "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "termination": { "const": "first_end_frame" },
+    "frame_number": { "const": 1 },
+    "clocks": {
+      "type": "object", "additionalProperties": false,
+      "required": ["master", "processors"],
+      "properties": {
+        "master": { "type": "integer", "minimum": 1 },
+        "processors": {
+          "type": "object", "additionalProperties": false,
+          "required": ["scpu", "sa1"],
+          "properties": {
+            "scpu": { "type": "integer", "minimum": 1 },
+            "sa1": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "final_states": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["processor", "cycle", "architectural_state_sha256"],
+        "properties": {
+          "processor": { "enum": ["scpu", "sa1"] },
+          "cycle": { "type": "integer", "minimum": 1 },
+          "architectural_state_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "writes": {
+      "type": "object", "additionalProperties": false,
+      "required": ["total_records", "chain_sha256", "processors"],
+      "properties": {
+        "total_records": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+        "chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "processors": {
+          "type": "array", "minItems": 2, "maxItems": 2,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["processor", "records", "chain_sha256"],
+            "properties": {
+              "processor": { "enum": ["scpu", "sa1"] },
+              "records": { "type": "integer", "minimum": 0 },
+              "chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        }
+      }
+    },
+    "register_events": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["kind", "records", "chain_sha256"],
+        "properties": {
+          "kind": { "enum": ["ppu_register", "dma_register"] },
+          "records": { "type": "integer", "minimum": 0 },
+          "chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}
