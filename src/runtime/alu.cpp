@@ -53,7 +53,7 @@ T adc_decimal(CpuContext& cpu, T left, T right) noexcept {
         if (adjusted > 0x9fffU) {
             adjusted += 0x6000U;
         }
-    } else if (adjusted > 0x009fU) {
+    } else if (adjusted > static_cast<Wide>(0x009fU)) {
         adjusted += 0x0060U;
     }
 

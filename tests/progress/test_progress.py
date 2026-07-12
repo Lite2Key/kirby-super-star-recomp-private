@@ -38,7 +38,7 @@ class ProgressTests(unittest.TestCase):
         output = progress_build.render_markdown(self.manifest)
         self.assertIn("not estimates of total project completion", output)
         self.assertIn("`evolving`", output)
-        self.assertIn("0 / discovered 0", output)
+        self.assertIn("S-CPU control flow | observed mode-aware blocks | 214 / 214 | `evolving`", output)
 
     def test_duplicate_ids_are_rejected(self):
         bad = copy.deepcopy(self.manifest)
