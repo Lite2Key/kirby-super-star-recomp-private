@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "reference": {
+    "kind": "architecture-manual",
+    "name": "W65C816S architectural contract",
+    "version": "reset-safe-subset-v1"
+  },
+  "vectors": [
+    {
+      "id": "lda8.negative-preserve-b",
+      "bytes": [169, 128],
+      "initial": {"processor":"s-cpu","a":43776,"x":0,"y":0,"d":0,"s":511,"pc":32768,"pbr":128,"dbr":0,"p":52,"e":true,"cycles":0},
+      "expected":{"processor":"s-cpu","a":43904,"x":0,"y":0,"d":0,"s":511,"pc":32770,"pbr":128,"dbr":0,"p":180,"e":true,"cycles":2},
+      "writes": []
+    },
+    {
+      "id": "rep.enter-16-bit-widths",
+      "bytes": [194, 48],
+      "initial": {"processor":"sa-1","a":0,"x":4660,"y":22136,"d":0,"s":511,"pc":4096,"pbr":0,"dbr":0,"p":52,"e":false,"cycles":7},
+      "expected":{"processor":"sa-1","a":0,"x":4660,"y":22136,"d":0,"s":511,"pc":4098,"pbr":0,"dbr":0,"p":4,"e":false,"cycles":10},
+      "writes": []
+    },
+    {
+      "id": "sta16.absolute-bank-wrap",
+      "bytes": [141, 255, 255],
+      "initial": {"processor":"sa-1","a":43981,"x":0,"y":0,"d":0,"s":511,"pc":8192,"pbr":0,"dbr":126,"p":4,"e":false,"cycles":10},
+      "expected":{"processor":"sa-1","a":43981,"x":0,"y":0,"d":0,"s":511,"pc":8195,"pbr":0,"dbr":126,"p":4,"e":false,"cycles":15},
+      "writes": [
+        {"address":8323071,"value":205,"kind":"data"},
+        {"address":8257536,"value":171,"kind":"data"}
+      ]
+    },
+    {
+      "id": "bra8.negative-wrap",
+      "bytes": [128, 254],
+      "initial": {"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":65534,"pbr":128,"dbr":0,"p":52,"e":true,"cycles":4},
+      "expected":{"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":65534,"pbr":128,"dbr":0,"p":52,"e":true,"cycles":7},
+      "writes": []
+    },
+    {
+      "id": "xce.enter-emulation",
+      "bytes": [251],
+      "initial": {"processor":"s-cpu","a":0,"x":43981,"y":39030,"d":0,"s":48879,"pc":0,"pbr":0,"dbr":0,"p":1,"e":false,"cycles":0},
+      "expected":{"processor":"s-cpu","a":0,"x":205,"y":118,"d":0,"s":495,"pc":1,"pbr":0,"dbr":0,"p":48,"e":true,"cycles":2},
+      "writes": []
+    }
+  ]
+}

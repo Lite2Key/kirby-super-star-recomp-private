@@ -1,0 +1,103 @@
+{
+  "cartridge": {
+    "copier_header": false,
+    "internal_header_offset": 32704,
+    "map_mode": 35,
+    "mapping": "sa1-lorom",
+    "payload_size": 4194304
+  },
+  "processors": {
+    "sa1": {
+      "control_registers": {
+        "irq_high": 8712,
+        "irq_low": 8711,
+        "nmi_high": 8710,
+        "nmi_low": 8709,
+        "reset_high": 8708,
+        "reset_low": 8707
+      },
+      "observed_reset_entry": {
+        "basis": "first-sa1-execution-event",
+        "target_cpu_address": 35828,
+        "target_rom_offset": 3060
+      },
+      "vector_source": "runtime-control-registers"
+    },
+    "scpu": {
+      "vector_source": "rom-hardware-vector-table",
+      "vectors": [
+        {
+          "mode": "native",
+          "name": "native_cop",
+          "target_cpu_address": 0,
+          "target_rom_offset": null,
+          "vector_cpu_address": 65508
+        },
+        {
+          "mode": "native",
+          "name": "native_brk",
+          "target_cpu_address": 24575,
+          "target_rom_offset": null,
+          "vector_cpu_address": 65510
+        },
+        {
+          "mode": "native",
+          "name": "native_abort",
+          "target_cpu_address": 0,
+          "target_rom_offset": null,
+          "vector_cpu_address": 65512
+        },
+        {
+          "mode": "native",
+          "name": "native_nmi",
+          "target_cpu_address": 33201,
+          "target_rom_offset": 433,
+          "vector_cpu_address": 65514
+        },
+        {
+          "mode": "native",
+          "name": "native_irq",
+          "target_cpu_address": 33954,
+          "target_rom_offset": 1186,
+          "vector_cpu_address": 65518
+        },
+        {
+          "mode": "emulation",
+          "name": "emulation_cop",
+          "target_cpu_address": 0,
+          "target_rom_offset": null,
+          "vector_cpu_address": 65524
+        },
+        {
+          "mode": "emulation",
+          "name": "emulation_abort",
+          "target_cpu_address": 0,
+          "target_rom_offset": null,
+          "vector_cpu_address": 65528
+        },
+        {
+          "mode": "emulation",
+          "name": "emulation_nmi",
+          "target_cpu_address": 0,
+          "target_rom_offset": null,
+          "vector_cpu_address": 65530
+        },
+        {
+          "mode": "emulation",
+          "name": "emulation_reset",
+          "target_cpu_address": 32772,
+          "target_rom_offset": 4,
+          "vector_cpu_address": 65532
+        },
+        {
+          "mode": "emulation",
+          "name": "emulation_irq_brk",
+          "target_cpu_address": 0,
+          "target_rom_offset": null,
+          "vector_cpu_address": 65534
+        }
+      ]
+    }
+  },
+  "schema_version": 1
+}

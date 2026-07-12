@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-12T21:12:00Z",
-    "commit": "0662fe0083b79c3fbaea03ab5f0c73a18c380300",
-    "dirty": false,
+    "generated_at": "2026-07-12T21:43:40Z",
+    "commit": "85b95c358340f9c13bee7dfe939d0ca11534b433",
+    "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
     "evidence": {
@@ -22,6 +22,21 @@
           "id": "ghidra.sanitized-export",
           "label": "Ghidra sanitized export validation",
           "path": "progress/evidence/ghidra-sanitized-export.md"
+        },
+        {
+          "id": "m1.reset-cfg",
+          "label": "Dual-CPU reset vectors and trace-seeded CFG",
+          "path": "progress/evidence/m1-reset-cfg.md"
+        },
+        {
+          "id": "m1m2.verification",
+          "label": "M1/M2 Python and artifact verification",
+          "path": "progress/evidence/m1-m2-verification.md"
+        },
+        {
+          "id": "m2.reset-prefix",
+          "label": "MesenCE-matched S-CPU reset prefix",
+          "path": "progress/evidence/m2-reset-prefix.md"
         },
         {
           "id": "recompiler.opcode-matrix",
@@ -44,6 +59,11 @@
           "id": "bootstrap.github-ci",
           "label": "Green Windows, Linux, Python, and boundary CI",
           "path": "progress/evidence/github-ci-bootstrap.md"
+        },
+        {
+          "id": "m1m2.windows-native",
+          "label": "M1/M2 Windows native build and CTest",
+          "path": "progress/evidence/m1-m2-verification.md"
         },
         {
           "id": "runtime.windows-foundation",
@@ -71,16 +91,30 @@
     {
       "id": "M1",
       "name": "Dual-CPU discovery",
-      "status": "in_progress",
+      "status": "passed",
       "summary": "Map reset paths, interrupts, traces, and initial S-CPU/SA-1 control flow.",
-      "gate": "Repeatable traces and an address-correct initial CFG exist for both CPUs."
+      "gate": "Repeatable traces and an address-correct initial CFG exist for both CPUs.",
+      "evidence": [
+        {
+          "id": "m1.reset-cfg",
+          "label": "Dual-CPU reset vectors and trace-seeded CFG",
+          "path": "progress/evidence/m1-reset-cfg.md"
+        }
+      ]
     },
     {
       "id": "M2",
       "name": "Lifter proof",
-      "status": "not_started",
+      "status": "in_progress",
       "summary": "Verify instruction semantics and lift the first blocks.",
-      "gate": "Registers, writes, and cycles match the scripted reference corpus."
+      "gate": "Registers, writes, and cycles match the scripted reference corpus.",
+      "evidence": [
+        {
+          "id": "m2.reset-prefix",
+          "label": "First MesenCE-matched S-CPU reset prefix",
+          "path": "progress/evidence/m2-reset-prefix.md"
+        }
+      ]
     },
     {
       "id": "M3",
@@ -228,7 +262,7 @@
       "name": "65C816 decoder and lifter",
       "group": "recompiler",
       "status": "in_progress",
-      "summary": "The full opcode/addressing metadata table is complete; execution semantics still require reference verification.",
+      "summary": "The full opcode/addressing metadata table is complete; 27 opcode semantics now execute through the runtime's lifted boundary.",
       "metrics": [
         {
           "label": "opcode definitions",
@@ -239,10 +273,10 @@
         },
         {
           "label": "reference-verified semantics",
-          "value": 0,
+          "value": 27,
           "total": 256,
           "denominator": "fixed",
-          "note": "Requires differential opcode and mode vectors."
+          "note": "Architecture-contract vectors cover the lifted layer; 16 consecutive KSS S-CPU reset-prefix instructions also match MesenCE state, writes, and cycles."
         }
       ]
     },
@@ -297,8 +331,8 @@
       "id": "differential",
       "name": "Differential validator",
       "group": "validation",
-      "status": "not_started",
-      "summary": "Evidence runner and normalized checkpoint comparison are planned.",
+      "status": "in_progress",
+      "summary": "A bounded private MesenCE oracle and value-free comparator exist; 16 S-CPU reset instructions match and 18 SA-1 timing samples are calibrated, but no required gameplay scenario is complete.",
       "metrics": [
         {
           "label": "passing required scenarios",
@@ -443,12 +477,12 @@
   ],
   "blockers": [],
   "next_proof": {
-    "title": "Build the initial reset CFG and prove the first lifted blocks differentially",
+    "title": "Complete and differentially verify the first S-CPU and SA-1 reset blocks",
     "acceptance": [
-      "Seed an address-correct reset CFG from the observed S-CPU and SA-1 blocks",
-      "Carry explicit processor, 24-bit PC, E, M, and X state through every reset-path edge",
-      "Lift the first reachable reset blocks and compare registers, flags, bus writes, and cycles against the reference",
-      "Increment verified-block counts only for blocks with current differential evidence"
+      "Lift the remaining S-CPU reset-prefix instructions through the first control-flow boundary",
+      "Model SA-1 memory timing well enough to match its first complete reset block cycle-for-cycle",
+      "Compare registers, flags, ordered bus writes, and cycles against fresh private MesenCE captures",
+      "Increment verified-block counts only after each complete basic block passes"
     ],
     "owner": "analysis/recompiler"
   },

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/differential-vector.schema.json",
+  "title": "65C816 lifted-instruction differential vector set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "reference", "vectors"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "version"],
+      "properties": {
+        "kind": { "enum": ["architecture-manual", "emulator"] },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "vectors": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/vector" }
+    }
+  },
+  "$defs": {
+    "cpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "a", "x", "y", "d", "s", "pc", "pbr", "dbr", "p", "e", "cycles"],
+      "properties": {
+        "processor": { "enum": ["s-cpu", "sa-1"] },
+        "a": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "x": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "y": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "d": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "s": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "pc": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "pbr": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "dbr": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "p": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "e": { "type": "boolean" },
+        "cycles": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "write": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "value", "kind"],
+      "properties": {
+        "address": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "value": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "kind": { "const": "data" }
+      }
+    },
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "bytes", "initial", "expected", "writes"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "bytes": {
+          "type": "array", "minItems": 1, "maxItems": 4,
+          "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+        },
+        "initial": { "$ref": "#/$defs/cpu" },
+        "expected": { "$ref": "#/$defs/cpu" },
+        "writes": { "type": "array", "items": { "$ref": "#/$defs/write" } }
+      }
+    }
+  }
+}

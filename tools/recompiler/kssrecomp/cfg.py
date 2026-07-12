@@ -15,6 +15,7 @@ class EdgeKind(str, Enum):
     CALL = "call"
     JUMP = "jump"
     DYNAMIC = "dynamic"
+    OBSERVED = "observed"
 
 
 @dataclass(frozen=True)

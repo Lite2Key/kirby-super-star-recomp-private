@@ -20,6 +20,9 @@ def test_cfg_serialization_and_cpp_are_deterministic() -> None:
     cpp = emit_cpp(graph)
     assert cpp.index(first.symbol) < cpp.index(later.symbol)
     assert "$008000: 20 10 80" in cpp
+    assert "Semantics not lifted in v1" in cpp
+    assert "LiftedInstruction{0xEA, {0x00, 0x00, 0x00}, 0}" in cpp
+    assert "CpuContext& cpu, Bus& bus, Scheduler&" in cpp
     assert cpp == emit_cpp(graph)
 
 

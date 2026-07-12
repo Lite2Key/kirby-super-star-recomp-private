@@ -52,7 +52,7 @@
       "type": "object",
       "required": ["kind", "source", "target", "evidence_id"],
       "properties": {
-        "kind": { "enum": ["fallthrough", "branch_taken", "call", "jump", "dynamic"] },
+        "kind": { "enum": ["fallthrough", "branch_taken", "call", "jump", "dynamic", "observed"] },
         "source": { "$ref": "#/$defs/identity" },
         "target": { "oneOf": [{ "$ref": "#/$defs/identity" }, { "type": "null" }] },
         "evidence_id": { "type": ["string", "null"] }

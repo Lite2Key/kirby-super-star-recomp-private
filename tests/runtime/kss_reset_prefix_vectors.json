@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "reference": {
+    "kind": "emulator",
+    "name": "MesenCE 2.2.1 S-CPU reset trace",
+    "version": "kss-usa-reset-prefix-v1"
+  },
+  "vectors": [
+    {
+      "id": "kss.scpu.008004.sei",
+      "bytes": [120],
+      "initial": {"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32772,"pbr":0,"dbr":0,"p":52,"e":true,"cycles":0},
+      "expected":{"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32773,"pbr":0,"dbr":0,"p":52,"e":true,"cycles":2},
+      "writes": []
+    },
+    {
+      "id": "kss.scpu.008005.clc",
+      "bytes": [24],
+      "initial": {"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32773,"pbr":0,"dbr":0,"p":52,"e":true,"cycles":2},
+      "expected":{"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32774,"pbr":0,"dbr":0,"p":52,"e":true,"cycles":4},
+      "writes": []
+    },
+    {
+      "id": "kss.scpu.008006.xce",
+      "bytes": [251],
+      "initial": {"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32774,"pbr":0,"dbr":0,"p":52,"e":true,"cycles":4},
+      "expected":{"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32775,"pbr":0,"dbr":0,"p":53,"e":false,"cycles":6},
+      "writes": []
+    },
+    {
+      "id": "kss.scpu.008007.sep20",
+      "bytes": [226,32],
+      "initial": {"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32775,"pbr":0,"dbr":0,"p":53,"e":false,"cycles":6},
+      "expected":{"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32777,"pbr":0,"dbr":0,"p":53,"e":false,"cycles":9},
+      "writes": []
+    },
+    {
+      "id": "kss.scpu.008009.rep10",
+      "bytes": [194,16],
+      "initial": {"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32777,"pbr":0,"dbr":0,"p":53,"e":false,"cycles":9},
+      "expected":{"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32779,"pbr":0,"dbr":0,"p":37,"e":false,"cycles":12},
+      "writes": []
+    },
+    {
+      "id": "kss.scpu.00800b.ldx16",
+      "bytes": [162,255,31],
+      "initial": {"processor":"s-cpu","a":0,"x":0,"y":0,"d":0,"s":511,"pc":32779,"pbr":0,"dbr":0,"p":37,"e":false,"cycles":12},
+      "expected":{"processor":"s-cpu","a":0,"x":8191,"y":0,"d":0,"s":511,"pc":32782,"pbr":0,"dbr":0,"p":37,"e":false,"cycles":15},
+      "writes": []
+    }
+  ]
+}

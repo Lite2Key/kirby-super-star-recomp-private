@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/recompiler/trace-seeded-cfg.schema.json",
+  "title": "KSS ROM-free trace-seeded dual-CPU CFG",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source", "processors", "entries", "observations", "cfg"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source": {
+      "type": "object", "additionalProperties": false, "required": ["format", "capture"],
+      "properties": {
+        "format": { "const": "mesen-ce-kss-trace-v1" },
+        "capture": {
+          "type": "object", "additionalProperties": false,
+          "required": ["limit", "event_count", "end_reason", "bounded"],
+          "properties": {
+            "limit": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+            "event_count": { "type": "integer", "minimum": 1 },
+            "end_reason": { "enum": ["limit", "complete", "missing_end_marker"] },
+            "bounded": { "const": true }
+          }
+        }
+      }
+    },
+    "processors": {
+      "type": "object", "additionalProperties": false, "required": ["scpu", "sa1"],
+      "properties": {
+        "scpu": { "$ref": "#/$defs/summary" },
+        "sa1": { "$ref": "#/$defs/summary" }
+      }
+    },
+    "entries": {
+      "type": "array", "maxItems": 2, "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["kind", "identity", "first_cycle"],
+        "properties": {
+          "kind": { "const": "reset_trace_seed" },
+          "identity": { "$ref": "#/$defs/identity" },
+          "first_cycle": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "observations": {
+      "type": "object", "additionalProperties": false, "required": ["blocks", "edges"],
+      "properties": {
+        "blocks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/blockObservation" } },
+        "edges": { "type": "array", "items": { "$ref": "#/$defs/edgeObservation" } }
+      }
+    },
+    "cfg": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "blocks"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "blocks": { "type": "array", "items": { "$ref": "#/$defs/cfgBlock" } }
+      }
+    }
+  },
+  "$defs": {
+    "summary": {
+      "type": "object", "additionalProperties": false, "required": ["events", "unique_blocks"],
+      "properties": {
+        "events": { "type": "integer", "minimum": 0 },
+        "unique_blocks": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "mode": {
+      "type": "object", "additionalProperties": false, "required": ["emulation", "m8", "x8"],
+      "properties": {
+        "emulation": { "type": "boolean" }, "m8": { "type": "boolean" }, "x8": { "type": "boolean" }
+      }
+    },
+    "identity": {
+      "type": "object", "additionalProperties": false, "required": ["processor", "pc", "mode"],
+      "properties": {
+        "processor": { "enum": ["scpu", "sa1"] },
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "mode": { "$ref": "#/$defs/mode" }
+      }
+    },
+    "blockObservation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["identity", "hits", "first_cycle", "last_cycle"],
+      "properties": {
+        "identity": { "$ref": "#/$defs/identity" },
+        "hits": { "type": "integer", "minimum": 1 },
+        "first_cycle": { "type": "integer", "minimum": 0 },
+        "last_cycle": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "edgeObservation": {
+      "type": "object", "additionalProperties": false, "required": ["source", "target", "hits"],
+      "properties": {
+        "source": { "$ref": "#/$defs/identity" },
+        "target": { "$ref": "#/$defs/identity" },
+        "hits": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "edge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "source", "target", "evidence_id"],
+      "properties": {
+        "kind": { "const": "observed" },
+        "source": { "$ref": "#/$defs/identity" },
+        "target": { "$ref": "#/$defs/identity" },
+        "evidence_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cfgBlock": {
+      "type": "object", "additionalProperties": false, "required": ["identity", "instructions", "edges"],
+      "properties": {
+        "identity": { "$ref": "#/$defs/identity" },
+        "instructions": { "type": "array", "maxItems": 0 },
+        "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/recompiler/reset-vectors.schema.json",
+  "title": "ROM-free dual-CPU reset and vector metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "cartridge", "processors"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "cartridge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["payload_size", "copier_header", "internal_header_offset", "map_mode", "mapping"],
+      "properties": {
+        "payload_size": { "type": "integer", "minimum": 32768 },
+        "copier_header": { "type": "boolean" },
+        "internal_header_offset": { "type": "integer", "minimum": 0 },
+        "map_mode": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "mapping": { "enum": ["lorom", "sa1-lorom", "hirom"] }
+      }
+    },
+    "processors": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scpu", "sa1"],
+      "properties": {
+        "scpu": { "$ref": "#/$defs/scpu" },
+        "sa1": { "$ref": "#/$defs/sa1" }
+      }
+    }
+  },
+  "$defs": {
+    "address": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+    "vector": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "mode", "vector_cpu_address", "target_cpu_address", "target_rom_offset"],
+      "properties": {
+        "name": { "enum": ["native_cop", "native_brk", "native_abort", "native_nmi", "native_irq", "emulation_cop", "emulation_abort", "emulation_nmi", "emulation_reset", "emulation_irq_brk"] },
+        "mode": { "enum": ["native", "emulation"] },
+        "vector_cpu_address": { "$ref": "#/$defs/address" },
+        "target_cpu_address": { "$ref": "#/$defs/address" },
+        "target_rom_offset": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "scpu": {
+      "type": "object", "additionalProperties": false,
+      "required": ["vector_source", "vectors"],
+      "properties": {
+        "vector_source": { "const": "rom-hardware-vector-table" },
+        "vectors": { "type": "array", "minItems": 10, "maxItems": 10, "items": { "$ref": "#/$defs/vector" } }
+      }
+    },
+    "sa1": {
+      "type": "object", "additionalProperties": false,
+      "required": ["vector_source", "control_registers"],
+      "properties": {
+        "vector_source": { "const": "runtime-control-registers" },
+        "control_registers": {
+          "type": "object", "additionalProperties": false,
+          "required": ["reset_low", "reset_high", "nmi_low", "nmi_high", "irq_low", "irq_high"],
+          "properties": {
+            "reset_low": { "const": 8707 }, "reset_high": { "const": 8708 },
+            "nmi_low": { "const": 8709 }, "nmi_high": { "const": 8710 },
+            "irq_low": { "const": 8711 }, "irq_high": { "const": 8712 }
+          }
+        },
+        "observed_reset_entry": {
+          "type": "object", "additionalProperties": false,
+          "required": ["target_cpu_address", "target_rom_offset", "basis"],
+          "properties": {
+            "target_cpu_address": { "$ref": "#/$defs/address" },
+            "target_rom_offset": { "type": ["integer", "null"], "minimum": 0 },
+            "basis": { "const": "first-sa1-execution-event" }
+          }
+        }
+      }
+    }
+  }
+}

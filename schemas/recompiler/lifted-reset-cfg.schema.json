@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/recompiler/lifted-reset-cfg.schema.json",
+  "title": "KSS bounded private-ROM lifted reset CFG",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "source", "regions", "blocks", "edges"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mapping", "payload_size", "max_blocks_per_processor", "byte_policy"],
+      "properties": {
+        "mapping": { "const": "sa1-lorom" },
+        "payload_size": { "type": "integer", "minimum": 32768 },
+        "max_blocks_per_processor": { "type": "integer", "minimum": 1, "maximum": 4096 },
+        "byte_policy": { "const": "instruction-bytes-only-max-4-per-node" }
+      }
+    },
+    "regions": {
+      "type": "object", "additionalProperties": false, "required": ["scpu", "sa1"],
+      "properties": { "scpu": { "$ref": "#/$defs/region" }, "sa1": { "$ref": "#/$defs/region" } }
+    },
+    "blocks": { "type": "array", "items": { "$ref": "#/$defs/block" } },
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } }
+  },
+  "$defs": {
+    "mode": {
+      "type": "object", "additionalProperties": false, "required": ["emulation", "m8", "x8"],
+      "properties": { "emulation": { "type": "boolean" }, "m8": { "type": "boolean" }, "x8": { "type": "boolean" } }
+    },
+    "identity": {
+      "type": "object", "additionalProperties": false, "required": ["processor", "pc", "mode"],
+      "properties": {
+        "processor": { "enum": ["scpu", "sa1"] },
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "mode": { "$ref": "#/$defs/mode" }
+      }
+    },
+    "region": {
+      "type": "object", "additionalProperties": false,
+      "required": ["entry", "decoded_blocks", "unresolved_blocks", "limit_reached"],
+      "properties": {
+        "entry": { "$ref": "#/$defs/identity" },
+        "decoded_blocks": { "type": "integer", "minimum": 0 },
+        "unresolved_blocks": { "type": "integer", "minimum": 0 },
+        "limit_reached": { "type": "boolean" }
+      }
+    },
+    "instruction": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pc", "bytes_hex", "opcode", "mnemonic", "addressing", "size", "flow", "target", "mode_after"],
+      "properties": {
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "bytes_hex": { "type": "string", "pattern": "^(?:[0-9A-F]{2}){1,4}$" },
+        "opcode": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "mnemonic": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "addressing": { "type": "string" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "flow": { "enum": ["next", "branch", "jump", "call", "return", "interrupt", "interrupt_return", "stop"] },
+        "target": { "type": ["integer", "null"], "minimum": 0, "maximum": 16777215 },
+        "mode_after": { "$ref": "#/$defs/mode" }
+      }
+    },
+    "block": {
+      "type": "object", "additionalProperties": false,
+      "required": ["identity", "rom_offset", "status", "instruction", "unresolved_reason"],
+      "properties": {
+        "identity": { "$ref": "#/$defs/identity" },
+        "rom_offset": { "type": ["integer", "null"], "minimum": 0 },
+        "status": { "enum": ["decoded", "unresolved"] },
+        "instruction": { "oneOf": [{ "$ref": "#/$defs/instruction" }, { "type": "null" }] },
+        "unresolved_reason": { "type": ["string", "null"] }
+      }
+    },
+    "edge": {
+      "type": "object", "additionalProperties": false, "required": ["source", "target"],
+      "properties": { "source": { "$ref": "#/$defs/identity" }, "target": { "$ref": "#/$defs/identity" } }
+    }
+  }
+}
