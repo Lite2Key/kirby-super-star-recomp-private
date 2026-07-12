@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 STATE_FIELDS = ("sequence", "processor", "cycle", "pc", "a", "x", "y", "d", "sp", "dbr", "ps", "emulation")
-WRITE_FIELDS = ("processor", "address", "value")
+WRITE_FIELDS = ("processor", "instruction_ordinal", "cycle", "address", "value")
 
 
 @dataclass(frozen=True)
@@ -67,13 +67,20 @@ def parse_log(path: Path) -> PrivateLog:
             states.append(values)
         elif line.startswith("KSS_DIFF_WRITE_V1|"):
             parts = line.split("|")
-            if len(parts) != 4 or parts[1] not in {"scpu", "sa1"}:
+            if len(parts) not in {4, 6} or parts[1] not in {"scpu", "sa1"}:
                 raise ValueError("malformed write record")
-            address = int(parts[2], 16)
-            value = _integer(parts[3], "write value", 0xFF)
+            if len(parts) == 6:
+                ordinal = _integer(parts[2], "write instruction ordinal")
+                cycle = _integer(parts[3], "write cycle")
+                address = int(parts[4], 16)
+                value = _integer(parts[5], "write value", 0xFF)
+            else:
+                ordinal = cycle = None
+                address = int(parts[2], 16)
+                value = _integer(parts[3], "write value", 0xFF)
             if address > 0xFFFFFF:
                 raise ValueError("write address is out of range")
-            writes.append((parts[1], address, value))
+            writes.append((parts[1], ordinal, cycle, address, value))
             if len(writes) > 1_000_000:
                 raise ValueError("write record limit exceeded")
 

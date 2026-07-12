@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "source_format": "kss-differential-v1",
+  "source_sha256": "87efe7fcac941f412b95d84a2aa6348a8373dd5dbb7cb07dc34bdd83372b1d82",
+  "blocks": [
+    {
+      "processor": "scpu",
+      "start_pc": 32772,
+      "terminator_pc": 33136,
+      "end_pc": 33133,
+      "instruction_records": 160,
+      "state_records": 161,
+      "cycle_start": 0,
+      "cycle_end": 516,
+      "cycle_delta": 516,
+      "write_records": 16582,
+      "state_chain_sha256": "5e62362d6a8268b16889fa5a1c75c80ad2093ac6243a3d3477612121ea27f44f",
+      "write_chain_sha256": "660821bcd2d2621ee42b7fd5e8d000ef1b4570409a0384c7f14584b97974e88b"
+    },
+    {
+      "processor": "sa1",
+      "start_pc": 35828,
+      "terminator_pc": 35872,
+      "end_pc": 35875,
+      "instruction_records": 2065,
+      "state_records": 2066,
+      "cycle_start": 1454,
+      "cycle_end": 22011,
+      "cycle_delta": 20557,
+      "write_records": 2055,
+      "state_chain_sha256": "30ff7ec32e1d682493bfa92169963d090297efcf215f2d88854a901c78567881",
+      "write_chain_sha256": "df384d135c6b62d97e2b70b4a3c779d8e91b0e895e272354a510116cf7fc3b56"
+    }
+  ]
+}

@@ -179,6 +179,28 @@ LiftResult execute_lifted(
             static_cast<std::uint8_t>(width8 ? 2U : 3U));
     }
 
+    if (instruction.opcode == 0xadU) { // LDA abs
+        if (instruction.operand_count != 2U) {
+            return reject_encoding();
+        }
+        const auto width8 = cpu.mode().accumulator_8bit;
+        const auto address = (static_cast<std::uint32_t>(cpu.data_bank) << 16U)
+            | operand16(instruction);
+        if (width8) {
+            const auto value = bus.read8(cpu.processor, address, BusAccessKind::data);
+            cpu.a = static_cast<std::uint16_t>((cpu.a & 0xff00U) | value);
+            set_nz8(cpu, value);
+        } else {
+            // Absolute data operands wrap the high-byte access inside DBR; they
+            // never carry into the next bank at $xx:FFFF.
+            const auto value = read16_bank_wrapped(
+                bus, cpu.processor, address, BusAccessKind::data);
+            cpu.a = value;
+            set_nz16(cpu, value);
+        }
+        return finish(cpu, 3, static_cast<std::uint8_t>(width8 ? 4U : 5U));
+    }
+
     if (instruction.opcode == 0x8dU || instruction.opcode == 0x8eU
         || instruction.opcode == 0x8cU || instruction.opcode == 0x9cU) { // STA/STX/STY/STZ abs
         if (instruction.operand_count != 2U) {
@@ -217,6 +239,36 @@ LiftResult execute_lifted(
         return finish(cpu, 2, cycles);
     }
 
+    if (instruction.opcode == 0x54U) { // MVN destination-bank, source-bank
+        if (instruction.operand_count != 2U) {
+            return reject_encoding();
+        }
+
+        // One dispatch performs one restartable architectural transfer.  PC
+        // remains on MVN while bytes remain and advances only after A wraps.
+        const auto destination_bank = instruction.operands[0];
+        const auto source_bank = instruction.operands[1];
+        cpu.data_bank = destination_bank;
+        const auto source_address = (static_cast<std::uint32_t>(source_bank) << 16U) | cpu.x;
+        const auto destination_address =
+            (static_cast<std::uint32_t>(destination_bank) << 16U) | cpu.y;
+        const auto value = bus.read8(cpu.processor, source_address, BusAccessKind::data);
+        bus.write8(cpu.processor, destination_address, value, BusAccessKind::data);
+
+        cpu.x = static_cast<std::uint16_t>(cpu.x + 1U);
+        cpu.y = static_cast<std::uint16_t>(cpu.y + 1U);
+        if (cpu.mode().index_8bit) {
+            cpu.x &= 0x00ffU;
+            cpu.y &= 0x00ffU;
+        }
+        cpu.a = static_cast<std::uint16_t>(cpu.a - 1U);
+        if (cpu.a == 0xffffU) {
+            cpu.pc = static_cast<std::uint16_t>(cpu.pc + 3U);
+        }
+        cpu.cycles += 7U;
+        return {LiftStatus::executed, 3, 7};
+    }
+
     if (instruction.opcode == 0x80U) { // BRA rel8
         if (instruction.operand_count != 1U) {
             return reject_encoding();
@@ -225,6 +277,29 @@ LiftResult execute_lifted(
         cpu.pc = static_cast<std::uint16_t>(cpu.pc + 2U + displacement);
         cpu.cycles += 3U;
         return {LiftStatus::executed, 2, 3};
+    }
+
+    if (instruction.opcode == 0x10U) { // BPL rel8
+        if (instruction.operand_count != 1U) {
+            return reject_encoding();
+        }
+        const auto next_pc = static_cast<std::uint16_t>(cpu.pc + 2U);
+        auto cycles = std::uint8_t{2};
+        if (!cpu.flag(StatusFlag::negative)) {
+            const auto displacement = static_cast<std::int8_t>(instruction.operands[0]);
+            const auto target = static_cast<std::uint16_t>(next_pc + displacement);
+            cycles = 3;
+            // The 65816 retains the 6502 page-cross penalty only while in
+            // emulation mode. Relative control flow wraps PC within PBR.
+            if (cpu.emulation && (next_pc & 0xff00U) != (target & 0xff00U)) {
+                ++cycles;
+            }
+            cpu.pc = target;
+        } else {
+            cpu.pc = next_pc;
+        }
+        cpu.cycles += cycles;
+        return {LiftStatus::executed, 2, cycles};
     }
 
     if (instruction.opcode == 0x4cU) { // JMP abs

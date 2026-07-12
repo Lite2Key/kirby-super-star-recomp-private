@@ -44,4 +44,39 @@ std::optional<Sa1ResetTiming> lookup_sa1_reset_timing(
     return std::nullopt;
 }
 
+std::optional<Sa1ResetBlockMoveTiming> lookup_sa1_reset_block_move_timing(
+    std::uint32_t pc,
+    std::uint8_t opcode,
+    std::uint32_t iterations) noexcept {
+    // The private Mesen reference entered the loop at cycle 1550 and reached
+    // its exit instruction at cycle 22011 after 2047 iterations.  Architectural
+    // MVN timing accounts for 2047 * 7 cycles; the remainder is measured SA-1
+    // bus arbitration for this exact run, not a reusable wait-state formula.
+    constexpr Sa1ResetBlockMoveTiming measured{
+        0x008c20U, 0x54U, 2047U, 2047U * 7U, 6132U};
+    if ((pc & 0x00ff'ffffU) == measured.pc && opcode == measured.opcode
+        && iterations == measured.iterations) {
+        return measured;
+    }
+    return std::nullopt;
+}
+
+std::optional<std::uint8_t> lookup_sa1_reset_mvn_wait(
+    std::uint32_t pc,
+    std::uint8_t opcode,
+    std::uint16_t a_before,
+    std::uint16_t x_before,
+    std::uint16_t y_before) noexcept {
+    if ((pc & 0x00ff'ffffU) != 0x008c20U || opcode != 0x54U || a_before > 0x07feU) {
+        return std::nullopt;
+    }
+    const auto iteration = static_cast<std::uint16_t>(0x07feU - a_before);
+    if (x_before != static_cast<std::uint16_t>(0x3000U + iteration)
+        || y_before != static_cast<std::uint16_t>(0x3001U + iteration)) {
+        return std::nullopt;
+    }
+    return static_cast<std::uint8_t>(
+        iteration == 0U || iteration == 2U || iteration == 12U ? 0U : 3U);
+}
+
 } // namespace kss

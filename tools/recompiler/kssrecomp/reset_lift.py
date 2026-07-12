@@ -41,8 +41,14 @@ def _rom_offset(address: int, payload_size: int) -> int | None:
     return ((((address >> 16) & 0x7F) << 15) | (address & 0x7FFF)) % payload_size
 
 
-def _edge_is_supported(flow: Flow, pc: int, size: int, target: int | None, successor: int) -> bool:
+def _edge_is_supported(
+    flow: Flow, pc: int, size: int, target: int | None, successor: int, opcode: int | None = None
+) -> bool:
     fallthrough = (pc & 0xFF0000) | ((pc + size) & 0xFFFF)
+    # MVN/MVP are restartable instructions: one architectural transfer keeps
+    # PC at the opcode while A has not wrapped, then exits to the fallthrough.
+    if opcode in (0x44, 0x54):
+        return successor in (pc, fallthrough)
     if flow == Flow.NEXT:
         return successor == fallthrough
     if flow == Flow.BRANCH:
@@ -189,7 +195,8 @@ def lift_reset_paths(
             mismatch = False
             for target in targets:
                 if target.mode != instruction.state_after.mode or not _edge_is_supported(
-                    instruction.flow, identity.pc, instruction.size, instruction.target, target.pc
+                    instruction.flow, identity.pc, instruction.size, instruction.target, target.pc,
+                    instruction.opcode
                 ):
                     mismatch = True
                     break

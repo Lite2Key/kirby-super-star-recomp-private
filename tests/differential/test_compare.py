@@ -17,7 +17,7 @@ def log(*, a: int = 1, write: int = 7, end_total: int = 2) -> str:
         "KSS_DIFF_START_V1|1",
         f"KSS_DIFF_STATE_V1|1|scpu|0|008004|{a}|2|3|4|511|0|52|1",
         "KSS_DIFF_STATE_V1|2|sa1|10|008BF4|5|6|7|8|511|0|52|1",
-        f"KSS_DIFF_WRITE_V1|scpu|000100|{write}",
+        f"KSS_DIFF_WRITE_V1|scpu|1|1|000100|{write}",
         f"KSS_DIFF_END_V1|{end_total}|limit|1|1",
         "",
     ))
@@ -69,7 +69,7 @@ def test_malformed_or_unbounded_logs_are_rejected(tmp_path: Path, text: str, mes
 def test_mesen_harness_is_bounded_and_uses_private_state_apis() -> None:
     script = (ROOT / "tools" / "mesen" / "differential_trace.lua").read_text(encoding="utf-8")
     for required in (
-        "local EVENTS_PER_CPU = 256", "emu.getCpuState", "emu.getState",
+        "local LIMITS = { scpu = 256, sa1 = 2200 }", "emu.getCpuState", "emu.getState",
         "emu.getCpuCycleCount", "emu.callbackType.exec", "emu.callbackType.write",
         "cart.coprocessor.cpu.", "KSS_DIFF_STATE_V1", "KSS_DIFF_WRITE_V1", "emu.stop(0)",
     ):

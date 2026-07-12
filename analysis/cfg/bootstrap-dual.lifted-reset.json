@@ -548,8 +548,124 @@
         "target": null
       },
       "rom_offset": 3104,
-      "status": "unresolved",
-      "unresolved_reason": "observed_control_flow_or_mode_mismatch"
+      "status": "decoded",
+      "unresolved_reason": null
+    },
+    {
+      "identity": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35875,
+        "processor": "sa1"
+      },
+      "instruction": {
+        "addressing": "immediate_x",
+        "bytes_hex": "A20060",
+        "flow": "next",
+        "mnemonic": "LDX",
+        "mode_after": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "opcode": 162,
+        "pc": 35875,
+        "size": 3,
+        "target": null
+      },
+      "rom_offset": 3107,
+      "status": "decoded",
+      "unresolved_reason": null
+    },
+    {
+      "identity": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35878,
+        "processor": "sa1"
+      },
+      "instruction": {
+        "addressing": "immediate_x",
+        "bytes_hex": "A00160",
+        "flow": "next",
+        "mnemonic": "LDY",
+        "mode_after": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "opcode": 160,
+        "pc": 35878,
+        "size": 3,
+        "target": null
+      },
+      "rom_offset": 3110,
+      "status": "decoded",
+      "unresolved_reason": null
+    },
+    {
+      "identity": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35881,
+        "processor": "sa1"
+      },
+      "instruction": {
+        "addressing": "immediate_m",
+        "bytes_hex": "A9FE1E",
+        "flow": "next",
+        "mnemonic": "LDA",
+        "mode_after": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "opcode": 169,
+        "pc": 35881,
+        "size": 3,
+        "target": null
+      },
+      "rom_offset": 3113,
+      "status": "decoded",
+      "unresolved_reason": null
+    },
+    {
+      "identity": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35884,
+        "processor": "sa1"
+      },
+      "instruction": {
+        "addressing": "block_move",
+        "bytes_hex": "540000",
+        "flow": "next",
+        "mnemonic": "MVN",
+        "mode_after": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "opcode": 84,
+        "pc": 35884,
+        "size": 3,
+        "target": null
+      },
+      "rom_offset": 3116,
+      "status": "decoded",
+      "unresolved_reason": null
     },
     {
       "identity": {
@@ -5556,6 +5672,126 @@
     {
       "source": {
         "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35872,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35872,
+        "processor": "sa1"
+      }
+    },
+    {
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35872,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35875,
+        "processor": "sa1"
+      }
+    },
+    {
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35875,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35878,
+        "processor": "sa1"
+      }
+    },
+    {
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35878,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35881,
+        "processor": "sa1"
+      }
+    },
+    {
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35881,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35884,
+        "processor": "sa1"
+      }
+    },
+    {
+      "source": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35884,
+        "processor": "sa1"
+      },
+      "target": {
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        },
+        "pc": 35884,
+        "processor": "sa1"
+      }
+    },
+    {
+      "source": {
+        "mode": {
           "emulation": true,
           "m8": true,
           "x8": true
@@ -8756,7 +8992,7 @@
   ],
   "regions": {
     "sa1": {
-      "decoded_blocks": 18,
+      "decoded_blocks": 23,
       "entry": {
         "mode": {
           "emulation": true,
@@ -8767,7 +9003,7 @@
         "processor": "sa1"
       },
       "limit_reached": false,
-      "unresolved_blocks": 1
+      "unresolved_blocks": 0
     },
     "scpu": {
       "decoded_blocks": 160,

@@ -55,9 +55,43 @@ void test_regions_and_strict_lookup() {
     assert(!kss::lookup_sa1_reset_timing(0x008bf4, 0xea));
 }
 
+void test_block_move_timing_is_bound_to_the_measured_run() {
+    const auto timing = kss::lookup_sa1_reset_block_move_timing(
+        0x008c20, 0x54, 2047);
+    assert(timing.has_value());
+    assert(timing->base_cycles == 14329);
+    assert(timing->observed_wait_cycles == 6132);
+    assert(timing->total_cycles() == 20461);
+
+    // Repeated iterations at $00:8C20 had different waits.  Neither the
+    // ordinary PC/opcode table nor a different run length may inherit the
+    // aggregate as though it were a universal seven-plus-three cycle rule.
+    assert(!kss::lookup_sa1_reset_timing(0x008c20, 0x54));
+    assert(!kss::lookup_sa1_reset_block_move_timing(0x008c20, 0x54, 1));
+    assert(!kss::lookup_sa1_reset_block_move_timing(0x008c21, 0x54, 2047));
+}
+
+void test_exact_mvn_iteration_wait_sequence() {
+    std::uint32_t wait = 0;
+    for (std::uint16_t iteration = 0; iteration < 2047U; ++iteration) {
+        const auto timing = kss::lookup_sa1_reset_mvn_wait(
+            0x008c20U, 0x54U,
+            static_cast<std::uint16_t>(0x07feU - iteration),
+            static_cast<std::uint16_t>(0x3000U + iteration),
+            static_cast<std::uint16_t>(0x3001U + iteration));
+        assert(timing.has_value());
+        wait += *timing;
+    }
+    assert(wait == 6132U);
+    assert(!kss::lookup_sa1_reset_mvn_wait(0x008c20U, 0x54U, 0x07feU, 0x3001U, 0x3001U));
+    assert(!kss::lookup_sa1_reset_mvn_wait(0x008c21U, 0x54U, 0x07feU, 0x3000U, 0x3001U));
+}
+
 } // namespace
 
 int main() {
     test_private_reference_summary();
     test_regions_and_strict_lookup();
+    test_block_move_timing_is_bound_to_the_measured_run();
+    test_exact_mvn_iteration_wait_sequence();
 }

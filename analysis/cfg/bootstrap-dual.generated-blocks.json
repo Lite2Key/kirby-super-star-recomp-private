@@ -1,0 +1,13 @@
+{
+  "failure_policy": "stop-on-lift-failure-omit-unresolved",
+  "generator": "kssrecomp.generated_blocks-v1",
+  "identity_policy": "processor-pc24-emulation-m8-x8",
+  "input_sha256": "425134961512c74518e86c2d620a20afeb6375a7baefc127ce1e48add0eb57e3",
+  "max_blocks_per_processor": 256,
+  "processors": {
+    "sa1": 23,
+    "scpu": 160
+  },
+  "registered_blocks": 183,
+  "schema_version": 1
+}

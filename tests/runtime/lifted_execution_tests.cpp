@@ -15,12 +15,21 @@ struct Write {
     kss::BusAccessKind kind;
 };
 
+struct Read {
+    kss::ProcessorId processor;
+    std::uint32_t address;
+    kss::BusAccessKind kind;
+};
+
 class RecordingBus final : public kss::Bus {
 public:
     std::array<std::uint8_t, 0x10000> bytes{};
+    std::vector<Read> reads;
     std::vector<Write> writes;
 
-    std::uint8_t read8(kss::ProcessorId, std::uint32_t address, kss::BusAccessKind) override {
+    std::uint8_t read8(kss::ProcessorId processor, std::uint32_t address,
+        kss::BusAccessKind kind) override {
+        reads.push_back({processor, address, kind});
         return bytes[address & 0xffffU];
     }
 
@@ -187,6 +196,68 @@ void test_control_flow_and_rejection_are_atomic() {
     assert(cpu.pc == before.pc && cpu.cycles == before.cycles);
 }
 
+void test_absolute_load_and_bpl_semantics() {
+    RecordingBus bus;
+    kss::CpuContext cpu;
+    cpu.processor = kss::ProcessorId::sa1;
+    cpu.emulation = false;
+    cpu.status = 0;
+    cpu.data_bank = 0x7e;
+    cpu.pc = 0x2000;
+    bus.bytes[0xffff] = 0x34;
+    bus.bytes[0x0000] = 0x92;
+    auto result = kss::execute_lifted(cpu, bus, instruction(0xad, {0xff, 0xff}));
+    assert(result.status == kss::LiftStatus::executed);
+    assert(result.instruction_bytes == 3 && result.instruction_cycles == 5);
+    assert(cpu.a == 0x9234 && cpu.pc == 0x2003 && cpu.cycles == 5);
+    assert(cpu.flag(kss::StatusFlag::negative) && !cpu.flag(kss::StatusFlag::zero));
+    assert(bus.reads.size() == 2);
+    assert(bus.reads[0].processor == kss::ProcessorId::sa1
+        && bus.reads[0].address == 0x7effff);
+    assert(bus.reads[1].address == 0x7e0000);
+    assert(bus.reads[0].kind == kss::BusAccessKind::data);
+
+    cpu.status = static_cast<std::uint8_t>(kss::StatusFlag::accumulator_width);
+    cpu.a = 0xab00;
+    cpu.data_bank = 0x12;
+    bus.bytes[0x3456] = 0;
+    result = kss::execute_lifted(cpu, bus, instruction(0xad, {0x56, 0x34}));
+    assert(result.instruction_cycles == 4 && cpu.a == 0xab00);
+    assert(cpu.flag(kss::StatusFlag::zero) && !cpu.flag(kss::StatusFlag::negative));
+    assert(bus.reads.back().address == 0x123456);
+
+    cpu.program_bank = 0x81;
+    cpu.pc = 0x8170;
+    cpu.cycles = 0;
+    cpu.status = 0;
+    result = kss::execute_lifted(cpu, bus, instruction(0x10, {0xfb}));
+    assert(result.instruction_cycles == 3 && cpu.pc == 0x816d && cpu.program_bank == 0x81);
+
+    cpu.pc = 0x8170;
+    cpu.status = static_cast<std::uint8_t>(kss::StatusFlag::negative);
+    result = kss::execute_lifted(cpu, bus, instruction(0x10, {0xfb}));
+    assert(result.instruction_cycles == 2 && cpu.pc == 0x8172);
+
+    cpu.emulation = true;
+    cpu.status = 0;
+    cpu.pc = 0x00fd;
+    result = kss::execute_lifted(cpu, bus, instruction(0x10, {0x01}));
+    assert(result.instruction_cycles == 4 && cpu.pc == 0x0100);
+    cpu.emulation = false;
+    cpu.pc = 0xfffe;
+    result = kss::execute_lifted(cpu, bus, instruction(0x10, {0x01}));
+    assert(result.instruction_cycles == 3 && cpu.pc == 0x0001
+        && cpu.program_bank == 0x81);
+
+    const auto before = cpu;
+    result = kss::execute_lifted(cpu, bus, instruction(0xad, {0x00}));
+    assert(result.status == kss::LiftStatus::invalid_encoding);
+    assert(cpu.pc == before.pc && cpu.cycles == before.cycles && cpu.a == before.a);
+    result = kss::execute_lifted(cpu, bus, instruction(0x10));
+    assert(result.status == kss::LiftStatus::invalid_encoding);
+    assert(cpu.pc == before.pc && cpu.cycles == before.cycles);
+}
+
 void test_stack_and_direct_page_semantics() {
     RecordingBus bus;
     kss::CpuContext cpu;
@@ -297,6 +368,94 @@ void test_kss_scpu_reset_prefix_against_mesen_reference() {
     assert(bus.writes[5].address == 0x002101 && bus.writes[5].value == 0x63);
 }
 
+void test_kss_scpu_first_reset_block_against_mesen_reference() {
+    // Observed instruction bytes from the ROM-free lifted-reset artifact.  The
+    // reference capture enters at $00:8004 and first reaches a control-flow
+    // boundary at BPL $00:8170 -> $00:816D.
+    constexpr std::array<std::uint8_t, 366> reset_bytes{
+        0x78, 0x18, 0xFB, 0xE2, 0x20, 0xC2, 0x10, 0xA2, 0xFF, 0x1F, 0x9A, 0x4B, 0xAB, 0x9C, 0x00, 0x42,
+        0xF4, 0x00, 0x21, 0x2B, 0xA9, 0x8F, 0x85, 0x00, 0xA9, 0x63, 0x85, 0x01, 0x64, 0x02, 0x64, 0x03,
+        0xA9, 0x04, 0x85, 0x05, 0x64, 0x06, 0x64, 0x0D, 0x64, 0x0D, 0x64, 0x0E, 0x64, 0x0E, 0x64, 0x0F,
+        0x64, 0x0F, 0x64, 0x10, 0x64, 0x10, 0x64, 0x11, 0x64, 0x11, 0x64, 0x12, 0x64, 0x12, 0x64, 0x13,
+        0x64, 0x13, 0x64, 0x14, 0x64, 0x14, 0xA9, 0x80, 0x85, 0x15, 0x64, 0x16, 0x64, 0x17, 0x64, 0x1A,
+        0x64, 0x1B, 0xA9, 0x01, 0x85, 0x1B, 0x64, 0x1C, 0x64, 0x1C, 0x64, 0x1D, 0x64, 0x1D, 0x64, 0x1E,
+        0x85, 0x1E, 0x64, 0x1F, 0x64, 0x1F, 0x64, 0x20, 0x64, 0x20, 0x64, 0x21, 0x64, 0x23, 0x64, 0x24,
+        0x64, 0x25, 0x64, 0x26, 0x64, 0x27, 0x64, 0x28, 0x64, 0x29, 0x64, 0x2A, 0x64, 0x2B, 0x64, 0x2E,
+        0x64, 0x2F, 0xA9, 0x30, 0x85, 0x30, 0x64, 0x31, 0xA9, 0xE0, 0x85, 0x32, 0x64, 0x33, 0xF4, 0x00,
+        0x42, 0x2B, 0xA9, 0xFF, 0x85, 0x01, 0x64, 0x02, 0x64, 0x03, 0x64, 0x04, 0x64, 0x05, 0x64, 0x06,
+        0x64, 0x07, 0x64, 0x08, 0x64, 0x09, 0x64, 0x0A, 0x64, 0x0B, 0x64, 0x0C, 0x64, 0x0D, 0xF4, 0x00,
+        0x37, 0x2B, 0xA9, 0x20, 0x8D, 0x00, 0x22, 0x9C, 0x01, 0x22, 0xA9, 0xA0, 0x8D, 0x02, 0x22, 0x9C,
+        0x20, 0x22, 0xA9, 0x01, 0x8D, 0x21, 0x22, 0xA9, 0x02, 0x8D, 0x22, 0x22, 0xA9, 0x03, 0x8D, 0x23,
+        0x22, 0x9C, 0x24, 0x22, 0xA9, 0x05, 0x8D, 0x28, 0x22, 0xA9, 0x80, 0x8D, 0x26, 0x22, 0xA9, 0xFF,
+        0x8D, 0x29, 0x22, 0x9C, 0x00, 0x30, 0x9C, 0x01, 0x30, 0xA2, 0xF4, 0x8B, 0x8E, 0x03, 0x22, 0x9C,
+        0x00, 0x22, 0xA2, 0x00, 0x00, 0x8E, 0x81, 0x21, 0x9C, 0x83, 0x21, 0xA9, 0x08, 0x8D, 0x10, 0x43,
+        0xA2, 0xFE, 0xFF, 0x8E, 0x12, 0x43, 0x9C, 0x14, 0x43, 0xA9, 0x80, 0x8D, 0x11, 0x43, 0xA2, 0x00,
+        0x20, 0x8E, 0x15, 0x43, 0xA9, 0x02, 0x8D, 0x0B, 0x42, 0xA2, 0x0E, 0x00, 0x8E, 0x81, 0x21, 0x9C,
+        0x83, 0x21, 0x9C, 0x10, 0x43, 0xA2, 0x8C, 0x81, 0x8E, 0x12, 0x43, 0x9C, 0x14, 0x43, 0xA9, 0x80,
+        0x8D, 0x11, 0x43, 0xA2, 0x17, 0x00, 0x8E, 0x15, 0x43, 0xA9, 0x02, 0x8D, 0x0B, 0x42, 0xA2, 0x26,
+        0x00, 0x8E, 0x81, 0x21, 0xA2, 0xA3, 0x81, 0x8E, 0x12, 0x43, 0xA2, 0x0E, 0x00, 0x8E, 0x15, 0x43,
+        0xA9, 0x02, 0x8D, 0x0B, 0x42, 0xA9, 0x7E, 0x8D, 0x14, 0x30, 0xA9, 0x80, 0x8D, 0x5F, 0x30, 0x8D,
+        0xA2, 0x30, 0xA9, 0xFF, 0x8D, 0x93, 0x30, 0xC2, 0x20, 0xAD, 0x00, 0x30, 0x10, 0xFB,
+    };
+
+    RecordingBus bus;
+    kss::CpuContext cpu;
+    cpu.processor = kss::ProcessorId::snes_cpu;
+    cpu.program_bank = 0;
+    cpu.pc = 0x8004;
+    cpu.status = 0x34;
+    cpu.emulation = true;
+
+    std::size_t offset = 0;
+    std::size_t executed = 0;
+    while (offset < reset_bytes.size()) {
+        assert(cpu.pc == static_cast<std::uint16_t>(0x8004U + offset));
+        kss::LiftedInstruction lifted{};
+        lifted.opcode = reset_bytes[offset];
+        switch (lifted.opcode) {
+        case 0xe2: case 0xc2: case 0xa9: case 0x85: case 0x64: case 0x10:
+            lifted.operand_count = 1;
+            break;
+        case 0xa2: case 0xf4: case 0x8d: case 0x8e: case 0x9c: case 0xad:
+            lifted.operand_count = 2;
+            break;
+        default:
+            lifted.operand_count = 0;
+            break;
+        }
+        for (std::uint8_t index = 0; index < lifted.operand_count; ++index) {
+            lifted.operands[index] = reset_bytes[offset + 1U + index];
+        }
+        const auto result = kss::execute_lifted(cpu, bus, lifted);
+        assert(result.status == kss::LiftStatus::executed);
+        ++executed;
+        offset += result.instruction_bytes;
+        if (lifted.opcode == 0x10) break;
+    }
+
+    // State 417 of the private MesenCE differential capture, immediately
+    // after the taken BPL. The CPU-cycle counter excludes interleaved SA-1
+    // scheduler time and therefore compares directly with this executor.
+    assert(executed == 160 && offset == reset_bytes.size());
+    assert(cpu.pc == 0x816d && cpu.program_bank == 0 && cpu.data_bank == 0);
+    assert(cpu.a == 0 && cpu.x == 14 && cpu.y == 0);
+    assert(cpu.direct_page == 0x3700 && cpu.stack_pointer == 0x1fff);
+    assert(cpu.status == 0x07 && !cpu.emulation && cpu.cycles == 516);
+    assert(bus.reads.size() == 9);
+    assert(bus.reads[bus.reads.size() - 2].address == 0x003000
+        && bus.reads.back().address == 0x003001);
+    assert(bus.writes.size() == 124);
+    const auto write_count = bus.writes.size();
+    assert(bus.writes[write_count - 4].address == 0x003014
+        && bus.writes[write_count - 4].value == 0x7e);
+    assert(bus.writes[write_count - 3].address == 0x00305f
+        && bus.writes[write_count - 3].value == 0x80);
+    assert(bus.writes[write_count - 2].address == 0x0030a2
+        && bus.writes[write_count - 2].value == 0x80);
+    assert(bus.writes[write_count - 1].address == 0x003093
+        && bus.writes[write_count - 1].value == 0xff);
+}
+
 } // namespace
 
 int main() {
@@ -305,7 +464,9 @@ int main() {
     test_immediate_loads_both_widths();
     test_absolute_stores_and_bus_writes();
     test_control_flow_and_rejection_are_atomic();
+    test_absolute_load_and_bpl_semantics();
     test_stack_and_direct_page_semantics();
     test_kss_scpu_reset_prefix_against_mesen_reference();
+    test_kss_scpu_first_reset_block_against_mesen_reference();
     return 0;
 }

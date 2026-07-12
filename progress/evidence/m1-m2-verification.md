@@ -1,10 +1,10 @@
 # M1/M2 implementation verification
 
 - Python command: `.venv/Scripts/python.exe -m pytest -q`
-- Python result: 91 tests passed
+- Python result: 96 tests passed
 - Native command: `scripts/build-windows.cmd`
-- Native result: MSVC warnings-as-errors build passed; 3 of 3 CTests passed
-- Native suites: runtime foundation, lifted semantics, SA-1 reset timing
+- Native result: MSVC warnings-as-errors build passed; 5 of 5 CTests passed
+- Native suites: runtime foundation, lifted semantics, SA-1 reset timing, generated-block dispatch, and MVN semantics
 - Trace CFG freshness: passed against `analysis/coverage/bootstrap-dual.json`
 - Lifted reset CFG freshness: passed against the authorized local ROM, sanitized vectors, and trace CFG
 - Asset boundary: passed

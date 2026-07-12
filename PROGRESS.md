@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-12T21:44:02Z` | commit `784b6bffcc79e9668e8f493207460000e1cb66a0` | tree `clean`
+Snapshot: `2026-07-12T22:21:11Z` | commit `a2c878e00fad97ddaab609559cb6d89489495a06` | tree `dirty`
 
 ## Milestone map
 
@@ -10,8 +10,8 @@ Snapshot: `2026-07-12T21:44:02Z` | commit `784b6bffcc79e9668e8f493207460000e1cb6
 |---|---|---|
 | M0 - Bootstrap | `passed` | All bootstrap checks pass without Nintendo-derived data. |
 | M1 - Dual-CPU discovery | `passed` | Repeatable traces and an address-correct initial CFG exist for both CPUs. |
-| M2 - Lifter proof | `in_progress` | Registers, writes, and cycles match the scripted reference corpus. |
-| M3 - Reset to first frame | `not_started` | Hardware events and the fixed first-frame checkpoint match. |
+| M2 - Lifter proof | `passed` | Registers, writes, and cycles match the scripted reference corpus. |
+| M3 - Reset to first frame | `in_progress` | Hardware events and the fixed first-frame checkpoint match. |
 | M4 - Title and menus | `not_started` | All title/menu scenarios pass deterministic replay. |
 | M5 - First playable room | `not_started` | The first-room route passes state, pixel, and event checks. |
 | M6 - Spring Breeze | `not_started` | Required Spring Breeze routes pass, including helper and save flows. |
@@ -27,11 +27,11 @@ Snapshot: `2026-07-12T21:44:02Z` | commit `784b6bffcc79e9668e8f493207460000e1cb6
 |---|---|---:|---|
 | ROM and address map | classified banks | 0 / 64 | `fixed` |
 | S-CPU control flow | observed mode-aware blocks | 214 / 214 | `evolving` |
-| S-CPU control flow | verified blocks | 0 / 214 | `evolving` |
+| S-CPU control flow | verified blocks | 1 / 214 | `evolving` |
 | SA-1 control flow | observed mode-aware blocks | 23 / 23 | `evolving` |
-| SA-1 control flow | verified blocks | 0 / 23 | `evolving` |
+| SA-1 control flow | verified blocks | 1 / 23 | `evolving` |
 | 65C816 decoder and lifter | opcode definitions | 256 / 256 | `fixed` |
-| 65C816 decoder and lifter | reference-verified semantics | 27 / 256 | `fixed` |
+| 65C816 decoder and lifter | reference-verified semantics | 30 / 256 | `fixed` |
 | Deterministic scheduler | synchronization classes | 0 / 8 | `fixed` |
 | S-CPU and SA-1 address spaces | synthetic mapping groups | 7 / 7 | `fixed` |
 | PPU, DMA, APU, input, and save | validated subsystems | 0 / 5 | `fixed` |
@@ -47,6 +47,7 @@ Snapshot: `2026-07-12T21:44:02Z` | commit `784b6bffcc79e9668e8f493207460000e1cb6
 - `ghidra.sanitized-export` [Ghidra sanitized export validation](progress/evidence/ghidra-sanitized-export.md)
 - `m1.reset-cfg` [Dual-CPU reset vectors and trace-seeded CFG](progress/evidence/m1-reset-cfg.md)
 - `m1m2.verification` [M1/M2 Python and artifact verification](progress/evidence/m1-m2-verification.md)
+- `m2.complete-reset-blocks` [Complete generated S-CPU and SA-1 reset-block proof](progress/evidence/m2-complete-reset-blocks.md)
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
@@ -59,12 +60,12 @@ Snapshot: `2026-07-12T21:44:02Z` | commit `784b6bffcc79e9668e8f493207460000e1cb6
 
 ## Next executable proof
 
-**Complete and differentially verify the first S-CPU and SA-1 reset blocks** - owner: `analysis/recompiler`
+**Execute translated reset code through the first rendered frame** - owner: `analysis/recompiler`
 
-- [ ] Lift the remaining S-CPU reset-prefix instructions through the first control-flow boundary
-- [ ] Model SA-1 memory timing well enough to match its first complete reset block cycle-for-cycle
-- [ ] Compare registers, flags, ordered bus writes, and cycles against fresh private MesenCE captures
-- [ ] Increment verified-block counts only after each complete basic block passes
+- [ ] Implement the DMA, PPU-register, SA-1 shared-memory, and scheduler effects exercised after the reset blocks
+- [ ] Continue generated dispatch with no unknown executed target through the first frame boundary
+- [ ] Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE
+- [ ] Keep presentation output optional until the compatibility checkpoint is green
 
 ## Active blockers
 

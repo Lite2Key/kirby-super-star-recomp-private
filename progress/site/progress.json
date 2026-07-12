@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-12T21:44:02Z",
-    "commit": "784b6bffcc79e9668e8f493207460000e1cb66a0",
-    "dirty": false,
+    "generated_at": "2026-07-12T22:21:11Z",
+    "commit": "a2c878e00fad97ddaab609559cb6d89489495a06",
+    "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
     "evidence": {
@@ -32,6 +32,11 @@
           "id": "m1m2.verification",
           "label": "M1/M2 Python and artifact verification",
           "path": "progress/evidence/m1-m2-verification.md"
+        },
+        {
+          "id": "m2.complete-reset-blocks",
+          "label": "Complete generated S-CPU and SA-1 reset-block proof",
+          "path": "progress/evidence/m2-complete-reset-blocks.md"
         },
         {
           "id": "m2.reset-prefix",
@@ -105,7 +110,7 @@
     {
       "id": "M2",
       "name": "Lifter proof",
-      "status": "in_progress",
+      "status": "passed",
       "summary": "Verify instruction semantics and lift the first blocks.",
       "gate": "Registers, writes, and cycles match the scripted reference corpus.",
       "evidence": [
@@ -113,13 +118,18 @@
           "id": "m2.reset-prefix",
           "label": "First MesenCE-matched S-CPU reset prefix",
           "path": "progress/evidence/m2-reset-prefix.md"
+        },
+        {
+          "id": "m2.complete-reset-blocks",
+          "label": "Complete generated S-CPU and SA-1 reset blocks",
+          "path": "progress/evidence/m2-complete-reset-blocks.md"
         }
       ]
     },
     {
       "id": "M3",
       "name": "Reset to first frame",
-      "status": "not_started",
+      "status": "in_progress",
       "summary": "Execute translated code through the first rendered frame.",
       "gate": "Hardware events and the fixed first-frame checkpoint match."
     },
@@ -202,7 +212,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The 10,000-event bootstrap trace observed 214 unique mode-aware blocks; none are semantics-verified yet.",
+      "summary": "The 10,000-event bootstrap trace observed 214 unique mode-aware blocks; the complete first reset block is semantics-verified.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -213,10 +223,10 @@
         },
         {
           "label": "verified blocks",
-          "value": 0,
+          "value": 1,
           "total": 214,
           "denominator": "evolving",
-          "note": "Zero currently observed blocks have passed differential register, flag, bus-write, and cycle verification."
+          "note": "The reset block from 00:8004 through the first taken BPL edge passed generated state, direct-write, and cycle verification."
         }
       ],
       "evidence": [
@@ -232,7 +242,7 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The 5,000-event bootstrap trace observed 23 unique mode-aware blocks; none are semantics-verified yet.",
+      "summary": "The 5,000-event bootstrap trace observed 23 unique mode-aware blocks; the complete first reset/MVN block is semantics-verified.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -243,10 +253,10 @@
         },
         {
           "label": "verified blocks",
-          "value": 0,
+          "value": 1,
           "total": 23,
           "denominator": "evolving",
-          "note": "Zero currently observed blocks have passed differential register, flag, bus-write, and cycle verification."
+          "note": "The reset block from 00:8BF4 through MVN exit at 00:8C23 passed generated state, ordered-write, and evidence-bound cycle verification."
         }
       ],
       "evidence": [
@@ -262,7 +272,7 @@
       "name": "65C816 decoder and lifter",
       "group": "recompiler",
       "status": "in_progress",
-      "summary": "The full opcode/addressing metadata table is complete; 27 opcode semantics now execute through the runtime's lifted boundary.",
+      "summary": "The full opcode/addressing metadata table is complete; 30 opcode semantics now execute through the runtime's lifted boundary.",
       "metrics": [
         {
           "label": "opcode definitions",
@@ -273,10 +283,10 @@
         },
         {
           "label": "reference-verified semantics",
-          "value": 27,
+          "value": 30,
           "total": 256,
           "denominator": "fixed",
-          "note": "Architecture-contract vectors cover the lifted layer; 16 consecutive KSS S-CPU reset-prefix instructions also match MesenCE state, writes, and cycles."
+          "note": "The lifted layer now executes both complete first reset blocks, including LDA absolute, BPL, and restartable MVN."
         }
       ]
     },
@@ -332,7 +342,7 @@
       "name": "Differential validator",
       "group": "validation",
       "status": "in_progress",
-      "summary": "A bounded private MesenCE oracle and value-free comparator exist; 16 S-CPU reset instructions match and 18 SA-1 timing samples are calibrated, but no required gameplay scenario is complete.",
+      "summary": "Both complete first reset blocks pass generated state/write/cycle proofs; first-frame hardware side effects are the next validation boundary.",
       "metrics": [
         {
           "label": "passing required scenarios",
@@ -477,12 +487,12 @@
   ],
   "blockers": [],
   "next_proof": {
-    "title": "Complete and differentially verify the first S-CPU and SA-1 reset blocks",
+    "title": "Execute translated reset code through the first rendered frame",
     "acceptance": [
-      "Lift the remaining S-CPU reset-prefix instructions through the first control-flow boundary",
-      "Model SA-1 memory timing well enough to match its first complete reset block cycle-for-cycle",
-      "Compare registers, flags, ordered bus writes, and cycles against fresh private MesenCE captures",
-      "Increment verified-block counts only after each complete basic block passes"
+      "Implement the DMA, PPU-register, SA-1 shared-memory, and scheduler effects exercised after the reset blocks",
+      "Continue generated dispatch with no unknown executed target through the first frame boundary",
+      "Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE",
+      "Keep presentation output optional until the compatibility checkpoint is green"
     ],
     "owner": "analysis/recompiler"
   },
@@ -503,6 +513,16 @@
       "observed_scpu_blocks": 214,
       "observed_sa1_blocks": 23,
       "trace_events": 25000
+    },
+    {
+      "at": "2026-07-12T23:20:00Z",
+      "verified_blocks": 2,
+      "passing_scenarios": 0,
+      "open_divergences": 0,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 23,
+      "generated_blocks": 183
     }
   ]
 }

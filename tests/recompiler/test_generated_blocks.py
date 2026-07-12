@@ -1,0 +1,51 @@
+from __future__ import annotations
+
+import copy
+import json
+from pathlib import Path
+
+import jsonschema
+import pytest
+
+from recompiler.kssrecomp.generated_blocks import GeneratedBlocksError, render
+
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def _document() -> dict:
+    return json.loads((ROOT / "analysis/cfg/bootstrap-dual.lifted-reset.json").read_text())
+
+
+def test_real_reset_artifact_emits_bounded_deterministic_cpp() -> None:
+    first = render(_document(), max_blocks_per_processor=256)
+    second = render(_document(), max_blocks_per_processor=256)
+    assert first == second
+    header, source, manifest = first
+    assert "register_reset_blocks" in header
+    assert manifest["processors"] == {"scpu": 160, "sa1": 23}
+    assert manifest["registered_blocks"] == 183
+    assert "block_scpu_008004_e1m1x1" in source
+    assert "block_sa1_008bf4_e1m1x1" in source
+    assert "block_sa1_008c20_e0m0x0" in source  # restartable MVN self-loop
+    assert "cpu.block_key() != expected" in source
+    assert "cpu.stopped = true" in source
+    schema = json.loads((ROOT / "schemas/recompiler/generated-block-manifest.schema.json").read_text())
+    jsonschema.validate(manifest, schema)
+
+
+def test_cross_processor_edges_and_duplicates_fail_closed() -> None:
+    document = _document()
+    broken = copy.deepcopy(document)
+    broken["edges"][0]["target"]["processor"] = "scpu"
+    with pytest.raises(GeneratedBlocksError, match="crosses processors"):
+        render(broken)
+    broken = copy.deepcopy(document)
+    broken["blocks"].append(copy.deepcopy(broken["blocks"][0]))
+    with pytest.raises(GeneratedBlocksError, match="duplicate"):
+        render(broken)
+
+
+def test_limit_is_validated() -> None:
+    with pytest.raises(GeneratedBlocksError, match="between 1 and 256"):
+        render(_document(), max_blocks_per_processor=0)

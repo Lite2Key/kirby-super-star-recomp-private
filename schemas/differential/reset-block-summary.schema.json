@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "source_sha256", "blocks"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_format": { "const": "kss-differential-v1" },
+    "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "blocks": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["processor", "start_pc", "terminator_pc", "end_pc", "instruction_records", "state_records", "cycle_start", "cycle_end", "cycle_delta", "write_records", "state_chain_sha256", "write_chain_sha256"],
+        "properties": {
+          "processor": { "enum": ["scpu", "sa1"] },
+          "start_pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+          "terminator_pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+          "end_pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+          "instruction_records": { "type": "integer", "minimum": 1 },
+          "state_records": { "type": "integer", "minimum": 2 },
+          "cycle_start": { "type": "integer", "minimum": 0 },
+          "cycle_end": { "type": "integer", "minimum": 0 },
+          "cycle_delta": { "type": "integer", "minimum": 1 },
+          "write_records": { "type": "integer", "minimum": 0 },
+          "state_chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "write_chain_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}
