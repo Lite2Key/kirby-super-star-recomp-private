@@ -55,6 +55,7 @@ class ProgressTests(unittest.TestCase):
     def test_passed_gate_requires_evidence(self):
         bad = copy.deepcopy(self.manifest)
         bad["milestones"][0]["status"] = "passed"
+        bad["milestones"][0].pop("evidence", None)
         with self.assertRaisesRegex(progress_build.ManifestError, "cannot pass without evidence"):
             progress_build.validate_manifest(bad)
 
