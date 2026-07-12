@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-12T21:08:58Z",
-    "commit": "4d42ac9b883261580a80c584549b2888b3847ff9",
-    "dirty": false,
+    "generated_at": "2026-07-12T21:11:11Z",
+    "commit": "3209c9eb2dce66b4a4708e5573391d98e6b79613",
+    "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
     "evidence": {
@@ -41,6 +41,11 @@
           "path": "progress/evidence/bootstrap-dashboard.md"
         },
         {
+          "id": "bootstrap.github-ci",
+          "label": "Green Windows, Linux, Python, and boundary CI",
+          "path": "progress/evidence/github-ci-bootstrap.md"
+        },
+        {
           "id": "runtime.windows-foundation",
           "label": "Windows runtime foundation build",
           "path": "progress/evidence/runtime-windows.md"
@@ -52,9 +57,16 @@
     {
       "id": "M0",
       "name": "Bootstrap",
-      "status": "in_progress",
+      "status": "passed",
       "summary": "Repository, toolchain locks, ROM boundary, synthetic CI, and dashboard.",
-      "gate": "All bootstrap checks pass without Nintendo-derived data."
+      "gate": "All bootstrap checks pass without Nintendo-derived data.",
+      "evidence": [
+        {
+          "id": "bootstrap.github-ci",
+          "label": "Windows, Linux, Python, and asset-boundary CI",
+          "path": "progress/evidence/github-ci-bootstrap.md"
+        }
+      ]
     },
     {
       "id": "M1",

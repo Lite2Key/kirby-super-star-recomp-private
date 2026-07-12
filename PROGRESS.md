@@ -2,13 +2,13 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-12T21:08:58Z` | commit `4d42ac9b883261580a80c584549b2888b3847ff9` | tree `clean`
+Snapshot: `2026-07-12T21:11:11Z` | commit `3209c9eb2dce66b4a4708e5573391d98e6b79613` | tree `dirty`
 
 ## Milestone map
 
 | Gate | Status | Evidence requirement |
 |---|---|---|
-| M0 - Bootstrap | `in_progress` | All bootstrap checks pass without Nintendo-derived data. |
+| M0 - Bootstrap | `passed` | All bootstrap checks pass without Nintendo-derived data. |
 | M1 - Dual-CPU discovery | `in_progress` | Repeatable traces and an address-correct initial CFG exist for both CPUs. |
 | M2 - Lifter proof | `not_started` | Registers, writes, and cycles match the scripted reference corpus. |
 | M3 - Reset to first frame | `not_started` | Hardware events and the fixed first-frame checkpoint match. |
@@ -50,6 +50,7 @@ Snapshot: `2026-07-12T21:08:58Z` | commit `4d42ac9b883261580a80c584549b2888b3847
 
 **Builds**
 - `bootstrap.dashboard` [Progress dashboard build](progress/evidence/bootstrap-dashboard.md)
+- `bootstrap.github-ci` [Green Windows, Linux, Python, and boundary CI](progress/evidence/github-ci-bootstrap.md)
 - `runtime.windows-foundation` [Windows runtime foundation build](progress/evidence/runtime-windows.md)
 
 ## Next executable proof
