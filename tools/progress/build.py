@@ -11,7 +11,10 @@ from typing import Any
 
 STATUSES = {"not_started", "in_progress", "blocked", "passed", "failed"}
 DENOMINATORS = {"fixed", "evolving"}
-BLOCK_STAGES = ("observed", "lifted", "generated", "executed", "reference_verified")
+BLOCK_STAGES = (
+    "observed", "lifted", "generated", "semantics_supported",
+    "executed", "reference_verified",
+)
 
 
 class ManifestError(ValueError):
@@ -37,7 +40,7 @@ def _unique(items: list[dict[str, Any]], collection: str) -> None:
 
 
 def validate_manifest(data: dict[str, Any]) -> None:
-    required = {"schema_version", "snapshot", "milestones", "components", "scenarios", "blockers", "next_proof", "trends"}
+    required = {"schema_version", "snapshot", "milestones", "workstreams", "components", "scenarios", "blockers", "next_proof", "trends"}
     if not isinstance(data, dict):
         raise ManifestError("manifest root must be an object")
     missing = sorted(required - data.keys())
@@ -46,11 +49,28 @@ def validate_manifest(data: dict[str, Any]) -> None:
     if data["schema_version"] != 1:
         raise ManifestError("unsupported schema_version; expected 1")
 
-    for name in ("milestones", "components", "scenarios", "blockers", "trends"):
+    for name in ("milestones", "workstreams", "components", "scenarios", "blockers", "trends"):
         if not isinstance(data[name], list):
             raise ManifestError(f"{name} must be an array")
-    for name in ("milestones", "components", "scenarios"):
+    for name in ("milestones", "workstreams", "components", "scenarios"):
         _unique(data[name], name)
+
+    for workstream in data["workstreams"]:
+        if not isinstance(workstream.get("name"), str) or not workstream["name"]:
+            raise ManifestError("workstream requires a name")
+        checkpoints = workstream.get("checkpoints")
+        if not isinstance(checkpoints, list) or not checkpoints:
+            raise ManifestError(f"workstreams/{workstream['id']} requires checkpoints")
+        names = [checkpoint.get("name") for checkpoint in checkpoints]
+        if any(not isinstance(name, str) or not name for name in names):
+            raise ManifestError(f"workstreams/{workstream['id']} has an invalid checkpoint name")
+        if len(names) != len(set(names)):
+            raise ManifestError(f"workstreams/{workstream['id']} has duplicate checkpoints")
+        for checkpoint in checkpoints:
+            if checkpoint.get("status") not in STATUSES:
+                raise ManifestError(
+                    f"workstreams/{workstream['id']} has an invalid checkpoint status"
+                )
 
     for collection in ("milestones", "components", "scenarios"):
         for item in data[collection]:
@@ -125,6 +145,9 @@ def load_block_map(root: Path) -> dict[str, Any]:
     frontier = _read_artifact(cfg_root / "first-frame-dual.frontier.json")
     bootstrap = _read_artifact(cfg_root / "bootstrap-dual.trace-cfg.json")
     reference = _read_artifact(root / "analysis" / "differential" / "reset-block-reference.json")
+    execution = _read_artifact(
+        root / "analysis" / "coverage" / "boot-probe-identity-coverage.json"
+    )
 
     try:
         observations = trace["observations"]["blocks"]
@@ -133,6 +156,7 @@ def load_block_map(root: Path) -> dict[str, Any]:
         generated_counts = generated["processors"]
         frontier_processors = frontier["processors"]
         references = reference["blocks"]
+        execution_missing_items = execution["missing_identities"]
     except (KeyError, TypeError) as exc:
         raise ManifestError("block-map artifact is missing a required collection") from exc
     if not all(isinstance(items, list) for items in (observations, lifted_blocks, bootstrap_blocks, references)):
@@ -151,6 +175,19 @@ def load_block_map(root: Path) -> dict[str, Any]:
     }
     if set(reference_windows) != {"scpu", "sa1"}:
         raise ManifestError("reset reference must cover both processors")
+
+    execution_missing = {_identity_key(item) for item in execution_missing_items}
+    if len(execution_missing) != len(execution_missing_items):
+        raise ManifestError("execution coverage contains duplicate missing identities")
+    if not execution_missing <= set(observed):
+        raise ManifestError("execution coverage contains identities outside the inventory")
+    execution_count = execution.get("executed_count")
+    missing_count = execution.get("missing_count")
+    if execution.get("inventory_count") != len(observed) \
+            or missing_count != len(execution_missing) \
+            or execution_count != len(observed) - len(execution_missing):
+        raise ManifestError("execution coverage counts disagree with the first-frame inventory")
+    execution_covered = set(observed) - execution_missing
 
     unsupported: dict[str, set[int]] = {}
     for processor in ("scpu", "sa1"):
@@ -172,7 +209,10 @@ def load_block_map(root: Path) -> dict[str, Any]:
             hits = observation.get("hits")
             if not isinstance(first_cycle, int) or not isinstance(hits, int) or hits < 1:
                 raise ManifestError("trace observation has invalid cycle or hit counts")
-            stage = "generated"
+            stage = "generated" if lifted_item["instruction"]["opcode"] in unsupported[processor] \
+                else "semantics_supported"
+            if key in execution_covered and stage == "semantics_supported":
+                stage = "executed"
             start_cycle, end_cycle = reference_windows[processor]
             if start_cycle <= first_cycle <= end_cycle:
                 stage = "reference_verified"
@@ -193,7 +233,13 @@ def load_block_map(root: Path) -> dict[str, Any]:
             "observed": len(blocks),
             "lifted": len(blocks),
             "generated": len(blocks),
-            "executed": sum(item["stage"] == "reference_verified" for item in blocks),
+            "semantics_supported": sum(
+                item["stage"] in {"semantics_supported", "executed", "reference_verified"}
+                for item in blocks
+            ),
+            "executed": sum(
+                item["stage"] in {"executed", "reference_verified"} for item in blocks
+            ),
             "reference_verified": sum(item["stage"] == "reference_verified" for item in blocks),
         }
         processors[processor] = {
@@ -213,6 +259,7 @@ def load_block_map(root: Path) -> dict[str, Any]:
             "analysis/cfg/first-frame-dual.generated-blocks.json",
             "analysis/cfg/first-frame-dual.frontier.json",
             "analysis/differential/reset-block-reference.json",
+            "analysis/coverage/boot-probe-identity-coverage.json",
         ],
     }
 

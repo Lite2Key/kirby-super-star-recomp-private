@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "reference": "spc-first-frame-reference.json",
+  "status": "port_phase_recapture_required",
+  "verified_prefix": {
+    "execution_records": 2600,
+    "through_pc": 65494,
+    "state_fields": ["pc", "a", "x", "y", "sp", "ps"],
+    "timing_relation": "mesen_counter_equals_two_times_architectural_cycles_plus_initial_offset"
+  },
+  "after_instruction_port_policy": {
+    "first_divergence_ordinal": 2601,
+    "pc": 65496,
+    "field": "y",
+    "preceding_pc": 65494,
+    "preceding_opcode": 235,
+    "intervening_event": {
+      "direction": "cpu_to_spc",
+      "port": 1
+    }
+  },
+  "before_instruction_port_policy": {
+    "first_divergence_ordinal": 2589,
+    "pc": 65490,
+    "field": "ps",
+    "preceding_pc": 65487,
+    "preceding_opcode": 120,
+    "intervening_event": {
+      "direction": "cpu_to_spc",
+      "port": 0
+    }
+  },
+  "required_recapture": [
+    "master_clock_for_every_cpu_to_spc_port_write",
+    "spc_cycle_or_memory_read_phase_for_every_port_access",
+    "deterministic_tie_break_between_port_write_and_spc_read"
+  ],
+  "v2_recapture": {
+    "harness_status": "implemented",
+    "sanitizer_status": "implemented_and_unit_tested",
+    "private_replay_status": "implemented_and_compile_checked",
+    "capture_status": "blocked_external_process_approval_usage_limit",
+    "ordering_key": ["master_clock", "callback_ordinal"],
+    "captured_phases": [
+      "spc_exec_boundary",
+      "scpu_port_write",
+      "spc_port_read",
+      "spc_port_write"
+    ]
+  },
+  "claim_boundary": "architecture tests pass; full 3661-record first-frame replay is not yet proven"
+}

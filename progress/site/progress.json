@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-12T22:52:35Z",
-    "commit": "611faf97de103e710d0aa4f894852adf7c17aaf7",
-    "dirty": false,
+    "generated_at": "2026-07-13T21:57:27Z",
+    "commit": "f78d0a119c38335f010ee2b759d36c7ad3ba11da",
+    "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
     "evidence": {
@@ -44,9 +44,19 @@
           "path": "progress/evidence/m2-reset-prefix.md"
         },
         {
+          "id": "m3.cpu-hardware-runtime",
+          "label": "CPU semantic closure, hardware boundary, SPC core, and executable boot probe",
+          "path": "progress/evidence/m3-cpu-hardware-runtime.md"
+        },
+        {
           "id": "m3.first-frame-frontier",
           "label": "First-frame oracle, generated frontier, and reset DMA proof",
           "path": "progress/evidence/m3-first-frame-frontier.md"
+        },
+        {
+          "id": "m3.local-verification",
+          "label": "149 Python and 20 native tests",
+          "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
           "id": "recompiler.opcode-matrix",
@@ -74,6 +84,11 @@
           "id": "m1m2.windows-native",
           "label": "M1/M2 Windows native build and CTest",
           "path": "progress/evidence/m1-m2-verification.md"
+        },
+        {
+          "id": "m3.private-generated",
+          "label": "Private-generated Windows build: 20/20 tests",
+          "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
           "id": "runtime.windows-foundation",
@@ -135,13 +150,18 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "The first-frame reference, generated inventory, and reset DMA model exist; native execution is at the explicit semantics frontier.",
+      "summary": "All observed dual-CPU identities have executable semantics; the Windows probe reaches the timed SPC/scheduler/renderer frontier.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
           "id": "m3.first-frame-frontier",
           "label": "First-frame discovery, frontier, and DMA checkpoint",
           "path": "progress/evidence/m3-first-frame-frontier.md"
+        },
+        {
+          "id": "m3.cpu-hardware-runtime",
+          "label": "CPU closure, hardware boundary, and executable boot probe",
+          "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         }
       ]
     },
@@ -202,6 +222,218 @@
       "gate": "Both packages pass external-ROM launch and save checks."
     }
   ],
+  "workstreams": [
+    {
+      "id": "discovery",
+      "name": "Discovery and routes",
+      "checkpoints": [
+        {
+          "name": "ROM identity",
+          "status": "passed"
+        },
+        {
+          "name": "Reset roots",
+          "status": "passed"
+        },
+        {
+          "name": "First-frame capture",
+          "status": "passed"
+        },
+        {
+          "name": "Route merger",
+          "status": "passed"
+        },
+        {
+          "name": "14-route corpus",
+          "status": "in_progress"
+        },
+        {
+          "name": "Whole-game map",
+          "status": "not_started"
+        }
+      ]
+    },
+    {
+      "id": "static-recomp",
+      "name": "Static recompilation",
+      "checkpoints": [
+        {
+          "name": "Decode 256",
+          "status": "passed"
+        },
+        {
+          "name": "Lift 254",
+          "status": "passed"
+        },
+        {
+          "name": "Generate 254",
+          "status": "passed"
+        },
+        {
+          "name": "Execute 236",
+          "status": "in_progress"
+        },
+        {
+          "name": "Verify 180",
+          "status": "in_progress"
+        },
+        {
+          "name": "All discovered routes",
+          "status": "not_started"
+        }
+      ]
+    },
+    {
+      "id": "processors",
+      "name": "Processors and timing",
+      "checkpoints": [
+        {
+          "name": "65C816 semantics",
+          "status": "passed"
+        },
+        {
+          "name": "SPC700 semantics",
+          "status": "passed"
+        },
+        {
+          "name": "S-CPU access timing",
+          "status": "passed"
+        },
+        {
+          "name": "SA-1 clock domain",
+          "status": "passed"
+        },
+        {
+          "name": "DMA/IRQ contention",
+          "status": "in_progress"
+        },
+        {
+          "name": "Frame replay parity",
+          "status": "not_started"
+        }
+      ]
+    },
+    {
+      "id": "video",
+      "name": "Video",
+      "checkpoints": [
+        {
+          "name": "Frame buffer",
+          "status": "passed"
+        },
+        {
+          "name": "Mode 1 backgrounds",
+          "status": "passed"
+        },
+        {
+          "name": "OBJ sprites",
+          "status": "passed"
+        },
+        {
+          "name": "Windows/color math",
+          "status": "passed"
+        },
+        {
+          "name": "First visible frame",
+          "status": "not_started"
+        },
+        {
+          "name": "Route pixel parity",
+          "status": "not_started"
+        }
+      ]
+    },
+    {
+      "id": "audio",
+      "name": "Audio",
+      "checkpoints": [
+        {
+          "name": "SPC IPL boot",
+          "status": "passed"
+        },
+        {
+          "name": "Upload protocol",
+          "status": "in_progress"
+        },
+        {
+          "name": "Timers and DSP I/O",
+          "status": "passed"
+        },
+        {
+          "name": "DSP voices",
+          "status": "passed"
+        },
+        {
+          "name": "Audio output",
+          "status": "not_started"
+        },
+        {
+          "name": "Route audio parity",
+          "status": "not_started"
+        }
+      ]
+    },
+    {
+      "id": "interaction",
+      "name": "Input and saves",
+      "checkpoints": [
+        {
+          "name": "Controller serial core",
+          "status": "passed"
+        },
+        {
+          "name": "Register integration",
+          "status": "passed"
+        },
+        {
+          "name": "Keyboard/gamepad host",
+          "status": "passed"
+        },
+        {
+          "name": "8 KiB SRAM primitive",
+          "status": "passed"
+        },
+        {
+          "name": "In-game save flow",
+          "status": "in_progress"
+        },
+        {
+          "name": "Two-player",
+          "status": "not_started"
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "name": "Validation and delivery",
+      "checkpoints": [
+        {
+          "name": "ROM-free CI",
+          "status": "passed"
+        },
+        {
+          "name": "Private generated build",
+          "status": "passed"
+        },
+        {
+          "name": "First-frame proof",
+          "status": "in_progress"
+        },
+        {
+          "name": "Windows release",
+          "status": "not_started"
+        },
+        {
+          "name": "Linux AppImage",
+          "status": "not_started"
+        },
+        {
+          "name": "Linux Flatpak",
+          "status": "not_started"
+        }
+      ]
+    }
+  ],
   "components": [
     {
       "id": "rom-map",
@@ -220,11 +452,34 @@
       ]
     },
     {
+      "id": "route-corpus",
+      "name": "Route coverage corpus",
+      "group": "analysis",
+      "status": "in_progress",
+      "summary": "The reset-rooted first-frame capture seeds a deterministic corpus; future bounded routes can be conservatively unioned with per-block and per-edge provenance.",
+      "metrics": [
+        {
+          "label": "captured required routes",
+          "value": 1,
+          "total": 14,
+          "denominator": "fixed",
+          "note": "A capture expands code discovery but does not by itself pass its gameplay scenario."
+        },
+        {
+          "label": "union observed identities",
+          "value": 254,
+          "total": 254,
+          "denominator": "evolving",
+          "note": "The denominator grows only from bounded captures sharing the same reset roots."
+        }
+      ]
+    },
+    {
       "id": "s-cpu",
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-frame trace contains 214 unique mode-aware S-CPU identities; all lift and generate, with an explicit unsupported-semantics frontier.",
+      "summary": "All 214 first-frame S-CPU identities lift, generate, and have implemented semantics; bounded post-reset slices are reference tested.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -239,6 +494,13 @@
           "total": 214,
           "denominator": "evolving",
           "note": "The reset block from 00:8004 through the first taken BPL edge passed generated state, direct-write, and cycle verification."
+        },
+        {
+          "label": "semantics-supported identities",
+          "value": 214,
+          "total": 214,
+          "denominator": "evolving",
+          "note": "Every identity in the current first-frame trace has an executable opcode semantic; this is not a whole-game denominator."
         }
       ],
       "evidence": [
@@ -251,6 +513,11 @@
           "id": "m3.first-frame-frontier",
           "label": "First-frame generated inventory and frontier",
           "path": "progress/evidence/m3-first-frame-frontier.md"
+        },
+        {
+          "id": "m3.cpu-hardware-runtime",
+          "label": "S-CPU reference slices and semantic closure",
+          "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         }
       ]
     },
@@ -259,7 +526,7 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-frame trace grows the SA-1 inventory to 40 unique mode-aware identities; all lift and generate.",
+      "summary": "All 40 first-frame SA-1 identities lift, generate, and have implemented semantics; TCD and reset/MVN are reference verified.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -274,6 +541,13 @@
           "total": 40,
           "denominator": "evolving",
           "note": "The reset block from 00:8BF4 through MVN exit at 00:8C23 passed generated state, ordered-write, and evidence-bound cycle verification."
+        },
+        {
+          "label": "semantics-supported identities",
+          "value": 40,
+          "total": 40,
+          "denominator": "evolving",
+          "note": "Every identity in the current first-frame trace has an executable opcode semantic; this is not a whole-game denominator."
         }
       ],
       "evidence": [
@@ -286,6 +560,11 @@
           "id": "m3.first-frame-frontier",
           "label": "First-frame generated inventory and frontier",
           "path": "progress/evidence/m3-first-frame-frontier.md"
+        },
+        {
+          "id": "m3.cpu-hardware-runtime",
+          "label": "SA-1 TCD reference and semantic closure",
+          "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         }
       ]
     },
@@ -294,7 +573,7 @@
       "name": "65C816 decoder and lifter",
       "group": "recompiler",
       "status": "in_progress",
-      "summary": "The full opcode/addressing metadata table is complete; 30 opcode semantics now execute through the runtime's lifted boundary.",
+      "summary": "All 256 65C816 opcodes have executable, architecture-tested semantics; asynchronous IRQ/NMI/reset entry is exposed as an explicit runtime boundary.",
       "metrics": [
         {
           "label": "opcode definitions",
@@ -304,11 +583,18 @@
           "note": "Definition coverage only; this does not claim verified execution semantics."
         },
         {
-          "label": "reference-verified semantics",
-          "value": 30,
+          "label": "executable opcode semantics",
+          "value": 256,
           "total": 256,
           "denominator": "fixed",
-          "note": "The lifted layer now executes both complete first reset blocks, including LDA absolute, BPL, and restartable MVN."
+          "note": "Exact whitelist equality covers all byte opcodes; route execution and asynchronous machine-event integration remain separately measured."
+        },
+        {
+          "label": "private generated block functions",
+          "value": 254,
+          "total": 254,
+          "denominator": "evolving",
+          "note": "Deterministically regenerated from the authorized ROM and current sanitized route corpus; this denominator grows with route discovery."
         }
       ]
     },
@@ -317,14 +603,14 @@
       "name": "Deterministic scheduler",
       "group": "runtime",
       "status": "in_progress",
-      "summary": "Stable master-clock event ordering exists; hardware synchronization semantics remain to be integrated.",
+      "summary": "The boot probe records the generated S-CPU micro-access stream, uses exact SA-1 2:1 conversion, and orders explicit SPC plus timestamped IRQ/NMI/reset events without inferred instruction timing.",
       "metrics": [
         {
           "label": "synchronization classes",
-          "value": 0,
+          "value": 4,
           "total": 8,
           "denominator": "fixed",
-          "note": "Interrupts, shared memory, DMA, timers, frames, APU ports, contention, and wait states."
+          "note": "Frames, value-free S-CPU bus timing, APU-port ordering, and timestamped CPU signals are validated. Shared-memory/DMA contention, device timers, and full wait-state integration remain."
         }
       ]
     },
@@ -349,13 +635,35 @@
       "name": "PPU, DMA, APU, input, and save",
       "group": "runtime",
       "status": "in_progress",
-      "summary": "Reset-time general DMA and WRAM ports are implemented and tested; PPU, APU, input, and save integration remain.",
+      "summary": "DMA, shared SA-1 I-RAM/control, Mode 1 BG/OBJ main/subscreen windows and color math, full SPC700 semantics plus a live sample-clocked DSP core, two-pad input, and atomic 8 KiB saves are implemented.",
       "metrics": [
         {
           "label": "validated subsystems",
-          "value": 1,
+          "value": 5,
           "total": 5,
-          "denominator": "fixed"
+          "denominator": "fixed",
+          "note": "DMA, PPU rendering, SPC/APU execution, controller input, and save persistence have synthetic proof; full-game route parity remains separate."
+        },
+        {
+          "label": "SPC700 opcode semantics",
+          "value": 256,
+          "total": 256,
+          "denominator": "fixed",
+          "note": "All byte opcodes are classified and architecture-tested; non-default TEST memory/wait-state modes remain explicit external boundaries."
+        },
+        {
+          "label": "DSP synthesis stages integrated",
+          "value": 4,
+          "total": 4,
+          "denominator": "fixed",
+          "note": "BRR, interpolation/envelopes, eight-voice stereo/noise/pitch-modulation mixing, and echo/FIR run behind the SPC register bridge at explicit 32 kHz sample clocks; host audio and internal 32-microcycle hazards remain."
+        },
+        {
+          "label": "persistent save bytes",
+          "value": 8192,
+          "total": 8192,
+          "denominator": "fixed",
+          "note": "Board-accurate raw .srm size with missing-file initialization, malformed-file rejection, and same-directory replace."
         }
       ]
     },
@@ -364,7 +672,7 @@
       "name": "Differential validator",
       "group": "validation",
       "status": "in_progress",
-      "summary": "Reset blocks pass and the deterministic first-frame oracle is captured; native first-frame state/event comparison remains the active gate.",
+      "summary": "Reset and two post-reset CPU slices pass, the first-frame oracle is deterministic, and SPC replay matches through ordinal 2600; timed full-frame comparison remains active.",
       "metrics": [
         {
           "label": "passing required scenarios",
@@ -380,11 +688,11 @@
       "name": "Windows package",
       "group": "delivery",
       "status": "in_progress",
-      "summary": "The Windows C++ runtime and tests build cleanly; packaging and gameplay execution remain outstanding.",
+      "summary": "The Windows C++ runtime, native GDI window host, keyboard/XInput bridge, and tests build cleanly; packaging and gameplay execution remain outstanding.",
       "metrics": [
         {
           "label": "release gates",
-          "value": 1,
+          "value": 2,
           "total": 7,
           "denominator": "fixed"
         }
@@ -507,15 +815,22 @@
       "required": true
     }
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "id": "spc-ack-clock-phase",
+      "severity": "technical",
+      "summary": "The final 18 first-frame S-CPU identities wait behind the SPC700 output-port acknowledgement; the integrated SPC/DSP clock phase must produce that event without patched memory or latches.",
+      "owner": "runtime/audio"
+    }
+  ],
   "next_proof": {
     "title": "Execute translated reset code through the first rendered frame",
     "acceptance": [
-      "Implement the 20 observed unsupported opcode kinds, beginning with JSL at 00:8172 and TCD at 00:8C36",
-      "Implement the PPU-register, SA-1 shared-memory, and explicit CPU/master-clock scheduler effects exercised before endFrame",
-      "Continue generated dispatch with no unsupported executed identity through the first-frame boundary",
+      "Recapture CPU-to-SPC port events with master/SPC phase and close the replay divergence after SPC ordinal 2600",
+      "Add the clock-qualified SPC phase stream to the integrated S-CPU, SA-1, DMA, and first-frame master-clock coordinator",
+      "Advance the current 236/254 executed identities through the SPC acknowledgement and run all 254 through the first-frame boundary with no patched state",
       "Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE",
-      "Keep presentation output optional until the compatibility checkpoint is green"
+      "Produce and compare the native framebuffer, then show the verified screenshot"
     ],
     "owner": "analysis/recompiler"
   },
@@ -558,6 +873,82 @@
       "trace_events": 25087,
       "generated_blocks": 254,
       "unsupported_frontier_identities": 34
+    },
+    {
+      "at": "2026-07-13T00:40:00Z",
+      "verified_blocks": 2,
+      "passing_scenarios": 0,
+      "open_divergences": 1,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "trace_events": 25087,
+      "generated_blocks": 254,
+      "implemented_opcode_semantics": 212,
+      "implemented_spc700_opcodes": 242,
+      "private_generated_blocks": 254,
+      "scpu_timed_accesses": 558,
+      "scpu_ready_master": 4218,
+      "sa1_ready_master": 152336,
+      "mode1_background_layers": 3,
+      "mode1_obj_supported": 1,
+      "save_ram_bytes": 8192,
+      "unsupported_frontier_identities": 0,
+      "spc_verified_prefix": 2600,
+      "native_frame_pixels": 61184,
+      "native_frame_nonblack_pixels": 0
+    },
+    {
+      "at": "2026-07-13T21:20:00Z",
+      "verified_blocks": 180,
+      "executed_blocks": 214,
+      "passing_scenarios": 0,
+      "open_divergences": 1,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "trace_events": 25087,
+      "generated_blocks": 254,
+      "implemented_opcode_semantics": 256,
+      "implemented_spc700_opcodes": 256,
+      "private_generated_blocks": 254,
+      "scpu_timed_accesses": 558,
+      "scpu_ready_master": 4218,
+      "sa1_ready_master": 152336,
+      "mode1_background_layers": 3,
+      "mode1_obj_supported": 1,
+      "dsp_foundation_stages": 4,
+      "save_ram_bytes": 8192,
+      "unsupported_frontier_identities": 0,
+      "spc_verified_prefix": 2600,
+      "native_frame_pixels": 61184,
+      "native_frame_nonblack_pixels": 0,
+      "standard_native_tests": 18,
+      "private_native_tests": 18,
+      "python_tests": 149
+    },
+    {
+      "at": "2026-07-13T21:56:47Z",
+      "verified_blocks": 180,
+      "executed_blocks": 236,
+      "execution_remaining": 18,
+      "passing_scenarios": 0,
+      "open_divergences": 1,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "generated_blocks": 254,
+      "implemented_opcode_semantics": 256,
+      "implemented_spc700_opcodes": 256,
+      "private_generated_blocks": 254,
+      "dsp_live_core": 1,
+      "windows_native_host": 1,
+      "save_ram_bytes": 8192,
+      "native_frame_pixels": 61184,
+      "native_frame_nonblack_pixels": 0,
+      "standard_native_tests": 20,
+      "private_native_tests": 20,
+      "python_tests": 149
     }
   ],
   "block_map": {
@@ -566,6 +957,7 @@
       "observed",
       "lifted",
       "generated",
+      "semantics_supported",
       "executed",
       "reference_verified"
     ],
@@ -2659,11 +3051,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21083,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54617,
@@ -2672,11 +3064,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21091,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54618,
@@ -2685,7 +3077,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21095,
             "evolving": true,
@@ -2698,11 +3090,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21098,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54622,
@@ -2711,7 +3103,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21100,
             "evolving": true,
@@ -2724,11 +3116,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21105,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54628,
@@ -2737,11 +3129,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21108,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54630,
@@ -2750,11 +3142,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21110,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54837,
@@ -2763,7 +3155,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21116,
             "evolving": true,
@@ -2776,7 +3168,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21119,
             "evolving": true,
@@ -2789,7 +3181,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21122,
             "evolving": true,
@@ -2802,7 +3194,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21126,
             "evolving": true,
@@ -2815,7 +3207,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21129,
             "evolving": true,
@@ -2828,7 +3220,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21133,
             "evolving": true,
@@ -2841,7 +3233,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21136,
             "evolving": true,
@@ -2854,7 +3246,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21138,
             "evolving": true,
@@ -2867,11 +3259,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21141,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54895,
@@ -2880,7 +3272,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21144,
             "evolving": true,
@@ -2893,11 +3285,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21147,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54899,
@@ -2906,11 +3298,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21154,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54900,
@@ -2919,11 +3311,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21156,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54901,
@@ -2932,11 +3324,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21158,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54902,
@@ -2945,11 +3337,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21160,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54904,
@@ -2958,11 +3350,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21167,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54905,
@@ -2971,11 +3363,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21169,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54906,
@@ -2984,7 +3376,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21171,
             "evolving": true,
@@ -2997,7 +3389,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21176,
             "evolving": true,
@@ -3010,11 +3402,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21179,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54914,
@@ -3023,7 +3415,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21182,
             "evolving": true,
@@ -3036,11 +3428,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21184,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54917,
@@ -3049,7 +3441,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21186,
             "evolving": true,
@@ -3062,11 +3454,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21190,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54922,
@@ -3075,11 +3467,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21192,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54923,
@@ -3088,7 +3480,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21196,
             "evolving": true,
@@ -3101,11 +3493,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 14,
             "first_cycle": 21200,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54929,
@@ -3114,11 +3506,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 14,
             "first_cycle": 21204,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54931,
@@ -3127,11 +3519,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 1,
             "first_cycle": 21297,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54856,
@@ -3140,11 +3532,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 1,
             "first_cycle": 21300,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54858,
@@ -3153,11 +3545,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 1,
             "first_cycle": 21306,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54859,
@@ -3166,11 +3558,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 1,
             "first_cycle": 21308,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54860,
@@ -3179,7 +3571,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 1,
             "first_cycle": 21311,
             "evolving": true,
@@ -3192,7 +3584,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 1,
             "first_cycle": 21313,
             "evolving": true,
@@ -3205,7 +3597,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21316,
             "evolving": true,
@@ -3218,7 +3610,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21319,
             "evolving": true,
@@ -3231,7 +3623,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21324,
             "evolving": true,
@@ -3244,11 +3636,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21327,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54883,
@@ -3257,11 +3649,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21329,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54864,
@@ -3270,11 +3662,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21332,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54865,
@@ -3283,11 +3675,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21335,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54867,
@@ -3296,11 +3688,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21341,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54868,
@@ -3309,11 +3701,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 152,
             "first_cycle": 21343,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54869,
@@ -3322,11 +3714,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 822,
             "first_cycle": 21346,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54872,
@@ -3335,11 +3727,11 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 822,
             "first_cycle": 21350,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 54874,
@@ -3348,22 +3740,23 @@
               "m8": true,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "semantics_supported",
             "hits": 151,
             "first_cycle": 21387,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           }
         ],
         "counts": {
           "observed": 214,
           "lifted": 214,
           "generated": 214,
-          "executed": 160,
+          "semantics_supported": 214,
+          "executed": 196,
           "reference_verified": 160
         },
         "evolving": 54,
-        "frontier": 33
+        "frontier": 0
       },
       "sa1": {
         "blocks": [
@@ -3634,7 +4027,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 22016,
             "evolving": false,
@@ -3647,7 +4040,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 22022,
             "evolving": false,
@@ -3660,7 +4053,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 7935,
             "first_cycle": 22028,
             "evolving": false,
@@ -3673,7 +4066,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112748,
             "evolving": true,
@@ -3686,7 +4079,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112754,
             "evolving": true,
@@ -3699,7 +4092,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112757,
             "evolving": true,
@@ -3712,11 +4105,11 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112763,
             "evolving": true,
-            "frontier": true
+            "frontier": false
           },
           {
             "pc": 35895,
@@ -3725,7 +4118,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112765,
             "evolving": true,
@@ -3738,7 +4131,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112768,
             "evolving": true,
@@ -3751,7 +4144,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112774,
             "evolving": true,
@@ -3764,7 +4157,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112779,
             "evolving": true,
@@ -3777,7 +4170,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112788,
             "evolving": true,
@@ -3790,7 +4183,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112793,
             "evolving": true,
@@ -3803,7 +4196,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112800,
             "evolving": true,
@@ -3816,7 +4209,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112804,
             "evolving": true,
@@ -3829,7 +4222,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112810,
             "evolving": true,
@@ -3842,7 +4235,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112817,
             "evolving": true,
@@ -3855,7 +4248,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 112824,
             "evolving": true,
@@ -3868,7 +4261,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 3268,
             "first_cycle": 112832,
             "evolving": true,
@@ -3881,7 +4274,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "generated",
+            "stage": "executed",
             "hits": 3268,
             "first_cycle": 112840,
             "evolving": true,
@@ -3892,11 +4285,12 @@
           "observed": 40,
           "lifted": 40,
           "generated": 40,
-          "executed": 20,
+          "semantics_supported": 40,
+          "executed": 40,
           "reference_verified": 20
         },
         "evolving": 17,
-        "frontier": 1
+        "frontier": 0
       }
     },
     "sources": [
@@ -3904,7 +4298,8 @@
       "analysis/cfg/first-frame-dual.lifted.json",
       "analysis/cfg/first-frame-dual.generated-blocks.json",
       "analysis/cfg/first-frame-dual.frontier.json",
-      "analysis/differential/reset-block-reference.json"
+      "analysis/differential/reset-block-reference.json",
+      "analysis/coverage/boot-probe-identity-coverage.json"
     ]
   }
 }

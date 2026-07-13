@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-12T22:52:35Z` | commit `611faf97de103e710d0aa4f894852adf7c17aaf7` | tree `clean`
+Snapshot: `2026-07-13T21:57:27Z` | commit `f78d0a119c38335f010ee2b759d36c7ad3ba11da` | tree `dirty`
 
 ## Milestone map
 
@@ -26,17 +26,25 @@ Snapshot: `2026-07-12T22:52:35Z` | commit `611faf97de103e710d0aa4f894852adf7c17a
 | Component | Counter | Progress | Denominator |
 |---|---|---:|---|
 | ROM and address map | classified banks | 0 / 64 | `fixed` |
+| Route coverage corpus | captured required routes | 1 / 14 | `fixed` |
+| Route coverage corpus | union observed identities | 254 / 254 | `evolving` |
 | S-CPU control flow | observed mode-aware blocks | 214 / 214 | `evolving` |
 | S-CPU control flow | verified blocks | 1 / 214 | `evolving` |
+| S-CPU control flow | semantics-supported identities | 214 / 214 | `evolving` |
 | SA-1 control flow | observed mode-aware blocks | 40 / 40 | `evolving` |
 | SA-1 control flow | verified blocks | 1 / 40 | `evolving` |
+| SA-1 control flow | semantics-supported identities | 40 / 40 | `evolving` |
 | 65C816 decoder and lifter | opcode definitions | 256 / 256 | `fixed` |
-| 65C816 decoder and lifter | reference-verified semantics | 30 / 256 | `fixed` |
-| Deterministic scheduler | synchronization classes | 0 / 8 | `fixed` |
+| 65C816 decoder and lifter | executable opcode semantics | 256 / 256 | `fixed` |
+| 65C816 decoder and lifter | private generated block functions | 254 / 254 | `evolving` |
+| Deterministic scheduler | synchronization classes | 4 / 8 | `fixed` |
 | S-CPU and SA-1 address spaces | synthetic mapping groups | 7 / 7 | `fixed` |
-| PPU, DMA, APU, input, and save | validated subsystems | 1 / 5 | `fixed` |
+| PPU, DMA, APU, input, and save | validated subsystems | 5 / 5 | `fixed` |
+| PPU, DMA, APU, input, and save | SPC700 opcode semantics | 256 / 256 | `fixed` |
+| PPU, DMA, APU, input, and save | DSP synthesis stages integrated | 4 / 4 | `fixed` |
+| PPU, DMA, APU, input, and save | persistent save bytes | 8192 / 8192 | `fixed` |
 | Differential validator | passing required scenarios | 0 / 14 | `evolving` |
-| Windows package | release gates | 1 / 7 | `fixed` |
+| Windows package | release gates | 2 / 7 | `fixed` |
 | Linux portability | delivery formats | 0 / 2 | `fixed` |
 
 ## Snapshot evidence
@@ -49,7 +57,9 @@ Snapshot: `2026-07-12T22:52:35Z` | commit `611faf97de103e710d0aa4f894852adf7c17a
 - `m1m2.verification` [M1/M2 Python and artifact verification](progress/evidence/m1-m2-verification.md)
 - `m2.complete-reset-blocks` [Complete generated S-CPU and SA-1 reset-block proof](progress/evidence/m2-complete-reset-blocks.md)
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
+- `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
+- `m3.local-verification` [149 Python and 20 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -57,21 +67,22 @@ Snapshot: `2026-07-12T22:52:35Z` | commit `611faf97de103e710d0aa4f894852adf7c17a
 - `bootstrap.dashboard` [Progress dashboard build](progress/evidence/bootstrap-dashboard.md)
 - `bootstrap.github-ci` [Green Windows, Linux, Python, and boundary CI](progress/evidence/github-ci-bootstrap.md)
 - `m1m2.windows-native` [M1/M2 Windows native build and CTest](progress/evidence/m1-m2-verification.md)
+- `m3.private-generated` [Private-generated Windows build: 20/20 tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `runtime.windows-foundation` [Windows runtime foundation build](progress/evidence/runtime-windows.md)
 
 ## Next executable proof
 
 **Execute translated reset code through the first rendered frame** - owner: `analysis/recompiler`
 
-- [ ] Implement the 20 observed unsupported opcode kinds, beginning with JSL at 00:8172 and TCD at 00:8C36
-- [ ] Implement the PPU-register, SA-1 shared-memory, and explicit CPU/master-clock scheduler effects exercised before endFrame
-- [ ] Continue generated dispatch with no unsupported executed identity through the first-frame boundary
+- [ ] Recapture CPU-to-SPC port events with master/SPC phase and close the replay divergence after SPC ordinal 2600
+- [ ] Add the clock-qualified SPC phase stream to the integrated S-CPU, SA-1, DMA, and first-frame master-clock coordinator
+- [ ] Advance the current 236/254 executed identities through the SPC acknowledgement and run all 254 through the first-frame boundary with no patched state
 - [ ] Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE
-- [ ] Keep presentation output optional until the compatibility checkpoint is green
+- [ ] Produce and compare the native framebuffer, then show the verified screenshot
 
 ## Active blockers
 
-No recorded blockers in this snapshot.
+- **technical** `spc-ack-clock-phase`: The final 18 first-frame S-CPU identities wait behind the SPC700 output-port acknowledgement; the integrated SPC/DSP clock phase must produce that event without patched memory or latches. (owner: runtime/audio)
 
 Regenerate the interactive dashboard with:
 

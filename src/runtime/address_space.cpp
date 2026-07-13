@@ -78,7 +78,16 @@ AddressMapping map_address(ProcessorId processor, std::uint32_t address) noexcep
         return {MemoryRegion::sa1_iram, offset, kReadWriteExecute, bank != 0U, false};
     }
 
+    // Both processors observe the cartridge I-RAM window at $3000-$3FFF in
+    // low hardware banks. Only the lower 2 KiB is connected; the upper half
+    // is represented by offsets >= kSa1IramSize so the bus can return zero and
+    // ignore writes without aliasing it onto live RAM.
     const auto low_hardware_bank = bank <= 0x3fU || (bank >= 0x80U && bank <= 0xbfU);
+    if (low_hardware_bank && offset >= 0x3000U && offset <= 0x3fffU) {
+        return {MemoryRegion::sa1_iram, static_cast<std::uint32_t>(offset - 0x3000U),
+            kReadWrite, bank != 0U, true};
+    }
+
     const auto sa1_register = offset >= 0x2200U && offset <= 0x23ffU;
     const auto snes_register = processor == ProcessorId::snes_cpu
         && ((offset >= 0x2100U && offset <= 0x21ffU)

@@ -36,6 +36,7 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(machine["schema_version"], 1)
             self.assertEqual(len(machine["block_map"]["processors"]["scpu"]["blocks"]), 214)
             self.assertEqual(len(machine["block_map"]["processors"]["sa1"]["blocks"]), 40)
+            self.assertEqual(len(machine["workstreams"]), 7)
 
     def test_block_map_is_derived_from_sanitized_first_frame_artifacts(self):
         block_map = progress_build.load_block_map(ROOT)
@@ -44,14 +45,16 @@ class ProgressTests(unittest.TestCase):
         sa1 = block_map["processors"]["sa1"]
         self.assertEqual(scpu["counts"], {
             "observed": 214, "lifted": 214, "generated": 214,
-            "executed": 160, "reference_verified": 160,
+            "semantics_supported": 214,
+            "executed": 196, "reference_verified": 160,
         })
         self.assertEqual(sa1["counts"], {
             "observed": 40, "lifted": 40, "generated": 40,
-            "executed": 20, "reference_verified": 20,
+            "semantics_supported": 40,
+            "executed": 40, "reference_verified": 20,
         })
         self.assertEqual((scpu["evolving"], sa1["evolving"]), (54, 17))
-        self.assertEqual((scpu["frontier"], sa1["frontier"]), (33, 1))
+        self.assertEqual((scpu["frontier"], sa1["frontier"]), (0, 0))
         rendered = json.dumps(block_map)
         for forbidden in ("bytes_hex", "rom_offset", "opcode", "mnemonic", "operand"):
             self.assertNotIn(forbidden, rendered)
@@ -64,6 +67,27 @@ class ProgressTests(unittest.TestCase):
             'data-map-filter="frontier"', 'data-map-filter="evolving"',
         ):
             self.assertIn(required, template)
+
+    def test_workstream_atlas_has_explicit_remaining_checkpoints(self):
+        template = (ROOT / "progress" / "template.html").read_text(encoding="utf-8")
+        self.assertIn('id="workstream-atlas"', template)
+        self.assertIn('id="workstream-detail"', template)
+        self.assertIn('class="workstream-step', template)
+        remaining = [
+            checkpoint
+            for stream in self.manifest["workstreams"]
+            for checkpoint in stream["checkpoints"]
+            if checkpoint["status"] != "passed"
+        ]
+        self.assertGreater(len(remaining), 0)
+        self.assertIn('id="auto-refresh"', template)
+        self.assertIn("setTimeout(()=>location.reload(),30000)", template)
+
+    def test_invalid_workstream_checkpoint_status_is_rejected(self):
+        bad = copy.deepcopy(self.manifest)
+        bad["workstreams"][0]["checkpoints"][0]["status"] = "almost"
+        with self.assertRaisesRegex(progress_build.ManifestError, "checkpoint status"):
+            progress_build.validate_manifest(bad)
 
     def test_markdown_calls_out_evolving_denominators(self):
         output = progress_build.render_markdown(self.manifest)

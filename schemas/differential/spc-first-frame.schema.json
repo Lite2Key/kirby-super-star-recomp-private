@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "source_format", "source_sha256", "boundary", "clocks", "execution", "ports"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_format": { "const": "kss-spc-first-frame-v1" },
+    "source_sha256": { "$ref": "#/$defs/sha" },
+    "boundary": { "const": "first_snes_end_frame" },
+    "clocks": {
+      "type": "object", "additionalProperties": false,
+      "required": ["master", "spc_counter_start", "spc_counter_end", "spc_counter_delta", "counter_unit"],
+      "properties": {
+        "master": { "type": "integer", "minimum": 1 },
+        "spc_counter_start": { "type": "integer", "minimum": 0 },
+        "spc_counter_end": { "type": "integer", "minimum": 1 },
+        "spc_counter_delta": { "type": "integer", "minimum": 1 },
+        "counter_unit": { "const": "mesen_spc_cycle_counter" }
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["records", "unique_pcs", "first_pc", "final_pc", "opcodes", "bootstrap_required_before_hook", "state_chain_sha256", "final_state_sha256"],
+      "properties": {
+        "records": { "type": "integer", "minimum": 1 },
+        "unique_pcs": { "type": "integer", "minimum": 1 },
+        "first_pc": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "final_pc": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "opcodes": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["opcode", "records"],
+            "properties": {
+              "opcode": { "type": "integer", "minimum": 0, "maximum": 255 },
+              "records": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        "bootstrap_required_before_hook": {
+          "type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+        },
+        "state_chain_sha256": { "$ref": "#/$defs/sha" },
+        "final_state_sha256": { "$ref": "#/$defs/sha" }
+      }
+    },
+    "ports": {
+      "type": "object", "additionalProperties": false,
+      "required": ["records", "by_direction_and_index", "chain_sha256"],
+      "properties": {
+        "records": { "type": "integer", "minimum": 0 },
+        "by_direction_and_index": {
+          "type": "array", "uniqueItems": true,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["direction", "index", "records"],
+            "properties": {
+              "direction": { "enum": ["cpu_to_spc", "spc_to_cpu"] },
+              "index": { "type": "integer", "minimum": 0, "maximum": 3 },
+              "records": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        "chain_sha256": { "$ref": "#/$defs/sha" }
+      }
+    }
+  },
+  "$defs": { "sha": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+}

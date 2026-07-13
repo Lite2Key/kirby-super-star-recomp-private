@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "source_sha256", "boundary", "frame_number", "width", "height", "pixel_format", "forced_blank", "brightness", "uniform", "nonblack_pixels", "rgba_sha256"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source_format": {"const": "kss-mesen-screen-buffer-v1"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "boundary": {"const": "first_end_frame"},
+    "frame_number": {"const": 1},
+    "width": {"const": 256},
+    "height": {"const": 239},
+    "pixel_format": {"const": "rgba8888"},
+    "forced_blank": {"const": true},
+    "brightness": {"const": 15},
+    "uniform": {"const": true},
+    "nonblack_pixels": {"const": 0},
+    "rgba_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

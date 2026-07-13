@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "source_sha256", "start_pc", "end_pc", "instruction_records", "state_records", "cycle_start", "cycle_end", "cycle_delta", "write_records", "stack_write_records", "direct_page_write_records", "state_chain_sha256", "write_chain_sha256"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source_format": {"const": "kss-scpu-frontier-v1"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "start_pc": {"const": 33138},
+    "end_pc": {"const": 54894},
+    "instruction_records": {"type": "integer", "minimum": 1},
+    "state_records": {"type": "integer", "minimum": 2},
+    "cycle_start": {"type": "integer", "minimum": 0},
+    "cycle_end": {"type": "integer", "minimum": 1},
+    "cycle_delta": {"type": "integer", "minimum": 1},
+    "write_records": {"type": "integer", "minimum": 0},
+    "stack_write_records": {"type": "integer", "minimum": 0},
+    "direct_page_write_records": {"type": "integer", "minimum": 0},
+    "state_chain_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "write_chain_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

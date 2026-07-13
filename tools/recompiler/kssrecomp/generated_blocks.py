@@ -127,6 +127,8 @@ namespace kss::generated {
             "    if (cpu.block_key() != expected) { cpu.stopped = true; return; }",
             "    const LiftedInstruction instruction{",
             f"        0x{raw[0]:02X}, {{{', '.join(f'0x{x:02X}' for x in operands)}}}, {len(raw) - 1}}};",
+            "    observe_generated_instruction_fetches(",
+            "        bus, cpu.processor, expected.address, instruction.operand_count);",
         ])
         if identity["processor"] == "sa1":
             source.extend([

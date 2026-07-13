@@ -1,0 +1,94 @@
+#pragma once
+
+#include "kss/cpu.hpp"
+#include "kss/generated_block_runner.hpp"
+#include "kss/lifted_execution.hpp"
+#include "kss/multi_clock_coordinator.hpp"
+#include "kss/native_host.hpp"
+#include "kss/snes_frame_renderer.hpp"
+#include "kss/spc700.hpp"
+
+#include <cstdint>
+#include <optional>
+#include <span>
+#include <vector>
+
+namespace kss {
+
+enum class BootProbeStatus : std::uint8_t {
+    scpu_setup_failed,
+    sa1_initialization_failed,
+    sa1_poll_observation_failed,
+    scpu_frontier_failed,
+    scpu_apu_wait_observation_failed,
+    timing_debt,
+    spc_provision_failed,
+    spc_step_failed,
+    expected_frontier_reached,
+};
+
+struct BootProbeSpcStep {
+    MasterClock at{};
+    std::uint32_t phase{};
+};
+
+struct BootProbeCpuSignal {
+    MasterClock at{};
+    CpuAsyncSignal signal{CpuAsyncSignal::irq};
+};
+
+struct BootProbeTimingEvidence {
+    // IPL bytes remain runtime-only. SPC steps require both a valid IPL and
+    // explicit coordinator phase stamps at or before the first frame.
+    std::span<const std::uint8_t> spc_ipl{};
+    std::span<const BootProbeSpcStep> spc_steps{};
+    std::span<const BootProbeCpuSignal> cpu_signals{};
+};
+
+struct BootProbeResult {
+    BootProbeStatus status{BootProbeStatus::scpu_setup_failed};
+    GeneratedRunResult scpu_setup{};
+    GeneratedRunResult sa1_initialization{};
+    // One complete trip around the hardware-gated SA-1 $300A poll. Reaching
+    // the same checkpoint after two blocks proves the wait without inventing
+    // the external event that releases it.
+    GeneratedRunResult sa1_poll_observation{};
+    GeneratedRunResult scpu_frontier{};
+    // The upload setup plus one complete $2140 acknowledgement comparison.
+    // It returns to $D68E while the modeled SPC output latch remains $AA.
+    GeneratedRunResult scpu_apu_wait_observation{};
+    CpuContext scpu{};
+    CpuContext sa1{};
+    FrameRenderResult frame{};
+    CoordinatorStatus timing_status{CoordinatorStatus::timing_debt};
+    MasterClock scpu_master_ready{};
+    std::size_t scpu_accesses_recorded{};
+    MasterClock sa1_master_ready{};
+    MasterClock master_now{};
+    bool first_frame_event_seen{};
+    std::size_t spc_steps_completed{};
+    std::optional<apu::SpcStepResult> last_spc_step{};
+    std::optional<apu::Spc700Registers> spc_registers{};
+    std::size_t cpu_signals_processed{};
+    std::optional<CpuAsyncResult> last_cpu_signal{};
+    std::uint8_t sa1_poll_value{};
+    std::uint8_t apu_port0_output{};
+    // Sanitized identity-only coverage. No instruction or ROM bytes are
+    // captured by this path.
+    std::vector<BlockKey> inventory_block_identities{};
+    std::vector<BlockKey> executed_block_identities{};
+    std::vector<BlockKey> missing_block_identities{};
+    HostSessionStatus host_status{HostSessionStatus::not_requested};
+};
+
+// Execute the causal reset synchronization proven by the private trace:
+// S-CPU hardware setup releases/configures SA-1, SA-1 fills shared I-RAM,
+// then S-CPU leaves its shared-memory wait and runs to the current explicit
+// semantic frontier. This is a development checkpoint, not a frame claim.
+[[nodiscard]] BootProbeResult run_boot_probe(
+    std::span<const std::uint8_t> rom,
+    BootProbeTimingEvidence timing = {},
+    std::span<std::uint8_t> persistent_bwram = {},
+    NativeHostPlatform* host = nullptr) noexcept;
+
+} // namespace kss

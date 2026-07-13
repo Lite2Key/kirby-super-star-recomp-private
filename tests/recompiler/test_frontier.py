@@ -23,10 +23,11 @@ def test_first_frame_frontier_is_exact_and_schema_valid() -> None:
     assert result["capture"] == {"event_count": 25087, "scpu_events": 8533, "sa1_events": 16554}
     assert result["processors"]["scpu"]["reachable_nodes"] == 214
     assert result["processors"]["scpu"]["new_nodes"] == 54
-    assert result["processors"]["scpu"]["first_unsupported"]["mnemonic"] == "JSL"
+    assert result["processors"]["scpu"]["first_unsupported"] is None
+    assert result["processors"]["scpu"]["unsupported_opcodes"] == []
     assert result["processors"]["sa1"]["reachable_nodes"] == 40
     assert result["processors"]["sa1"]["new_nodes"] == 17
-    assert result["processors"]["sa1"]["first_unsupported"]["mnemonic"] == "TCD"
+    assert result["processors"]["sa1"]["first_unsupported"] is None
     assert result["unresolved"] == {"scpu": [], "sa1": []}
     jsonschema.validate(result, _load("schemas/recompiler/frontier.schema.json"))
 

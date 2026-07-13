@@ -18,6 +18,15 @@
       }
     },
     {
+      "name": "windows-msvc-private",
+      "inherits": "windows-msvc",
+      "displayName": "Windows MSVC x64 with private generated blocks",
+      "binaryDir": "${sourceDir}/build/windows-private",
+      "cacheVariables": {
+        "KSS_USE_PRIVATE_GENERATED": "ON"
+      }
+    },
+    {
       "name": "linux-ninja",
       "displayName": "Linux Ninja",
       "generator": "Ninja",
@@ -40,6 +49,10 @@
       "configurePreset": "windows-msvc"
     },
     {
+      "name": "windows-msvc-private-debug",
+      "configurePreset": "windows-msvc-private"
+    },
+    {
       "name": "linux-ninja-debug",
       "configurePreset": "linux-ninja"
     }
@@ -48,6 +61,11 @@
     {
       "name": "windows-msvc-debug",
       "configurePreset": "windows-msvc",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-msvc-private-debug",
+      "configurePreset": "windows-msvc-private",
       "output": { "outputOnFailure": true }
     },
     {

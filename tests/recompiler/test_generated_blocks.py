@@ -30,6 +30,8 @@ def test_real_reset_artifact_emits_bounded_deterministic_cpp() -> None:
     assert "block_sa1_008c20_e0m0x0" in source  # restartable MVN self-loop
     assert "cpu.block_key() != expected" in source
     assert "cpu.stopped = true" in source
+    assert "observe_generated_instruction_fetches(" in source
+    assert "expected.address, instruction.operand_count" in source
     schema = json.loads((ROOT / "schemas/recompiler/generated-block-manifest.schema.json").read_text())
     jsonschema.validate(manifest, schema)
 

@@ -54,10 +54,14 @@ std::uint8_t RomBackedDualBus::read8(
         value = bwram_[mapping.canonical_offset];
         break;
     case MemoryRegion::sa1_iram:
-        value = sa1_iram_[mapping.canonical_offset];
+        value = mapping.canonical_offset < sa1_iram_.size()
+            ? sa1_iram_[mapping.canonical_offset] : 0U;
         break;
     case MemoryRegion::hardware_register:
-        if (processor == ProcessorId::snes_cpu) {
+        if (mapping.canonical_offset >= 0x2200U && mapping.canonical_offset <= 0x23ffU) {
+            value = sa1_io_.read(processor,
+                static_cast<std::uint16_t>(mapping.canonical_offset), open_bus(processor));
+        } else if (processor == ProcessorId::snes_cpu) {
             value = read_snes_register(
                 static_cast<std::uint16_t>(mapping.canonical_offset), kind);
         }
@@ -88,10 +92,17 @@ void RomBackedDualBus::write8(
         bwram_[mapping.canonical_offset] = value;
         break;
     case MemoryRegion::sa1_iram:
-        sa1_iram_[mapping.canonical_offset] = value;
+        if (mapping.canonical_offset < sa1_iram_.size()
+            && sa1_io_.iram_write_enabled(
+                processor, static_cast<std::uint16_t>(mapping.canonical_offset))) {
+            sa1_iram_[mapping.canonical_offset] = value;
+        }
         break;
     case MemoryRegion::hardware_register:
-        if (processor == ProcessorId::snes_cpu) {
+        if (mapping.canonical_offset >= 0x2200U && mapping.canonical_offset <= 0x23ffU) {
+            sa1_io_.write(processor,
+                static_cast<std::uint16_t>(mapping.canonical_offset), value);
+        } else if (processor == ProcessorId::snes_cpu) {
             write_snes_register(
                 static_cast<std::uint16_t>(mapping.canonical_offset), value, kind);
         }
@@ -110,7 +121,7 @@ std::uint8_t RomBackedDualBus::read_snes_register(
         wram_port_address_ = (wram_port_address_ + 1U) & 0x1ffffU;
         return value;
     }
-    return snes_registers_[snes_register_index(offset)];
+    return snes_io_.read(offset, open_bus(ProcessorId::snes_cpu));
 }
 
 void RomBackedDualBus::write_snes_register(
@@ -118,6 +129,7 @@ void RomBackedDualBus::write_snes_register(
     std::uint8_t value,
     BusAccessKind kind) {
     snes_registers_[snes_register_index(offset)] = value;
+    snes_io_.write(offset, value);
     switch (offset) {
     case 0x2180: // WMDATA
         wram_[wram_port_address_ & 0x1ffffU] = value;
@@ -221,6 +233,16 @@ std::span<std::uint8_t> RomBackedDualBus::bwram() noexcept {
     return bwram_;
 }
 
+std::span<std::uint8_t, kKssSaveRamSize> RomBackedDualBus::persistent_bwram() noexcept {
+    return std::span<std::uint8_t, kKssSaveRamSize>{bwram_.data(), kKssSaveRamSize};
+}
+
+std::span<const std::uint8_t, kKssSaveRamSize>
+RomBackedDualBus::persistent_bwram() const noexcept {
+    return std::span<const std::uint8_t, kKssSaveRamSize>{
+        bwram_.data(), kKssSaveRamSize};
+}
+
 std::span<std::uint8_t> RomBackedDualBus::sa1_iram() noexcept {
     return sa1_iram_;
 }
@@ -239,6 +261,48 @@ std::span<const DmaPortWrite> RomBackedDualBus::dma_port_writes() const noexcept
 
 std::uint32_t RomBackedDualBus::wram_port_address() const noexcept {
     return wram_port_address_;
+}
+
+const Sa1ControlState& RomBackedDualBus::sa1_control_state() const noexcept {
+    return sa1_io_.state();
+}
+
+const PpuFunctionalState& RomBackedDualBus::ppu_state() const noexcept {
+    return snes_io_.ppu_state();
+}
+
+std::span<const std::uint8_t> RomBackedDualBus::apu_input_ports() const noexcept {
+    return snes_io_.apu_input_ports();
+}
+
+std::span<const std::uint8_t> RomBackedDualBus::apu_output_ports() const noexcept {
+    return snes_io_.apu_output_ports();
+}
+
+std::span<const std::uint8_t> RomBackedDualBus::vram() const noexcept { return snes_io_.vram(); }
+std::span<const std::uint8_t> RomBackedDualBus::cgram() const noexcept { return snes_io_.cgram(); }
+std::span<const std::uint8_t> RomBackedDualBus::ppu_register_latches() const noexcept {
+    return snes_io_.ppu_register_latches();
+}
+
+void RomBackedDualBus::set_controller_buttons(
+    std::size_t port, std::uint16_t buttons) noexcept {
+    snes_io_.set_controller_buttons(port,buttons);
+}
+
+std::uint16_t RomBackedDualBus::controller_buttons(std::size_t port) const noexcept {
+    return snes_io_.controller_buttons(port);
+}
+
+bool RomBackedDualBus::provision_spc_ipl(std::span<const std::uint8_t> bytes) noexcept {
+    return snes_io_.provision_spc_ipl(bytes);
+}
+
+apu::SpcStepResult RomBackedDualBus::step_spc() noexcept { return snes_io_.step_spc(); }
+bool RomBackedDualBus::spc_provisioned() const noexcept { return snes_io_.spc_provisioned(); }
+apu::Spc700Core* RomBackedDualBus::spc_core() noexcept { return snes_io_.spc_core(); }
+const apu::Spc700Core* RomBackedDualBus::spc_core() const noexcept {
+    return snes_io_.spc_core();
 }
 
 } // namespace kss
