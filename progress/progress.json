@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-13T22:49:53Z",
-    "commit": "8eb6d4ef98f75d2a7b48ba7d9fb076f8d0de59f7",
+    "generated_at": "2026-07-13T23:05:27Z",
+    "commit": "4d9f78e381610fdb799de586197bc877f7a30da4",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -55,7 +55,7 @@
         },
         {
           "id": "m3.local-verification",
-          "label": "162 Python and 21 native tests",
+          "label": "174 Python and 21 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -274,7 +274,7 @@
           "status": "passed"
         },
         {
-          "name": "Verify 180",
+          "name": "Oracle 248",
           "status": "in_progress"
         },
         {
@@ -479,7 +479,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "All 214 first-frame S-CPU identities lift, generate, and have implemented semantics; bounded post-reset slices are reference tested.",
+      "summary": "All 214 first-frame S-CPU identities lift, generate, execute, and have Mesen architectural-state oracle coverage; shared-boundary native parity remains separate.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -526,7 +526,7 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "All 40 first-frame SA-1 identities lift, generate, and have implemented semantics; TCD and reset/MVN are reference verified.",
+      "summary": "All 40 first-frame SA-1 identities execute; 34 have architectural-state/write oracle coverage and the remaining six have identity/order evidence only.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -827,6 +827,12 @@
       "severity": "external",
       "summary": "The Codex execution reviewer currently rejects the external Mesen launch and GitHub push despite valid local auth; its reported reset is July 20, 2026 at 3:39 PM.",
       "owner": "workspace authorization"
+    },
+    {
+      "id": "shared-first-endframe-parity",
+      "severity": "technical",
+      "summary": "Framebuffer parity is exact, but the runtime has not yet executed S-CPU, SA-1, SPC, DMA, PPU, arbitration, and interrupts to the same first endFrame state/event boundary as Mesen.",
+      "owner": "runtime/validation"
     }
   ],
   "next_proof": {
@@ -994,6 +1000,25 @@
       "standard_native_tests": 21,
       "private_native_tests": 21,
       "python_tests": 162
+    },
+    {
+      "at": "2026-07-13T23:03:23Z",
+      "verified_blocks": 248,
+      "executed_blocks": 254,
+      "execution_remaining": 0,
+      "reference_oracle_remaining": 6,
+      "passing_scenarios": 0,
+      "open_divergences": 2,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "scpu_reference_oracle_blocks": 214,
+      "sa1_reference_oracle_blocks": 34,
+      "framebuffer_parity": 1,
+      "shared_endframe_parity": 0,
+      "standard_native_tests": 21,
+      "private_native_tests": 21,
+      "python_tests": 174
     }
   ]
 }

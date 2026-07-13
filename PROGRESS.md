@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-13T22:49:53Z` | commit `8eb6d4ef98f75d2a7b48ba7d9fb076f8d0de59f7` | tree `dirty`
+Snapshot: `2026-07-13T23:05:27Z` | commit `4d9f78e381610fdb799de586197bc877f7a30da4` | tree `dirty`
 
 ## Milestone map
 
@@ -59,7 +59,7 @@ Snapshot: `2026-07-13T22:49:53Z` | commit `8eb6d4ef98f75d2a7b48ba7d9fb076f8d0de5
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
 - `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
-- `m3.local-verification` [162 Python and 21 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.local-verification` [174 Python and 21 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -83,6 +83,7 @@ Snapshot: `2026-07-13T22:49:53Z` | commit `8eb6d4ef98f75d2a7b48ba7d9fb076f8d0de5
 
 - **technical** `post-first-frame-route-expansion`: The complete observed first-frame inventory executes and the anchored continuation pipeline is ready, but the required Mesen capture through the first non-black endFrame has not yet been acquired. (owner: analysis/recompiler)
 - **external** `execution-reviewer-limit`: The Codex execution reviewer currently rejects the external Mesen launch and GitHub push despite valid local auth; its reported reset is July 20, 2026 at 3:39 PM. (owner: workspace authorization)
+- **technical** `shared-first-endframe-parity`: Framebuffer parity is exact, but the runtime has not yet executed S-CPU, SA-1, SPC, DMA, PPU, arbitration, and interrupts to the same first endFrame state/event boundary as Mesen. (owner: runtime/validation)
 
 Regenerate the interactive dashboard with:
 

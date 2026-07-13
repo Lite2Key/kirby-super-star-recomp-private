@@ -46,12 +46,12 @@ class ProgressTests(unittest.TestCase):
         self.assertEqual(scpu["counts"], {
             "observed": 214, "lifted": 214, "generated": 214,
             "semantics_supported": 214,
-            "executed": 214, "reference_verified": 160,
+            "executed": 214, "reference_verified": 214,
         })
         self.assertEqual(sa1["counts"], {
             "observed": 40, "lifted": 40, "generated": 40,
             "semantics_supported": 40,
-            "executed": 40, "reference_verified": 20,
+            "executed": 40, "reference_verified": 34,
         })
         self.assertEqual((scpu["evolving"], sa1["evolving"]), (54, 17))
         self.assertEqual((scpu["frontier"], sa1["frontier"]), (0, 0))

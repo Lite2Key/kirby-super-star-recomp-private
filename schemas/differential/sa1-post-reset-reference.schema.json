@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/kss/sa1-post-reset-reference.schema.json",
+  "title": "ROM-free SA-1 post-reset reference coverage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "source_format", "processor", "boundary", "claim_scope",
+    "private_source_sha256", "identity_route", "architectural_slice",
+    "identity_order_only_remaining"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source_format": {"const": "kss-sa1-post-reset-reference-v1"},
+    "processor": {"const": "sa1"},
+    "boundary": {"const": "after-reset-reference-through-first-end-frame"},
+    "claim_scope": {"type": "string", "minLength": 1},
+    "private_source_sha256": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["execution_trace", "architectural_slice"],
+      "properties": {
+        "execution_trace": {"$ref": "#/$defs/digest"},
+        "architectural_slice": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "identity_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed_identity_count", "event_records", "identity_chain_sha256", "identities"],
+      "properties": {
+        "observed_identity_count": {"const": 20},
+        "event_records": {"type": "integer", "minimum": 20},
+        "identity_chain_sha256": {"$ref": "#/$defs/digest"},
+        "identities": {
+          "type": "array", "minItems": 20, "maxItems": 20,
+          "uniqueItems": true, "items": {"$ref": "#/$defs/identity"}
+        }
+      }
+    },
+    "architectural_slice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state_verified_count", "state_records", "write_records",
+        "state_chain_sha256", "write_chain_sha256", "identities"
+      ],
+      "properties": {
+        "state_verified_count": {"const": 14},
+        "state_records": {"type": "integer", "minimum": 14},
+        "write_records": {"type": "integer", "minimum": 0},
+        "state_chain_sha256": {"$ref": "#/$defs/digest"},
+        "write_chain_sha256": {"$ref": "#/$defs/digest"},
+        "identities": {
+          "type": "array", "minItems": 14, "maxItems": 14,
+          "uniqueItems": true, "items": {"$ref": "#/$defs/identity"}
+        }
+      }
+    },
+    "identity_order_only_remaining": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity_order_only_count", "reason", "identities"],
+      "properties": {
+        "identity_order_only_count": {"const": 6},
+        "reason": {"type": "string", "minLength": 1},
+        "identities": {
+          "type": "array", "minItems": 6, "maxItems": 6,
+          "uniqueItems": true, "items": {"$ref": "#/$defs/identity"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "pc", "mode"],
+      "properties": {
+        "processor": {"const": "sa1"},
+        "pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
+        "mode": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["emulation", "m8", "x8"],
+          "properties": {
+            "emulation": {"const": false},
+            "m8": {"const": false},
+            "x8": {"const": false}
+          }
+        }
+      }
+    }
+  }
+}

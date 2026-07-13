@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-13T22:49:53Z",
-    "commit": "8eb6d4ef98f75d2a7b48ba7d9fb076f8d0de59f7",
+    "generated_at": "2026-07-13T23:05:27Z",
+    "commit": "4d9f78e381610fdb799de586197bc877f7a30da4",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -55,7 +55,7 @@
         },
         {
           "id": "m3.local-verification",
-          "label": "162 Python and 21 native tests",
+          "label": "174 Python and 21 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -274,7 +274,7 @@
           "status": "passed"
         },
         {
-          "name": "Verify 180",
+          "name": "Oracle 248",
           "status": "in_progress"
         },
         {
@@ -479,7 +479,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "All 214 first-frame S-CPU identities lift, generate, and have implemented semantics; bounded post-reset slices are reference tested.",
+      "summary": "All 214 first-frame S-CPU identities lift, generate, execute, and have Mesen architectural-state oracle coverage; shared-boundary native parity remains separate.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -526,7 +526,7 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "All 40 first-frame SA-1 identities lift, generate, and have implemented semantics; TCD and reset/MVN are reference verified.",
+      "summary": "All 40 first-frame SA-1 identities execute; 34 have architectural-state/write oracle coverage and the remaining six have identity/order evidence only.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -827,6 +827,12 @@
       "severity": "external",
       "summary": "The Codex execution reviewer currently rejects the external Mesen launch and GitHub push despite valid local auth; its reported reset is July 20, 2026 at 3:39 PM.",
       "owner": "workspace authorization"
+    },
+    {
+      "id": "shared-first-endframe-parity",
+      "severity": "technical",
+      "summary": "Framebuffer parity is exact, but the runtime has not yet executed S-CPU, SA-1, SPC, DMA, PPU, arbitration, and interrupts to the same first endFrame state/event boundary as Mesen.",
+      "owner": "runtime/validation"
     }
   ],
   "next_proof": {
@@ -994,6 +1000,25 @@
       "standard_native_tests": 21,
       "private_native_tests": 21,
       "python_tests": 162
+    },
+    {
+      "at": "2026-07-13T23:03:23Z",
+      "verified_blocks": 248,
+      "executed_blocks": 254,
+      "execution_remaining": 0,
+      "reference_oracle_remaining": 6,
+      "passing_scenarios": 0,
+      "open_divergences": 2,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "scpu_reference_oracle_blocks": 214,
+      "sa1_reference_oracle_blocks": 34,
+      "framebuffer_parity": 1,
+      "shared_endframe_parity": 0,
+      "standard_native_tests": 21,
+      "private_native_tests": 21,
+      "python_tests": 174
     }
   ],
   "block_map": {
@@ -3096,7 +3121,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21083,
             "evolving": true,
@@ -3109,7 +3134,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21091,
             "evolving": true,
@@ -3122,7 +3147,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21095,
             "evolving": true,
@@ -3135,7 +3160,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21098,
             "evolving": true,
@@ -3148,7 +3173,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21100,
             "evolving": true,
@@ -3161,7 +3186,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21105,
             "evolving": true,
@@ -3174,7 +3199,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21108,
             "evolving": true,
@@ -3187,7 +3212,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21110,
             "evolving": true,
@@ -3200,7 +3225,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21116,
             "evolving": true,
@@ -3213,7 +3238,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21119,
             "evolving": true,
@@ -3226,7 +3251,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21122,
             "evolving": true,
@@ -3239,7 +3264,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21126,
             "evolving": true,
@@ -3252,7 +3277,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21129,
             "evolving": true,
@@ -3265,7 +3290,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21133,
             "evolving": true,
@@ -3278,7 +3303,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21136,
             "evolving": true,
@@ -3291,7 +3316,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21138,
             "evolving": true,
@@ -3304,7 +3329,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21141,
             "evolving": true,
@@ -3317,7 +3342,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21144,
             "evolving": true,
@@ -3330,7 +3355,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21147,
             "evolving": true,
@@ -3343,7 +3368,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21154,
             "evolving": true,
@@ -3356,7 +3381,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21156,
             "evolving": true,
@@ -3369,7 +3394,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21158,
             "evolving": true,
@@ -3382,7 +3407,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21160,
             "evolving": true,
@@ -3395,7 +3420,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21167,
             "evolving": true,
@@ -3408,7 +3433,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21169,
             "evolving": true,
@@ -3421,7 +3446,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21171,
             "evolving": true,
@@ -3434,7 +3459,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21176,
             "evolving": true,
@@ -3447,7 +3472,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21179,
             "evolving": true,
@@ -3460,7 +3485,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21182,
             "evolving": true,
@@ -3473,7 +3498,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21184,
             "evolving": true,
@@ -3486,7 +3511,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21186,
             "evolving": true,
@@ -3499,7 +3524,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21190,
             "evolving": true,
@@ -3512,7 +3537,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21192,
             "evolving": true,
@@ -3525,7 +3550,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21196,
             "evolving": true,
@@ -3538,7 +3563,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 14,
             "first_cycle": 21200,
             "evolving": true,
@@ -3551,7 +3576,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 14,
             "first_cycle": 21204,
             "evolving": true,
@@ -3564,7 +3589,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21297,
             "evolving": true,
@@ -3577,7 +3602,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21300,
             "evolving": true,
@@ -3590,7 +3615,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21306,
             "evolving": true,
@@ -3603,7 +3628,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21308,
             "evolving": true,
@@ -3616,7 +3641,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21311,
             "evolving": true,
@@ -3629,7 +3654,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 21313,
             "evolving": true,
@@ -3642,7 +3667,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21316,
             "evolving": true,
@@ -3655,7 +3680,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21319,
             "evolving": true,
@@ -3668,7 +3693,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21324,
             "evolving": true,
@@ -3681,7 +3706,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21327,
             "evolving": true,
@@ -3694,7 +3719,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21329,
             "evolving": true,
@@ -3707,7 +3732,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21332,
             "evolving": true,
@@ -3720,7 +3745,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21335,
             "evolving": true,
@@ -3733,7 +3758,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21341,
             "evolving": true,
@@ -3746,7 +3771,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 152,
             "first_cycle": 21343,
             "evolving": true,
@@ -3759,7 +3784,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 822,
             "first_cycle": 21346,
             "evolving": true,
@@ -3772,7 +3797,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 822,
             "first_cycle": 21350,
             "evolving": true,
@@ -3785,7 +3810,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 151,
             "first_cycle": 21387,
             "evolving": true,
@@ -3798,7 +3823,7 @@
           "generated": 214,
           "semantics_supported": 214,
           "executed": 214,
-          "reference_verified": 160
+          "reference_verified": 214
         },
         "evolving": 54,
         "frontier": 0
@@ -4150,7 +4175,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112763,
             "evolving": true,
@@ -4163,7 +4188,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112765,
             "evolving": true,
@@ -4176,7 +4201,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112768,
             "evolving": true,
@@ -4189,7 +4214,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112774,
             "evolving": true,
@@ -4202,7 +4227,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112779,
             "evolving": true,
@@ -4215,7 +4240,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112788,
             "evolving": true,
@@ -4228,7 +4253,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112793,
             "evolving": true,
@@ -4241,7 +4266,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112800,
             "evolving": true,
@@ -4254,7 +4279,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112804,
             "evolving": true,
@@ -4267,7 +4292,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112810,
             "evolving": true,
@@ -4280,7 +4305,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112817,
             "evolving": true,
@@ -4293,7 +4318,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 1,
             "first_cycle": 112824,
             "evolving": true,
@@ -4306,7 +4331,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 3268,
             "first_cycle": 112832,
             "evolving": true,
@@ -4319,7 +4344,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "executed",
+            "stage": "reference_verified",
             "hits": 3268,
             "first_cycle": 112840,
             "evolving": true,
@@ -4332,7 +4357,7 @@
           "generated": 40,
           "semantics_supported": 40,
           "executed": 40,
-          "reference_verified": 20
+          "reference_verified": 34
         },
         "evolving": 17,
         "frontier": 0
@@ -4344,6 +4369,8 @@
       "analysis/cfg/first-frame-dual.generated-blocks.json",
       "analysis/cfg/first-frame-dual.frontier.json",
       "analysis/differential/reset-block-reference.json",
+      "analysis/differential/scpu-reference-identity-coverage.json",
+      "analysis/differential/sa1-post-reset-reference.json",
       "analysis/coverage/boot-probe-identity-coverage.json"
     ]
   }

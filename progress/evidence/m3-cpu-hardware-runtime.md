@@ -30,8 +30,11 @@ cross-domain scheduling and native pixel parity are not yet proven.
 - The full boot probe records unique processor/PC/E-M-X dispatch identities:
   `254 / 254` execute (`214 / 214` S-CPU and `40 / 40` SA-1) when the authentic
   external IPL is provided at runtime, with no PC, port, or memory patch. Of the
-  observed inventory, 180 identities also sit inside current reference-verified
-  slices. Execution coverage does not imply state, event, timing, or pixel parity.
+  observed inventory, `248 / 254` identities sit inside architectural-state
+  reference-oracle slices: all `214 / 214` S-CPU identities and `34 / 40` SA-1
+  identities. The remaining six SA-1 identities have identity/order evidence
+  but no per-instruction state records. Oracle availability does not imply
+  native state, event, or timing parity.
 
 Raw states, addresses, values, and APU transfer data remain under `.private/`.
 Committed differential artifacts contain bounded counts and SHA-256 chains.
@@ -175,9 +178,17 @@ known first-boundary CPU anchors, rejects partial/non-visible/regressing traces,
 emits identity-only sanitized artifacts, and preserves per-route block and edge
 provenance through corpus union, lifting, and private generation.
 
+The sanitized first-frame parity audit proves exact framebuffer parity only:
+both surfaces are 256x239, have zero non-black pixels, and share RGBA digest
+`c664df7cb2d0d7512f75d4eb998776a29980a051456da362c8152cc14c5416ec`.
+Complete hardware-boundary parity is not yet proven: the runtime stops at the
+translated upload frontier before scheduling the frame marker, so Mesen's CPU
+final states, `26906`-write chain, `3661` SPC execution / `462` port-event
+chains, `54` PPU / `23` DMA event chains, and cross-domain timing remain gates.
+
 ## Verification
 
-- Python: `162 passed`.
+- Python: `174 passed`.
 - Windows warnings-as-errors build: passed.
 - Windows standard CTest: `21 / 21 passed`.
 - Windows private-generated CTest: `21 / 21 passed`.

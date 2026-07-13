@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "verdict": {
+    "full_first_frame_parity_proven": false,
+    "reason": "The native pixels match the forced-blank reference, but the runtime surface is captured at a translated upload frontier and only then paired with a scheduled frame marker; it is not produced by executing all processors and hardware events through Mesen's first endFrame boundary."
+  },
+  "data_boundary": {
+    "policy": "sanitized-digests-counts-and-identities-only",
+    "rom_bytes_included": false,
+    "spc_ipl_bytes_included": false,
+    "pixel_payload_included": false,
+    "private_trace_records_included": false
+  },
+  "hardware_reference": {
+    "boundary": "first_end_frame",
+    "master_clock": 306900,
+    "processors": {
+      "scpu": {
+        "cycle": 31780,
+        "architectural_state_sha256": "98e8f2a52b1e498c5faaf195b63a0562df902f17df8fec7b2e7264c4ef8c8344"
+      },
+      "sa1": {
+        "cycle": 153450,
+        "architectural_state_sha256": "1232394440f6521dabe0cce2e0952b1c22ff9153053fcc13c39235338f5e8e1d"
+      }
+    },
+    "cpu_writes": {
+      "records": 26906,
+      "chain_sha256": "d92ed13ac930089c88ebbb945311f413ccddba7eeef4d26df8d3adb35740894c",
+      "scpu_records": 16902,
+      "sa1_records": 10004
+    },
+    "register_events": {
+      "ppu_records": 54,
+      "ppu_chain_sha256": "c1aef4ef534bfbd499ed84e3334a85afcb46f45a067f34d3e154d9f682cf4e66",
+      "dma_records": 23,
+      "dma_chain_sha256": "0e96ccb5a9c739a514d6f66455736ce2157903f5915ef1afa1870e4d23747977"
+    },
+    "spc": {
+      "execution_records": 3661,
+      "unique_pcs": 24,
+      "counter_delta": 29282,
+      "state_chain_sha256": "c0a430d56bc0ab041a62d9ab06af52d148341c403ca026f3169eff2c53ccceef",
+      "final_state_sha256": "2646fcc92e6841307241821e831b5728c45d2fc678d250cad9b83c0c3c967c1f",
+      "port_records": 462,
+      "port_chain_sha256": "088a8bedbc716630f85c402207d2499b90a44c7b0716f754ed8b506df9d7293c"
+    },
+    "frame": {
+      "width": 256,
+      "height": 239,
+      "forced_blank": true,
+      "brightness": 15,
+      "nonblack_pixels": 0,
+      "rgba_sha256": "c664df7cb2d0d7512f75d4eb998776a29980a051456da362c8152cc14c5416ec"
+    }
+  },
+  "native_runtime_observation": {
+    "boundary": "translated_upload_frontier_then_scheduled_first_frame_marker",
+    "probe_status": "expected_frontier_reached",
+    "generated_identities": {
+      "inventory": 254,
+      "executed": 254,
+      "missing": 0
+    },
+    "causal_boot": {
+      "spc_start_acknowledged": true,
+      "patched_state": false,
+      "scpu_acknowledgement_route_blocks": 51,
+      "scpu_upload_blocks": 25
+    },
+    "frontiers": {
+      "scpu_pc": 54875,
+      "sa1_pc": 35928
+    },
+    "local_timing": {
+      "scpu_timed_accesses": 768,
+      "scpu_ready_master": 154442,
+      "sa1_ready_master": 152352,
+      "scheduled_frame_marker_master": 306900,
+      "spc_instructions": 1828,
+      "spc_architectural_cycles": 7364
+    },
+    "frame": {
+      "width": 256,
+      "height": 239,
+      "nonblack_pixels": 0,
+      "rgba_sha256": "c664df7cb2d0d7512f75d4eb998776a29980a051456da362c8152cc14c5416ec",
+      "bmp_sha256": "8854cb214f2aef57964680eeca1da76f3e1f9a23132e07782775cd2fd75d9f93",
+      "bmp_bytes": 244790
+    }
+  },
+  "claims": {
+    "proven_now": [
+      "The hardware's first endFrame surface is uniformly black at 256x239 and has the committed RGBA digest.",
+      "The native renderer emits the same dimensions, nonblack count, and RGBA digest from the current translated state.",
+      "The runtime reaches the SPC start acknowledgement through live SPC execution without patching state.",
+      "The runtime executes all 254 generated first-frame block identities at least once."
+    ],
+    "not_proven": [
+      "same_hardware_boundary",
+      "scpu_final_state",
+      "sa1_final_state",
+      "cpu_write_chain",
+      "ppu_register_chain",
+      "dma_register_chain",
+      "spc_execution_chain",
+      "spc_port_chain",
+      "cross_processor_event_order",
+      "interrupt_delivery_at_hardware_time"
+    ]
+  },
+  "residual_divergences": [
+    {
+      "area": "frame_boundary",
+      "reference": "Mesen first_end_frame reached by hardware execution",
+      "runtime": "translated upload frontier followed by a coordinator marker at master 306900",
+      "required_proof": "continue S-CPU, SA-1, SPC, DMA, PPU, and interrupt execution to the same endFrame event"
+    },
+    {
+      "area": "processor_state_and_writes",
+      "reference": "two final-state digests and a 26906-record write-chain digest",
+      "runtime": "frontier identities and local access counts only",
+      "required_proof": "emit comparably canonical final-state and ordered write-chain digests at the shared boundary"
+    },
+    {
+      "area": "spc_execution_and_ports",
+      "reference": "3661 execution records and 462 ordered port records through first_end_frame",
+      "runtime": "1828 instructions and 7364 architectural cycles through the generated upload frontier",
+      "required_proof": "execute the remaining interval with master-clock and port microphase ordering, then compare state and port chains"
+    },
+    {
+      "area": "ppu_and_dma_events",
+      "reference": "54 PPU-register and 23 DMA-register events with chain digests",
+      "runtime": "matching black pixels without comparable event-chain output",
+      "required_proof": "record canonical PPU and DMA register chains while advancing to the hardware frame boundary"
+    },
+    {
+      "area": "shared_timing",
+      "reference": "hardware counters sampled at first_end_frame",
+      "runtime": "local ready times stop before the scheduled marker and are not a boundary-state claim",
+      "required_proof": "drive every clock domain causally to master 306900 with arbitration, scan timing, and interrupts enabled"
+    }
+  ],
+  "sources": [
+    "analysis/differential/first-frame-reference.json",
+    "analysis/differential/ppu-first-frame-reference.json",
+    "analysis/differential/spc-first-frame-reference.json",
+    "analysis/hardware/first-frame-functional-requirements.json",
+    "analysis/coverage/boot-probe-identity-coverage.json"
+  ]
+}

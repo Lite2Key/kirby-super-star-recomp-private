@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "pc", "mode", "proofs"],
+      "properties": {
+        "processor": {"const": "scpu"},
+        "pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
+        "mode": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["emulation", "m8", "x8"],
+          "properties": {
+            "emulation": {"type": "boolean"},
+            "m8": {"type": "boolean"},
+            "x8": {"type": "boolean"}
+          }
+        },
+        "proofs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "analysis/differential/scpu-frontier-reference.json",
+              "analysis/differential/scpu-frontier2-reference.json"
+            ]
+          }
+        }
+      }
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "identity_count", "new_identity_count"],
+      "properties": {
+        "summary": {"type": "string"},
+        "identity_count": {"type": "integer", "minimum": 1},
+        "new_identity_count": {"type": "integer", "minimum": 1}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "claim_scope", "identity_policy", "inventory_source",
+    "inventory_count", "baseline_reference_verified_count",
+    "newly_reference_verified_count", "reference_verified_count", "proof_windows",
+    "newly_reference_verified_identities", "remaining_unverified_identities",
+    "rom_bytes_included", "private_values_included"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "claim_scope": {"type": "string", "minLength": 1},
+    "identity_policy": {"const": "processor-pc24-emulation-m8-x8"},
+    "inventory_source": {"const": "analysis/cfg/first-frame-dual.trace-cfg.json"},
+    "inventory_count": {"const": 214},
+    "baseline_reference_verified_count": {"const": 160},
+    "newly_reference_verified_count": {"const": 54},
+    "reference_verified_count": {"const": 214},
+    "proof_windows": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/window"}
+    },
+    "newly_reference_verified_identities": {
+      "type": "array",
+      "minItems": 54,
+      "maxItems": 54,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/identity"}
+    },
+    "remaining_unverified_identities": {"const": []},
+    "rom_bytes_included": {"const": false},
+    "private_values_included": {"const": false}
+  }
+}

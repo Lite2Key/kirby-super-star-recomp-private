@@ -145,6 +145,12 @@ def load_block_map(root: Path) -> dict[str, Any]:
     frontier = _read_artifact(cfg_root / "first-frame-dual.frontier.json")
     bootstrap = _read_artifact(cfg_root / "bootstrap-dual.trace-cfg.json")
     reference = _read_artifact(root / "analysis" / "differential" / "reset-block-reference.json")
+    scpu_reference = _read_artifact(
+        root / "analysis" / "differential" / "scpu-reference-identity-coverage.json"
+    )
+    sa1_reference = _read_artifact(
+        root / "analysis" / "differential" / "sa1-post-reset-reference.json"
+    )
     execution = _read_artifact(
         root / "analysis" / "coverage" / "boot-probe-identity-coverage.json"
     )
@@ -156,6 +162,8 @@ def load_block_map(root: Path) -> dict[str, Any]:
         generated_counts = generated["processors"]
         frontier_processors = frontier["processors"]
         references = reference["blocks"]
+        scpu_reference_items = scpu_reference["newly_reference_verified_identities"]
+        sa1_reference_items = sa1_reference["architectural_slice"]["identities"]
         execution_missing_items = execution["missing_identities"]
     except (KeyError, TypeError) as exc:
         raise ManifestError("block-map artifact is missing a required collection") from exc
@@ -175,6 +183,20 @@ def load_block_map(root: Path) -> dict[str, Any]:
     }
     if set(reference_windows) != {"scpu", "sa1"}:
         raise ManifestError("reset reference must cover both processors")
+
+    expanded_reference = {
+        _identity_key(item) for item in scpu_reference_items + sa1_reference_items
+    }
+    if len(expanded_reference) != len(scpu_reference_items) + len(sa1_reference_items):
+        raise ManifestError("expanded reference artifacts contain duplicate identities")
+    if not expanded_reference <= set(observed):
+        raise ManifestError("expanded reference artifacts contain identities outside inventory")
+    if scpu_reference.get("newly_reference_verified_count") != len(scpu_reference_items) \
+            or scpu_reference.get("reference_verified_count") != 214:
+        raise ManifestError("S-CPU reference coverage counts disagree")
+    if sa1_reference.get("architectural_slice", {}).get("state_verified_count") \
+            != len(sa1_reference_items):
+        raise ManifestError("SA-1 architectural reference counts disagree")
 
     execution_missing = {_identity_key(item) for item in execution_missing_items}
     if len(execution_missing) != len(execution_missing_items):
@@ -214,7 +236,7 @@ def load_block_map(root: Path) -> dict[str, Any]:
             if key in execution_covered and stage == "semantics_supported":
                 stage = "executed"
             start_cycle, end_cycle = reference_windows[processor]
-            if start_cycle <= first_cycle <= end_cycle:
+            if start_cycle <= first_cycle <= end_cycle or key in expanded_reference:
                 stage = "reference_verified"
             mode = {"emulation": key[2], "m8": key[3], "x8": key[4]}
             blocks.append({
@@ -259,6 +281,8 @@ def load_block_map(root: Path) -> dict[str, Any]:
             "analysis/cfg/first-frame-dual.generated-blocks.json",
             "analysis/cfg/first-frame-dual.frontier.json",
             "analysis/differential/reset-block-reference.json",
+            "analysis/differential/scpu-reference-identity-coverage.json",
+            "analysis/differential/sa1-post-reset-reference.json",
             "analysis/coverage/boot-probe-identity-coverage.json",
         ],
     }
