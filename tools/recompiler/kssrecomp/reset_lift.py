@@ -115,6 +115,13 @@ def lift_reset_paths(
             raise ResetLiftError(f"duplicate trace CFG node: {identity.symbol}")
         identities.add(identity)
         outgoing[identity] = [_identity(edge["target"]) for edge in raw.get("edges", [])]
+    routes_by_identity: dict[BlockIdentity, list[str]] = {}
+    for raw in trace_cfg.get("observations", {}).get("blocks", []):
+        identity = _identity(raw["identity"])
+        routes = raw.get("routes", [])
+        if not isinstance(routes, list) or any(not isinstance(route, str) for route in routes):
+            raise ResetLiftError("trace CFG block provenance is invalid")
+        routes_by_identity[identity] = list(routes)
     for source, targets in outgoing.items():
         if any(target not in identities for target in targets):
             raise ResetLiftError(f"trace CFG edge from {source.symbol} has missing target")
@@ -159,6 +166,8 @@ def lift_reset_paths(
                 "instruction": None,
                 "unresolved_reason": None,
             }
+            if routes_by_identity.get(identity):
+                record["routes"] = routes_by_identity[identity]
             if offset is None:
                 record["status"] = "unresolved"
                 record["unresolved_reason"] = "address_not_rom_mapped"

@@ -2,11 +2,14 @@
 
 #include "kss/controller.hpp"
 #include "kss/snes_frame_renderer.hpp"
+#include "kss/visible_frame_capture.hpp"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <memory>
+#include <optional>
 
 namespace kss {
 
@@ -80,6 +83,43 @@ enum class HostSessionStatus : std::uint8_t {
     open_failed,
     presentation_failed,
     platform_error,
+    frame_source_exhausted,
+    frame_source_error,
+    non_monotonic_frame_boundary,
+    capture_write_failed,
+};
+
+enum class HostFrameSourceStatus : std::uint8_t {
+    no_frame,
+    frame_boundary,
+    exhausted,
+    source_error,
+};
+
+struct HostFrameBoundarySnapshot {
+    MasterClock boundary_master{};
+    // The source retains ownership. The snapshot must remain immutable while
+    // the host consumes this boundary, through the next next_frame call.
+    const PpuFunctionalState* ppu_state{};
+};
+
+struct HostFrameSource {
+    void* context{};
+    HostFrameSourceStatus (*next_frame)(
+        void*, HostFrameBoundarySnapshot&) noexcept{};
+
+    [[nodiscard]] HostFrameSourceStatus next(
+        HostFrameBoundarySnapshot& snapshot) const noexcept {
+        return next_frame ? next_frame(context, snapshot)
+                          : HostFrameSourceStatus::source_error;
+    }
+};
+
+struct HostFrameSessionResult {
+    HostSessionStatus status{HostSessionStatus::not_requested};
+    std::uint64_t observed_boundaries{};
+    std::optional<FrameBoundaryObservation> first_visible{};
+    bool first_visible_bmp_written{};
 };
 
 // OS backends own windows and device polling. The shared session driver below
@@ -97,6 +137,16 @@ public:
     NativeHostPlatform& platform,
     const RgbaFrame& frame,
     HostControllerSink controllers) noexcept;
+
+// Drives a host window from genuine runtime-owned frame-boundary snapshots.
+// This function never advances guest clocks, repeats a prior snapshot, or
+// clears forced blank. A runtime that has not reached another boundary must
+// report no_frame; a completed bounded run must report exhausted.
+[[nodiscard]] HostFrameSessionResult run_native_host_frame_session(
+    NativeHostPlatform& platform,
+    HostFrameSource frames,
+    HostControllerSink controllers,
+    const std::filesystem::path& first_visible_bmp = {}) noexcept;
 
 #ifdef _WIN32
 [[nodiscard]] std::unique_ptr<NativeHostPlatform> make_win32_host_platform();

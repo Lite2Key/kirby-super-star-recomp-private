@@ -11,6 +11,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -397,6 +398,13 @@ void test_cli_usage() {
         == kss::BootstrapExitCode::usage_error);
     assert(errors.str().find("--save requires a path") != std::string::npos);
 
+    const char* missing_ipl_path[] = {"kss-runtime", "--spc-ipl"};
+    output.str({});
+    errors.str({});
+    assert(kss::runtime_cli(2, missing_ipl_path, output, errors)
+        == kss::BootstrapExitCode::usage_error);
+    assert(errors.str().find("--spc-ipl requires a path") != std::string::npos);
+
     const char* save_override[] = {
         "kss-runtime", "--rom", "definitely-missing.sfc", "--save", "slot-a.srm"};
     output.str({});
@@ -404,6 +412,40 @@ void test_cli_usage() {
     assert(kss::runtime_cli(5, save_override, output, errors)
         == kss::BootstrapExitCode::rom_rejected);
     assert(errors.str().find("unknown argument") == std::string::npos);
+}
+
+void test_external_spc_ipl_loader_requires_exact_hardware_size() {
+    const auto path = std::filesystem::temp_directory_path()
+        / "kss-runtime-external-spc-ipl-test.bin";
+    std::error_code error;
+    std::filesystem::remove(path, error);
+
+    std::array<std::uint8_t, kss::apu::Spc700Core::kIplSize> expected{};
+    for (std::size_t index = 0; index < expected.size(); ++index) {
+        expected[index] = static_cast<std::uint8_t>(index);
+    }
+    {
+        std::ofstream output_file(path, std::ios::binary);
+        output_file.write(reinterpret_cast<const char*>(expected.data()),
+            static_cast<std::streamsize>(expected.size()));
+    }
+    const auto accepted = kss::load_spc_ipl(path);
+    assert(accepted.ok());
+    assert(accepted.file_size == expected.size());
+    assert(accepted.bytes == expected);
+
+    {
+        std::ofstream output_file(path, std::ios::binary | std::ios::trunc);
+        output_file.write(reinterpret_cast<const char*>(expected.data()),
+            static_cast<std::streamsize>(expected.size() - 1U));
+    }
+    const auto short_image = kss::load_spc_ipl(path);
+    assert(short_image.status == kss::SpcIplLoadStatus::wrong_file_size);
+    assert(short_image.file_size == expected.size() - 1U);
+
+    std::filesystem::remove(path, error);
+    assert(kss::load_spc_ipl(path).status
+        == kss::SpcIplLoadStatus::file_not_found);
 }
 
 } // namespace
@@ -423,5 +465,6 @@ int main() {
     test_alu_logical_shift_and_memory_ops();
     test_sha256_vectors();
     test_cli_usage();
+    test_external_spc_ipl_loader_requires_exact_hardware_size();
     return 0;
 }

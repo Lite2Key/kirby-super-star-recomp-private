@@ -15,8 +15,9 @@ namespace kss {
 namespace {
 
 void print_usage(std::ostream& stream) {
-    stream << "Usage: kss-runtime --rom <path> [--validate-only]"
-              " [--save <srm-path>] [--dump-first-frame <bmp-path>]\n";
+    stream << "Usage: kss-recomp|kss-native --rom <path> [--validate-only]"
+              " [--spc-ipl <64-byte-path>] [--save <srm-path>]"
+              " [--dump-first-frame <bmp-path>]\n";
 }
 
 std::vector<std::uint8_t> read_rom(const std::filesystem::path& path) {
@@ -32,6 +33,38 @@ std::vector<std::uint8_t> read_rom(const std::filesystem::path& path) {
 }
 
 } // namespace
+
+SpcIplLoadResult load_spc_ipl(const std::filesystem::path& path) noexcept {
+    SpcIplLoadResult result{};
+    std::error_code error;
+    if (!std::filesystem::is_regular_file(path, error) || error) {
+        result.status = SpcIplLoadStatus::file_not_found;
+        return result;
+    }
+    result.file_size = std::filesystem::file_size(path, error);
+    if (error) {
+        result.status = SpcIplLoadStatus::read_error;
+        return result;
+    }
+    if (result.file_size != result.bytes.size()) {
+        result.status = SpcIplLoadStatus::wrong_file_size;
+        return result;
+    }
+    std::ifstream input(path, std::ios::binary);
+    if (!input) {
+        result.status = SpcIplLoadStatus::read_error;
+        return result;
+    }
+    input.read(reinterpret_cast<char*>(result.bytes.data()),
+        static_cast<std::streamsize>(result.bytes.size()));
+    if (input.gcount() != static_cast<std::streamsize>(result.bytes.size())
+        || input.bad()) {
+        result.status = SpcIplLoadStatus::read_error;
+        return result;
+    }
+    result.status = SpcIplLoadStatus::loaded;
+    return result;
+}
 
 BootstrapExitCode run_bootstrap(
     const BootstrapOptions& options,
@@ -58,6 +91,26 @@ BootstrapExitCode run_bootstrap(
 
     output << "ROM accepted\n"
            << "SHA-256: " << validation.actual_sha256 << "\n";
+
+    SpcIplLoadResult spc_ipl{};
+    if (!options.spc_ipl_path.empty()) {
+        spc_ipl = load_spc_ipl(options.spc_ipl_path);
+        if (!spc_ipl.ok()) {
+            errors << "SNES SPC700 IPL rejected: " << options.spc_ipl_path.string();
+            if (spc_ipl.status == SpcIplLoadStatus::wrong_file_size) {
+                errors << " (observed " << spc_ipl.file_size
+                       << " bytes; expected " << apu::Spc700Core::kIplSize << ')';
+            } else if (spc_ipl.status == SpcIplLoadStatus::file_not_found) {
+                errors << " (file not found)";
+            } else {
+                errors << " (read error)";
+            }
+            errors << "\n";
+            return BootstrapExitCode::spc_ipl_rejected;
+        }
+        output << "External SNES SPC700 IPL accepted: "
+               << options.spc_ipl_path.string() << "\n";
+    }
     if (options.validate_only) {
         output << "Validation-only run complete\n";
         return BootstrapExitCode::success;
@@ -85,7 +138,11 @@ BootstrapExitCode run_bootstrap(
             ? "Save RAM loaded: " : "Save RAM initialized empty: ")
            << save_path.string() << "\n";
 
-    const auto probe = run_boot_probe(rom, {}, save_ram, options.host);
+    const BootProbeTimingEvidence timing{
+        options.spc_ipl_path.empty()
+            ? std::span<const std::uint8_t>{}
+            : std::span<const std::uint8_t>{spc_ipl.bytes}};
+    const auto probe = run_boot_probe(rom, timing, save_ram, options.host);
     output << "Translated boot probe:\n"
            << "  S-CPU setup blocks: " << probe.scpu_setup.completed_blocks << "\n"
            << "  SA-1 initialization blocks: " << probe.sa1_initialization.completed_blocks << "\n"
@@ -160,6 +217,15 @@ BootstrapExitCode runtime_cli(
                 return BootstrapExitCode::usage_error;
             }
             options.frame_output = argv[index];
+            continue;
+        }
+        if (argument == "--spc-ipl") {
+            if (++index >= argc) {
+                errors << "error: --spc-ipl requires a path\n";
+                print_usage(errors);
+                return BootstrapExitCode::usage_error;
+            }
+            options.spc_ipl_path = argv[index];
             continue;
         }
         if (argument == "--save") {

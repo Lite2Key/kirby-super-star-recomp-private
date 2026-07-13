@@ -51,3 +51,15 @@ def test_cross_processor_edges_and_duplicates_fail_closed() -> None:
 def test_limit_is_validated() -> None:
     with pytest.raises(GeneratedBlocksError, match="between 1 and 4096"):
         render(_document(), max_blocks_per_processor=0)
+
+
+def test_manifest_counts_registered_identity_route_provenance() -> None:
+    document = _document()
+    document["blocks"][0]["routes"] = ["boot", "first-visible"]
+    manifest = render(document, max_blocks_per_processor=256)[2]
+    assert manifest["route_provenance"] == {
+        "policy": "coverage-route-ids-per-registered-identity",
+        "registered_blocks_by_route": {"boot": 1, "first-visible": 1},
+    }
+    schema = json.loads((ROOT / "schemas/recompiler/generated-block-manifest.schema.json").read_text())
+    jsonschema.validate(manifest, schema)

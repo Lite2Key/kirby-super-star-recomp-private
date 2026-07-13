@@ -91,4 +91,93 @@ HostSessionStatus run_native_host_session(
     }
 }
 
+HostFrameSessionResult run_native_host_frame_session(
+    NativeHostPlatform& platform,
+    HostFrameSource frames,
+    HostControllerSink controllers,
+    const std::filesystem::path& first_visible_bmp) noexcept {
+    HostFrameSessionResult result;
+    if (!frames.next_frame) {
+        result.status = HostSessionStatus::frame_source_error;
+        return result;
+    }
+    if (!platform.open(kSnesFrameWidth, kSnesFrameHeight)) {
+        result.status = HostSessionStatus::open_failed;
+        return result;
+    }
+    struct CloseGuard {
+        NativeHostPlatform& platform;
+        ~CloseGuard() { platform.close(); }
+    } close_guard{platform};
+
+    VisibleFrameCapture capture;
+    HostInputSnapshot input{};
+    std::array<std::uint16_t, SnesControllerPorts::kPortCount> delivered{};
+    delivered.fill(0xffffU);
+
+    const auto finish = [&result, &capture](HostSessionStatus status) {
+        result.status = status;
+        result.observed_boundaries = capture.observed_boundaries();
+        result.first_visible = capture.first_visible_observation();
+        return result;
+    };
+
+    for (;;) {
+        const auto poll_status = platform.poll(input);
+        for (std::size_t port = 0; port < delivered.size(); ++port) {
+            const auto buttons = static_cast<std::uint16_t>(
+                input.controller_buttons[port] & SnesControllerPorts::kButtonMask);
+            if (buttons != delivered[port]) {
+                controllers.update(port, buttons);
+                delivered[port] = buttons;
+            }
+        }
+        if (poll_status == HostPollStatus::clean_shutdown) {
+            return finish(HostSessionStatus::clean_shutdown);
+        }
+        if (poll_status == HostPollStatus::platform_error) {
+            return finish(HostSessionStatus::platform_error);
+        }
+
+        HostFrameBoundarySnapshot snapshot{};
+        switch (frames.next(snapshot)) {
+        case HostFrameSourceStatus::no_frame:
+            continue;
+        case HostFrameSourceStatus::exhausted:
+            return finish(HostSessionStatus::frame_source_exhausted);
+        case HostFrameSourceStatus::source_error:
+            return finish(HostSessionStatus::frame_source_error);
+        case HostFrameSourceStatus::frame_boundary:
+            break;
+        }
+        if (!snapshot.ppu_state) {
+            return finish(HostSessionStatus::frame_source_error);
+        }
+
+        const auto observation = capture.observe(
+            snapshot.boundary_master, *snapshot.ppu_state);
+        if (observation.status == FrameBoundaryStatus::non_monotonic_boundary) {
+            return finish(HostSessionStatus::non_monotonic_frame_boundary);
+        }
+
+        auto rendered = SnesFrameRenderer::render(*snapshot.ppu_state);
+        if (rendered.status == FrameRenderStatus::rendered) {
+            if (!rendered.frame.valid()) {
+                return finish(HostSessionStatus::invalid_frame);
+            }
+            if (!platform.present(rendered.frame)) {
+                return finish(HostSessionStatus::presentation_failed);
+            }
+        }
+
+        if (observation.captured_first_visible && !first_visible_bmp.empty()) {
+            if (capture.write_first_visible_bmp(first_visible_bmp)
+                != FrameWriteStatus::written) {
+                return finish(HostSessionStatus::capture_write_failed);
+            }
+            result.first_visible_bmp_written = true;
+        }
+    }
+}
+
 } // namespace kss

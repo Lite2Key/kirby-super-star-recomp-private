@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-13T22:30:34Z",
-    "commit": "94a4cc8adbfa8c63a57b08125966adc67f89468c",
+    "generated_at": "2026-07-13T22:49:53Z",
+    "commit": "8eb6d4ef98f75d2a7b48ba7d9fb076f8d0de59f7",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -55,7 +55,7 @@
         },
         {
           "id": "m3.local-verification",
-          "label": "152 Python and 21 native tests",
+          "label": "162 Python and 21 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -353,7 +353,7 @@
         },
         {
           "name": "Upload protocol",
-          "status": "in_progress"
+          "status": "passed"
         },
         {
           "name": "Timers and DSP I/O",
@@ -692,7 +692,7 @@
       "metrics": [
         {
           "label": "release gates",
-          "value": 2,
+          "value": 3,
           "total": 7,
           "denominator": "fixed"
         }
@@ -819,20 +819,19 @@
     {
       "id": "post-first-frame-route-expansion",
       "severity": "technical",
-      "summary": "The complete observed first-frame inventory now executes, but that hardware frame is genuinely forced blank; discovery must expand beyond the first endFrame until game code clears INIDISP and supplies a visible PPU boundary.",
+      "summary": "The complete observed first-frame inventory executes and the anchored continuation pipeline is ready, but the required Mesen capture through the first non-black endFrame has not yet been acquired.",
       "owner": "analysis/recompiler"
     },
     {
-      "id": "runtime-ipl-cli",
-      "severity": "technical",
-      "summary": "Authentic SPC interleaving accepts runtime-only IPL bytes through the boot API; the Windows CLI still needs an external IPL-file option and validation without embedding firmware.",
-      "owner": "runtime/windows"
+      "id": "execution-reviewer-limit",
+      "severity": "external",
+      "summary": "The Codex execution reviewer currently rejects the external Mesen launch and GitHub push despite valid local auth; its reported reset is July 20, 2026 at 3:39 PM.",
+      "owner": "workspace authorization"
     }
   ],
   "next_proof": {
     "title": "Expand from the forced-blank hardware frame to the first visible frame",
     "acceptance": [
-      "Expose a validated external IPL-file option to the diagnostic and native Windows hosts without committing firmware",
       "Capture and sanitize the route from the first endFrame through the first non-black endFrame with clock-qualified CPU/SPC events",
       "Union, lift, generate, and execute every newly discovered identity on that route without patched state",
       "Match the expanded CPU, PPU, event, and master-clock checkpoints against MesenCE",
@@ -977,6 +976,24 @@
       "standard_native_tests": 21,
       "private_native_tests": 21,
       "python_tests": 152
+    },
+    {
+      "at": "2026-07-13T22:47:52Z",
+      "verified_blocks": 180,
+      "executed_blocks": 254,
+      "execution_remaining": 0,
+      "passing_scenarios": 0,
+      "open_divergences": 1,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "generated_blocks": 254,
+      "external_ipl_cli": 1,
+      "post_frame_route_pipeline": 1,
+      "visible_frame_host_session": 1,
+      "standard_native_tests": 21,
+      "private_native_tests": 21,
+      "python_tests": 162
     }
   ],
   "block_map": {

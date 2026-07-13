@@ -139,6 +139,10 @@ Committed differential artifacts contain bounded counts and SHA-256 chains.
 - `kss-native.exe` presents this 256x239 surface through a Win32/GDI host at
   centered integer scale and maps keyboard plus two XInput pads to the existing
   controller boundary. Closing at the development frontier remains non-saving.
+- The source-driven native frame session consumes at most one runtime-supplied,
+  timestamped PPU snapshot per host poll. No-frame gaps, exhaustion, source
+  errors, and non-monotonic boundaries are explicit; first-visible BMP output
+  occurs once and only after a genuine visible classification.
 
 ## Executable Windows probe
 
@@ -162,12 +166,18 @@ current hardware-gated S-CPU checkpoint:
 The probe deliberately returns a development-frontier exit code. Its local
 generated S-CPU access timing is accepted, but full cross-domain frame parity
 still depends on expanding the trace beyond the forced-blank first hardware
-frame. The boot API accepts runtime IPL bytes, but the CLI does not yet expose
-an external IPL-file option.
+frame. Both Windows executables now accept `--spc-ipl <path>`, require exactly
+64 bytes, and pass the external firmware as a transient runtime span; omission
+preserves the bounded no-IPL path and malformed input exits separately.
+
+The post-frame route pipeline is ready for that expansion. It requires both
+known first-boundary CPU anchors, rejects partial/non-visible/regressing traces,
+emits identity-only sanitized artifacts, and preserves per-route block and edge
+provenance through corpus union, lifting, and private generation.
 
 ## Verification
 
-- Python: `152 passed`.
+- Python: `162 passed`.
 - Windows warnings-as-errors build: passed.
 - Windows standard CTest: `21 / 21 passed`.
 - Windows private-generated CTest: `21 / 21 passed`.

@@ -1,9 +1,12 @@
 #include "kss/dual_bus.hpp"
 #include "kss/native_host.hpp"
+#include "kss/snes_timing.hpp"
 
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include <utility>
 #include <vector>
 
@@ -25,15 +28,25 @@ public:
     bool opened{};
     bool presented{};
     bool closed{};
+    std::uint16_t opened_width{};
+    std::uint16_t opened_height{};
+    std::size_t present_count{};
+    std::vector<std::uint8_t> presented_red;
     std::vector<Tick> ticks;
     std::size_t next_tick{};
 
     bool open(std::uint16_t width, std::uint16_t height) override {
-        opened = width == 1U && height == 1U;
+        opened = true;
+        opened_width = width;
+        opened_height = height;
         return open_result;
     }
     bool present(const kss::RgbaFrame& frame) override {
         presented = frame.valid();
+        if (presented) {
+            ++present_count;
+            presented_red.push_back(frame.pixels[0]);
+        }
         return present_result;
     }
     kss::HostPollStatus poll(kss::HostInputSnapshot& input) override {
@@ -58,6 +71,55 @@ void set_bus_buttons(void* context, std::size_t port, std::uint16_t buttons) noe
 
 kss::RgbaFrame one_pixel_frame() {
     return {1, 1, {0x11, 0x22, 0x33, 0xff}};
+}
+
+struct FrameEvent {
+    kss::HostFrameSourceStatus status{kss::HostFrameSourceStatus::no_frame};
+    kss::MasterClock boundary_master{};
+    kss::PpuFunctionalState state{};
+    bool supplies_state{};
+};
+
+struct FrameSequence {
+    std::vector<FrameEvent> events;
+    std::size_t next_event{};
+
+    static kss::HostFrameSourceStatus next(
+        void* context, kss::HostFrameBoundarySnapshot& snapshot) noexcept {
+        auto& self = *static_cast<FrameSequence*>(context);
+        if (self.next_event >= self.events.size()) {
+            return kss::HostFrameSourceStatus::source_error;
+        }
+        auto& event = self.events[self.next_event++];
+        if (event.status == kss::HostFrameSourceStatus::frame_boundary) {
+            snapshot.boundary_master = event.boundary_master;
+            snapshot.ppu_state = event.supplies_state ? &event.state : nullptr;
+        }
+        return event.status;
+    }
+
+    kss::HostFrameSource source() noexcept { return {this, &FrameSequence::next}; }
+};
+
+kss::PpuFunctionalState forced_blank_state() {
+    kss::PpuFunctionalState state{};
+    state.forced_blank = true;
+    state.brightness = 15;
+    return state;
+}
+
+kss::PpuFunctionalState black_mode1_state() {
+    kss::PpuFunctionalState state{};
+    state.brightness = 0;
+    state.registers[0x05] = 0x01;
+    return state;
+}
+
+kss::PpuFunctionalState red_mode1_state() {
+    auto state = black_mode1_state();
+    state.brightness = 15;
+    state.cgram[0] = 0x1f;
+    return state;
 }
 
 void test_keyboard_mapping() {
@@ -150,6 +212,77 @@ void test_session_targets_existing_two_port_bus_api() {
     assert(bus.controller_buttons(1) == finish.input.controller_buttons[1]);
 }
 
+void test_frame_session_consumes_only_supplied_boundaries_and_captures_visible() {
+    FakePlatform platform;
+    platform.ticks.resize(6);
+    FrameSequence sequence;
+    sequence.events = {
+        {kss::HostFrameSourceStatus::no_frame},
+        {kss::HostFrameSourceStatus::frame_boundary,
+            kss::kSnesFirstFrameMasterClock, forced_blank_state(), true},
+        {kss::HostFrameSourceStatus::frame_boundary,
+            kss::kSnesFirstFrameMasterClock + 100U, black_mode1_state(), true},
+        {kss::HostFrameSourceStatus::frame_boundary,
+            kss::kSnesFirstFrameMasterClock + 200U, red_mode1_state(), true},
+        {kss::HostFrameSourceStatus::no_frame},
+        {kss::HostFrameSourceStatus::exhausted},
+    };
+    const auto output = std::filesystem::path{"native-host-first-visible-test.bmp"};
+    std::filesystem::remove(output);
+    const auto result = kss::run_native_host_frame_session(
+        platform, sequence.source(), {}, output);
+
+    assert(result.status == kss::HostSessionStatus::frame_source_exhausted);
+    assert(result.observed_boundaries == 3U);
+    assert(result.first_visible && result.first_visible->frame_ordinal == 3U);
+    assert(result.first_visible->status == kss::FrameBoundaryStatus::visible);
+    assert(result.first_visible_bmp_written);
+    assert(platform.opened_width == kss::kSnesFrameWidth);
+    assert(platform.opened_height == kss::kSnesFrameHeight);
+    assert(platform.present_count == 3U); // no_frame never repeats an old surface.
+    assert(platform.presented_red == (std::vector<std::uint8_t>{0, 0, 255}));
+    assert(platform.closed);
+
+    std::ifstream image(output, std::ios::binary | std::ios::ate);
+    assert(image && image.tellg() == static_cast<std::streamoff>(
+        54U + kss::kSnesFrameWidth * kss::kSnesFrameHeight * 4U));
+    image.close();
+    std::filesystem::remove(output);
+}
+
+void test_frame_session_rejects_non_monotonic_or_invalid_sources() {
+    FakePlatform platform;
+    platform.ticks.resize(2);
+    FrameSequence repeated;
+    repeated.events = {
+        {kss::HostFrameSourceStatus::frame_boundary, 100U,
+            forced_blank_state(), true},
+        {kss::HostFrameSourceStatus::frame_boundary, 100U,
+            red_mode1_state(), true},
+    };
+    auto result = kss::run_native_host_frame_session(
+        platform, repeated.source(), {});
+    assert(result.status == kss::HostSessionStatus::non_monotonic_frame_boundary);
+    assert(result.observed_boundaries == 1U && !result.first_visible);
+    assert(platform.present_count == 1U && platform.closed);
+
+    FakePlatform missing_platform;
+    missing_platform.ticks.resize(1);
+    FrameSequence missing;
+    missing.events = {{kss::HostFrameSourceStatus::frame_boundary, 200U,
+        red_mode1_state(), false}};
+    result = kss::run_native_host_frame_session(
+        missing_platform, missing.source(), {});
+    assert(result.status == kss::HostSessionStatus::frame_source_error);
+    assert(result.observed_boundaries == 0U);
+    assert(missing_platform.present_count == 0U && missing_platform.closed);
+
+    FakePlatform null_platform;
+    result = kss::run_native_host_frame_session(null_platform, {}, {});
+    assert(result.status == kss::HostSessionStatus::frame_source_error);
+    assert(!null_platform.opened && !null_platform.closed);
+}
+
 } // namespace
 
 int main() {
@@ -158,4 +291,6 @@ int main() {
     test_headless_session_delivers_two_pads_and_closes();
     test_session_failures_are_explicit_and_closed();
     test_session_targets_existing_two_port_bus_api();
+    test_frame_session_consumes_only_supplied_boundaries_and_captures_visible();
+    test_frame_session_rejects_non_monotonic_or_invalid_sources();
 }

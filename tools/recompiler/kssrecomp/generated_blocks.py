@@ -180,6 +180,15 @@ namespace kss::generated {
         "identity_policy": "processor-pc24-emulation-m8-x8",
         "failure_policy": "stop-on-lift-failure-omit-unresolved",
     }
+    route_counts: dict[str, int] = {}
+    for block in blocks:
+        for route in block.get("routes", []):
+            route_counts[route] = route_counts.get(route, 0) + 1
+    if route_counts:
+        manifest["route_provenance"] = {
+            "policy": "coverage-route-ids-per-registered-identity",
+            "registered_blocks_by_route": dict(sorted(route_counts.items())),
+        }
     return header, "\n".join(source), manifest
 
 

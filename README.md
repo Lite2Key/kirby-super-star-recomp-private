@@ -38,9 +38,15 @@ or an explicit ROM path:
 ```powershell
 .\run-port.cmd
 .\run-port.cmd "C:\path\to\Kirby Super Star (USA).sfc"
-.\build\windows-ninja\kss-native.exe --rom "C:\path\to\Kirby Super Star (USA).sfc" --save "C:\path\to\slot-a.srm"
-.\build\windows-ninja\kss-recomp.exe --rom "C:\path\to\Kirby Super Star (USA).sfc" --dump-first-frame ".private\native-first-frame.bmp"
+.\build\windows-ninja\kss-native.exe --rom "C:\path\to\Kirby Super Star (USA).sfc" --spc-ipl "C:\path\to\snes-ipl.bin" --save "C:\path\to\slot-a.srm"
+.\build\windows-ninja\kss-recomp.exe --rom "C:\path\to\Kirby Super Star (USA).sfc" --spc-ipl "C:\path\to\snes-ipl.bin" --dump-first-frame ".private\native-first-frame.bmp"
 ```
+
+`--spc-ipl` is optional and accepts only an external 64-byte SNES SPC700 IPL
+image. The runtime validates and reads it directly from the supplied path; the
+firmware is never copied into the repository or generated output. Omitting the
+option preserves the bounded, fail-closed no-IPL diagnostic at the `$D68E`
+acknowledgement wait.
 
 The native host uses arrow keys for the D-pad; `Z/X/A/S` for `B/A/Y/X`;
 right Shift and Enter for Select/Start; and `Q/W` for L/R. XInput pads 1 and 2

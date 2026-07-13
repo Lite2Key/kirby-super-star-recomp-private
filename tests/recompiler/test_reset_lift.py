@@ -97,3 +97,15 @@ def test_output_is_deterministic() -> None:
     assert lift_reset_paths(vectors, cfg, rom) == lift_reset_paths(
         copy.deepcopy(vectors), copy.deepcopy(cfg), bytes(rom)
     )
+
+
+def test_lift_preserves_identity_route_provenance() -> None:
+    vectors, cfg, rom = inputs()
+    cfg["observations"] = {"blocks": [
+        {"identity": cfg["cfg"]["blocks"][0]["identity"], "routes": ["boot", "first-visible"]}
+    ]}
+    result = lift_reset_paths(vectors, cfg, rom)
+    first = next(block for block in result["blocks"] if block["identity"]["pc"] == 0x8000)
+    assert first["routes"] == ["boot", "first-visible"]
+    schema = json.loads((ROOT / "schemas/recompiler/lifted-reset-cfg.schema.json").read_text())
+    jsonschema.Draft202012Validator(schema).validate(result)

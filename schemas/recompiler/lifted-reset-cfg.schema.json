@@ -69,7 +69,11 @@
         "rom_offset": { "type": ["integer", "null"], "minimum": 0 },
         "status": { "enum": ["decoded", "unresolved"] },
         "instruction": { "oneOf": [{ "$ref": "#/$defs/instruction" }, { "type": "null" }] },
-        "unresolved_reason": { "type": ["string", "null"] }
+        "unresolved_reason": { "type": ["string", "null"] },
+        "routes": {
+          "type": "array", "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" }
+        }
       }
     },
     "edge": {

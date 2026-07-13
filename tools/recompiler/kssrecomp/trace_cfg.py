@@ -27,6 +27,7 @@ class Observation:
     hits: int
     first_cycle: int
     last_cycle: int
+    routes: tuple[str, ...] = ()
 
 
 def _identity(value: Mapping[str, Any], context: str) -> BlockIdentity:
@@ -58,6 +59,19 @@ def _nonnegative_int(value: Any, context: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
         raise TraceCfgError(f"{context} must be a non-negative integer")
     return value
+
+
+def _routes(value: Any, context: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if (not isinstance(value, list) or any(
+            not isinstance(item, str) or not item
+            or not item.replace("-", "").replace("_", "").isalnum()
+            for item in value)):
+        raise TraceCfgError(f"{context} must be an array of route ids")
+    if len(set(value)) != len(value):
+        raise TraceCfgError(f"{context} contains duplicate route ids")
+    return tuple(value)
 
 
 def build_trace_seeded_cfg(coverage: Mapping[str, Any]) -> dict[str, object]:
@@ -92,7 +106,8 @@ def build_trace_seeded_cfg(coverage: Mapping[str, Any]) -> dict[str, object]:
         if last < first:
             raise TraceCfgError(f"blocks[{index}] last_cycle precedes first_cycle")
         observations[identity] = Observation(
-            identity, _positive_int(raw.get("hits"), f"blocks[{index}].hits"), first, last
+            identity, _positive_int(raw.get("hits"), f"blocks[{index}].hits"), first, last,
+            _routes(raw.get("routes"), f"blocks[{index}].routes"),
         )
 
     if not observations:
@@ -149,15 +164,17 @@ def build_trace_seeded_cfg(coverage: Mapping[str, Any]) -> dict[str, object]:
                 "first_cycle": earliest.first_cycle,
             })
 
-    block_records = [
-        {
+    block_records = []
+    for item in sorted(observations.values(), key=lambda item: item.identity):
+        record = {
             "identity": item.identity.to_dict(),
             "hits": item.hits,
             "first_cycle": item.first_cycle,
             "last_cycle": item.last_cycle,
         }
-        for item in sorted(observations.values(), key=lambda item: item.identity)
-    ]
+        if item.routes:
+            record["routes"] = list(item.routes)
+        block_records.append(record)
     serialized_edges.sort(key=lambda item: (
         item["source"]["processor"], item["source"]["pc"],
         _mode_key(item["source"]["mode"]), item["target"]["pc"],

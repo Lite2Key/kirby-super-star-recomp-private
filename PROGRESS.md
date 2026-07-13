@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-13T22:30:34Z` | commit `94a4cc8adbfa8c63a57b08125966adc67f89468c` | tree `dirty`
+Snapshot: `2026-07-13T22:49:53Z` | commit `8eb6d4ef98f75d2a7b48ba7d9fb076f8d0de59f7` | tree `dirty`
 
 ## Milestone map
 
@@ -44,7 +44,7 @@ Snapshot: `2026-07-13T22:30:34Z` | commit `94a4cc8adbfa8c63a57b08125966adc67f894
 | PPU, DMA, APU, input, and save | DSP synthesis stages integrated | 4 / 4 | `fixed` |
 | PPU, DMA, APU, input, and save | persistent save bytes | 8192 / 8192 | `fixed` |
 | Differential validator | passing required scenarios | 0 / 14 | `evolving` |
-| Windows package | release gates | 2 / 7 | `fixed` |
+| Windows package | release gates | 3 / 7 | `fixed` |
 | Linux portability | delivery formats | 0 / 2 | `fixed` |
 
 ## Snapshot evidence
@@ -59,7 +59,7 @@ Snapshot: `2026-07-13T22:30:34Z` | commit `94a4cc8adbfa8c63a57b08125966adc67f894
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
 - `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
-- `m3.local-verification` [152 Python and 21 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.local-verification` [162 Python and 21 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -74,7 +74,6 @@ Snapshot: `2026-07-13T22:30:34Z` | commit `94a4cc8adbfa8c63a57b08125966adc67f894
 
 **Expand from the forced-blank hardware frame to the first visible frame** - owner: `analysis/recompiler`
 
-- [ ] Expose a validated external IPL-file option to the diagnostic and native Windows hosts without committing firmware
 - [ ] Capture and sanitize the route from the first endFrame through the first non-black endFrame with clock-qualified CPU/SPC events
 - [ ] Union, lift, generate, and execute every newly discovered identity on that route without patched state
 - [ ] Match the expanded CPU, PPU, event, and master-clock checkpoints against MesenCE
@@ -82,8 +81,8 @@ Snapshot: `2026-07-13T22:30:34Z` | commit `94a4cc8adbfa8c63a57b08125966adc67f894
 
 ## Active blockers
 
-- **technical** `post-first-frame-route-expansion`: The complete observed first-frame inventory now executes, but that hardware frame is genuinely forced blank; discovery must expand beyond the first endFrame until game code clears INIDISP and supplies a visible PPU boundary. (owner: analysis/recompiler)
-- **technical** `runtime-ipl-cli`: Authentic SPC interleaving accepts runtime-only IPL bytes through the boot API; the Windows CLI still needs an external IPL-file option and validation without embedding firmware. (owner: runtime/windows)
+- **technical** `post-first-frame-route-expansion`: The complete observed first-frame inventory executes and the anchored continuation pipeline is ready, but the required Mesen capture through the first non-black endFrame has not yet been acquired. (owner: analysis/recompiler)
+- **external** `execution-reviewer-limit`: The Codex execution reviewer currently rejects the external Mesen launch and GitHub push despite valid local auth; its reported reset is July 20, 2026 at 3:39 PM. (owner: workspace authorization)
 
 Regenerate the interactive dashboard with:
 
