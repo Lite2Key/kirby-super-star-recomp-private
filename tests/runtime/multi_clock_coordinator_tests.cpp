@@ -77,6 +77,23 @@ void test_stable_cross_domain_event_ordering() {
         CoordinatorEventKind::custom) == CoordinatorStatus::past_timestamp);
 }
 
+void test_spc_rational_clock_and_causal_alignment() {
+    MultiClockCoordinator coordinator;
+    std::uint64_t total_master = 0;
+    for (unsigned cycle = 0; cycle < 1024U; ++cycle) {
+        const auto advance = coordinator.account_spc_cycles(1U);
+        assert(advance.status == CoordinatorStatus::accepted);
+        total_master += advance.master_clocks;
+    }
+    assert(total_master == (1024U * 21'477'272ULL) / 1'024'000ULL);
+    assert(coordinator.ready_at(ClockDomain::spc) == total_master);
+    assert(coordinator.align_domain(ClockDomain::scpu, total_master)
+        == CoordinatorStatus::accepted);
+    assert(coordinator.ready_at(ClockDomain::scpu) == total_master);
+    assert(coordinator.align_domain(ClockDomain::scpu, total_master - 1U)
+        == CoordinatorStatus::past_timestamp);
+}
+
 void test_first_frame_sa1_alignment() {
     MultiClockCoordinator coordinator;
     assert(kss::kSnesFirstFrameMasterClock == 306900);
@@ -152,6 +169,7 @@ void test_scpu_signal_ordering_against_bus_commit_and_frame_boundary() {
 int main() {
     test_exact_domain_progress_and_timing_debt();
     test_stable_cross_domain_event_ordering();
+    test_spc_rational_clock_and_causal_alignment();
     test_first_frame_sa1_alignment();
     test_cpu_to_spc_phase_ordering_and_monotonic_stamps();
     test_scpu_signal_ordering_against_bus_commit_and_frame_boundary();

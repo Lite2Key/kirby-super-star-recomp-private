@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "boundary": "first_snes_end_frame",
+  "protocol": "snes_spc_ipl_upload",
+  "fixed_tokens": {
+    "ready_port0": 170,
+    "ready_port1": 187,
+    "start": 204
+  },
+  "ready": {
+    "spc_counters": [
+      4802,
+      4812
+    ],
+    "instruction_pcs": [
+      65481,
+      65484
+    ]
+  },
+  "kss_upload_setup": {
+    "destination": 1792,
+    "transfer_flag": 1,
+    "write_order": [
+      2,
+      3,
+      1,
+      0
+    ]
+  },
+  "start_acknowledgement": {
+    "ordering": "write lands after a failed CMP read and before its BNE",
+    "first_post_write_spc_counter": 21634,
+    "ack_spc_counter": 21702,
+    "mesen_counter_delta_from_first_post_write_boundary": 68,
+    "architectural_spc_cycles_from_first_post_write_boundary": 34,
+    "instruction_path": [
+      {
+        "pc": 65490,
+        "opcode": 208,
+        "effect": "BNE start-wait (taken using the preceding failed compare)"
+      },
+      {
+        "pc": 65487,
+        "opcode": 120,
+        "effect": "CMP input F4 with start token CC"
+      },
+      {
+        "pc": 65490,
+        "opcode": 208,
+        "effect": "BNE start-wait (not taken)"
+      },
+      {
+        "pc": 65492,
+        "opcode": 47,
+        "effect": "BRA upload setup"
+      },
+      {
+        "pc": 65519,
+        "opcode": 186,
+        "effect": "MOVW YA,F6 (destination)"
+      },
+      {
+        "pc": 65521,
+        "opcode": 218,
+        "effect": "MOVW dp,YA (install destination pointer)"
+      },
+      {
+        "pc": 65523,
+        "opcode": 186,
+        "effect": "MOVW YA,F4 (start token and transfer flag)"
+      },
+      {
+        "pc": 65525,
+        "opcode": 196,
+        "effect": "MOV F4,A (publish start acknowledgement)"
+      }
+    ]
+  },
+  "transfer_at_boundary": {
+    "bytes_sent": 152,
+    "counters_echoed": 151,
+    "pending_counter": 151,
+    "payload_values_included": false
+  },
+  "scheduler_acceptance": [
+    "CPU-to-SPC F4 commits must be ordered against the SPC FFCF read phase",
+    "SPC FFF5 writes publish to the opposite latch before the next FFF7 boundary",
+    "S-CPU reads must observe only committed SPC-to-CPU latch values",
+    "A transfer counter is complete only after the SPC echoes it on output F4"
+  ]
+}

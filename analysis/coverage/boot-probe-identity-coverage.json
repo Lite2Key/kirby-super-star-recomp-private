@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "claim_scope": "ROM-free generated-dispatch identity coverage only; not architectural-state, event, timing, or reference parity",
-  "boundary": "current-full-boot-probe-through-bounded-sa1-and-apu-wait-observations",
+  "boundary": "runtime-ipl-interleaved-through-complete-first-frame-identity-inventory",
   "identity_policy": "processor-pc24-emulation-m8-x8",
   "inventory_source": "analysis/coverage/first-frame-dual.json",
   "inventory_count": 254,
-  "executed_count": 236,
-  "missing_count": 18,
+  "executed_count": 254,
+  "missing_count": 0,
   "executed_definition": "all inventory_source identities except missing_identities",
   "processors": {
-    "scpu": {"inventory": 214, "executed": 196, "missing": 18},
+    "scpu": {"inventory": 214, "executed": 214, "missing": 0},
     "sa1": {"inventory": 40, "executed": 40, "missing": 0}
   },
   "bounded_wait_observations": {
@@ -26,24 +26,17 @@
       "release_dependency": "SPC700 output-port acknowledgement and timing event not present in bounded execution"
     }
   },
-  "missing_identities": [
-    {"processor":"scpu","pc":54856,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54858,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54859,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54860,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54862,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54864,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54865,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54867,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54868,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54869,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54872,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54874,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54875,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54877,"mode":{"emulation":false,"m8":false,"x8":false}},
-    {"processor":"scpu","pc":54880,"mode":{"emulation":false,"m8":false,"x8":false}},
-    {"processor":"scpu","pc":54882,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54883,"mode":{"emulation":false,"m8":true,"x8":false}},
-    {"processor":"scpu","pc":54931,"mode":{"emulation":false,"m8":true,"x8":false}}
-  ]
+  "runtime_ipl_observation": {
+    "start_acknowledged": true,
+    "spc_instructions": 1828,
+    "spc_architectural_cycles": 7364,
+    "scpu_acknowledgement_route_blocks": 51,
+    "scpu_upload_blocks": 25,
+    "scpu_ready_master": 154442,
+    "final_scpu": {"processor":"scpu","pc":54875,"mode":{"emulation":false,"m8":true,"x8":false}},
+    "ipl_bytes_included": false,
+    "cartridge_values_included": false,
+    "patched_state": false
+  },
+  "missing_identities": []
 }

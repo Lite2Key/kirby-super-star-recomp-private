@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-13T21:57:27Z` | commit `f78d0a119c38335f010ee2b759d36c7ad3ba11da` | tree `dirty`
+Snapshot: `2026-07-13T22:30:34Z` | commit `94a4cc8adbfa8c63a57b08125966adc67f89468c` | tree `dirty`
 
 ## Milestone map
 
@@ -59,7 +59,7 @@ Snapshot: `2026-07-13T21:57:27Z` | commit `f78d0a119c38335f010ee2b759d36c7ad3ba1
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
 - `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
-- `m3.local-verification` [149 Python and 20 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.local-verification` [152 Python and 21 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -67,22 +67,23 @@ Snapshot: `2026-07-13T21:57:27Z` | commit `f78d0a119c38335f010ee2b759d36c7ad3ba1
 - `bootstrap.dashboard` [Progress dashboard build](progress/evidence/bootstrap-dashboard.md)
 - `bootstrap.github-ci` [Green Windows, Linux, Python, and boundary CI](progress/evidence/github-ci-bootstrap.md)
 - `m1m2.windows-native` [M1/M2 Windows native build and CTest](progress/evidence/m1-m2-verification.md)
-- `m3.private-generated` [Private-generated Windows build: 20/20 tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.private-generated` [Private-generated Windows build: 21/21 tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `runtime.windows-foundation` [Windows runtime foundation build](progress/evidence/runtime-windows.md)
 
 ## Next executable proof
 
-**Execute translated reset code through the first rendered frame** - owner: `analysis/recompiler`
+**Expand from the forced-blank hardware frame to the first visible frame** - owner: `analysis/recompiler`
 
-- [ ] Recapture CPU-to-SPC port events with master/SPC phase and close the replay divergence after SPC ordinal 2600
-- [ ] Add the clock-qualified SPC phase stream to the integrated S-CPU, SA-1, DMA, and first-frame master-clock coordinator
-- [ ] Advance the current 236/254 executed identities through the SPC acknowledgement and run all 254 through the first-frame boundary with no patched state
-- [ ] Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE
-- [ ] Produce and compare the native framebuffer, then show the verified screenshot
+- [ ] Expose a validated external IPL-file option to the diagnostic and native Windows hosts without committing firmware
+- [ ] Capture and sanitize the route from the first endFrame through the first non-black endFrame with clock-qualified CPU/SPC events
+- [ ] Union, lift, generate, and execute every newly discovered identity on that route without patched state
+- [ ] Match the expanded CPU, PPU, event, and master-clock checkpoints against MesenCE
+- [ ] Feed the real boundary to VisibleFrameCapture, compare the native framebuffer, and show the verified screenshot
 
 ## Active blockers
 
-- **technical** `spc-ack-clock-phase`: The final 18 first-frame S-CPU identities wait behind the SPC700 output-port acknowledgement; the integrated SPC/DSP clock phase must produce that event without patched memory or latches. (owner: runtime/audio)
+- **technical** `post-first-frame-route-expansion`: The complete observed first-frame inventory now executes, but that hardware frame is genuinely forced blank; discovery must expand beyond the first endFrame until game code clears INIDISP and supplies a visible PPU boundary. (owner: analysis/recompiler)
+- **technical** `runtime-ipl-cli`: Authentic SPC interleaving accepts runtime-only IPL bytes through the boot API; the Windows CLI still needs an external IPL-file option and validation without embedding firmware. (owner: runtime/windows)
 
 Regenerate the interactive dashboard with:
 

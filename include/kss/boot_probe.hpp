@@ -55,8 +55,14 @@ struct BootProbeResult {
     GeneratedRunResult sa1_poll_observation{};
     GeneratedRunResult scpu_frontier{};
     // The upload setup plus one complete $2140 acknowledgement comparison.
-    // It returns to $D68E while the modeled SPC output latch remains $AA.
+    // Without a runtime IPL it returns to $D68E while the modeled output latch
+    // remains $AA. With a runtime IPL it reaches $D648 through the real $CC
+    // acknowledgement.
     GeneratedRunResult scpu_apu_wait_observation{};
+    // Runtime-IPL mode continues the real token/data protocol until every
+    // generated first-frame identity has been observed or a hard boundary is
+    // reached.
+    GeneratedRunResult scpu_upload_observation{};
     CpuContext scpu{};
     CpuContext sa1{};
     FrameRenderResult frame{};
@@ -73,6 +79,7 @@ struct BootProbeResult {
     std::optional<CpuAsyncResult> last_cpu_signal{};
     std::uint8_t sa1_poll_value{};
     std::uint8_t apu_port0_output{};
+    bool apu_cc_acknowledged{};
     // Sanitized identity-only coverage. No instruction or ROM bytes are
     // captured by this path.
     std::vector<BlockKey> inventory_block_identities{};

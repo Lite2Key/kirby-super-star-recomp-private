@@ -28,8 +28,8 @@ cross-domain scheduling and native pixel parity are not yet proven.
 - SA-1 TCD is reference verified at two cycles, and every identity observed
   before the first frame now has implemented semantics.
 - The full boot probe records unique processor/PC/E-M-X dispatch identities:
-  `236 / 254` currently execute (`196 / 214` S-CPU and `40 / 40` SA-1), with
-  the exact 18-identity gap stored in the ROM-free coverage artifact. Of the
+  `254 / 254` execute (`214 / 214` S-CPU and `40 / 40` SA-1) when the authentic
+  external IPL is provided at runtime, with no PC, port, or memory patch. Of the
   observed inventory, 180 identities also sit inside current reference-verified
   slices. Execution coverage does not imply state, event, timing, or pixel parity.
 
@@ -132,6 +132,10 @@ Committed differential artifacts contain bounded counts and SHA-256 chains.
   `c664df7cb2d0d7512f75d4eb998776a29980a051456da362c8152cc14c5416ec`.
 - Mode 1 BG/OBJ rendering is architecture-tested synthetically, but the black
   reset frame is not used to imply that a visible Kirby route has pixel parity.
+- `VisibleFrameCapture` consumes only strictly increasing live PPU boundaries,
+  distinguishes forced blank, unsupported, brightness/content black, and true
+  non-black output, and preserves only the first genuine visible frame. BMP
+  output fails closed until that boundary exists.
 - `kss-native.exe` presents this 256x239 surface through a Win32/GDI host at
   centered integer scale and maps keyboard plus two XInput pads to the existing
   controller boundary. Closing at the development frontier remains non-saving.
@@ -147,23 +151,28 @@ current hardware-gated S-CPU checkpoint:
 - Bounded SA-1 `$8C58 -> $8C5B -> $8C58` poll observation: `2` blocks,
   reading the real shared-I-RAM value `$00`.
 - S-CPU post-wait dispatches: `18`.
-- Bounded S-CPU APU acknowledgement observation: `20` blocks, returning to
-  `$00:D68E` because the real SPC output latch remains at IPL-ready `$AA`.
-- Result: S-CPU `$00:D68E`, SA-1 `$00:8C58`.
+- The no-IPL diagnostic remains bounded at `$00:D68E` after `20` wait blocks,
+  correctly observing IPL-ready `$AA` rather than an immediate echo.
+- With the runtime-only authentic IPL, SPC executes `1828` instructions / `7364`
+  architectural cycles, publishes the real `$CC` acknowledgement, releases the
+  S-CPU acknowledgement route in `51` blocks, and executes `25` more upload
+  blocks. Result: all `254 / 254` identities observed, S-CPU `$00:D65B`, ready
+  master `154442`, and no missing identity.
 
 The probe deliberately returns a development-frontier exit code. Its local
 generated S-CPU access timing is accepted, but full cross-domain frame parity
-still depends on the clock-qualified SPC acknowledgement/event replay. No PC,
-port, or memory value is forced to claim the additional execution coverage.
+still depends on expanding the trace beyond the forced-blank first hardware
+frame. The boot API accepts runtime IPL bytes, but the CLI does not yet expose
+an external IPL-file option.
 
 ## Verification
 
-- Python: `149 passed`.
+- Python: `152 passed`.
 - Windows warnings-as-errors build: passed.
-- Windows standard CTest: `20 / 20 passed`.
-- Windows private-generated CTest: `20 / 20 passed`.
+- Windows standard CTest: `21 / 21 passed`.
+- Windows private-generated CTest: `21 / 21 passed`.
 - Authorized-ROM executable probe: reached the expected hardware frontier.
 - Asset-boundary and diff checks: passed.
 
-The next proof is clock-qualified SPC port replay and integration of the
-multi-domain coordinator with generated execution through the first boundary.
+The next proof is post-first-frame route discovery through the first boundary
+where the game itself clears forced blank, followed by native pixel comparison.

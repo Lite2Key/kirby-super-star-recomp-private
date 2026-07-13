@@ -49,6 +49,12 @@ BootProbeResult run_boot_probe(
     }
     result.inventory_block_identities = dispatcher.registered_identities();
     dispatcher.set_execution_identity_sink(&result.executed_block_identities);
+    MultiClockCoordinator clocks;
+    const bool live_spc = !timing.spc_ipl.empty() && timing.spc_steps.empty();
+    if (live_spc && !hardware_bus.provision_spc_ipl(timing.spc_ipl)) {
+        result.status = BootProbeStatus::spc_provision_failed;
+        return result;
+    }
 
     result.scpu.processor = ProcessorId::snes_cpu;
     result.scpu.pc = 0x8004;
@@ -90,42 +96,181 @@ BootProbeResult run_boot_probe(
         return result;
     }
 
+    std::size_t accounted_scpu_accesses = 0;
+    bool live_spc_ok = true;
+    const auto account_new_scpu_accesses = [&]() noexcept {
+        const auto accesses = bus.timing_accesses();
+        if (accesses.size() == accounted_scpu_accesses) return true;
+        const auto advance = clocks.account_scpu_accesses(
+            accesses.subspan(accounted_scpu_accesses));
+        accounted_scpu_accesses = accesses.size();
+        return advance.status == CoordinatorStatus::accepted;
+    };
+    const auto advance_spc_to = [&](MasterClock target) noexcept {
+        // One first-frame synchronization never needs remotely this many SPC
+        // instructions (the reset-to-frame reference is under four thousand).
+        // Keep a strict fail-closed guard against a zero-cycle or stuck core.
+        constexpr std::size_t instruction_limit = 16'384U;
+        for (std::size_t count = 0;
+             clocks.ready_at(ClockDomain::spc) < target && count < instruction_limit;
+             ++count) {
+            result.last_spc_step = hardware_bus.step_spc();
+            if (result.last_spc_step->status != apu::SpcStepStatus::executed) {
+                live_spc_ok = false;
+                return false;
+            }
+            const auto advance = clocks.account_spc_cycles(
+                result.last_spc_step->instruction_cycles);
+            if (advance.status != CoordinatorStatus::accepted) {
+                live_spc_ok = false;
+                return false;
+            }
+            ++result.spc_steps_completed;
+        }
+        if (clocks.ready_at(ClockDomain::spc) < target) {
+            live_spc_ok = false;
+            return false;
+        }
+        return true;
+    };
+    const auto run_interleaved_until = [&](BlockKey checkpoint,
+        std::size_t max_blocks, std::size_t minimum_blocks = 0U) noexcept {
+        GeneratedRunResult run{};
+        if (minimum_blocks == 0U && result.scpu.block_key() == checkpoint) {
+            run.status = GeneratedRunStatus::checkpoint_reached;
+            return run;
+        }
+        for (std::size_t step = 0; step < max_blocks; ++step) {
+            if (result.scpu.stopped) {
+                run.status = GeneratedRunStatus::cpu_stopped;
+                return run;
+            }
+            const auto before = result.scpu.block_key();
+            const auto dispatch = dispatcher.dispatch(result.scpu, bus, scheduler);
+            if (dispatch == DispatchStatus::unknown_block) {
+                run.status = GeneratedRunStatus::unknown_block;
+                return run;
+            }
+            if (dispatch == DispatchStatus::cpu_stopped) {
+                run.status = GeneratedRunStatus::cpu_stopped;
+                return run;
+            }
+            if (result.scpu.stopped) {
+                run.status = GeneratedRunStatus::generated_block_failed_closed;
+                return run;
+            }
+            run.last_completed = before;
+            ++run.completed_blocks;
+            if (!account_new_scpu_accesses()
+                || !advance_spc_to(clocks.ready_at(ClockDomain::scpu))) {
+                run.status = GeneratedRunStatus::generated_block_failed_closed;
+                return run;
+            }
+            if (run.completed_blocks >= minimum_blocks
+                && result.scpu.block_key() == checkpoint) {
+                run.status = GeneratedRunStatus::checkpoint_reached;
+                return run;
+            }
+        }
+        run.status = GeneratedRunStatus::step_limit;
+        return run;
+    };
+
+    if (live_spc) {
+        if (!account_new_scpu_accesses()) {
+            result.status = BootProbeStatus::timing_debt;
+            return result;
+        }
+        const auto sa1_timing = clocks.account_sa1_cycles(result.sa1.cycles);
+        result.sa1_master_ready = sa1_timing.ready_at;
+        if (sa1_timing.status != CoordinatorStatus::accepted
+            || clocks.align_domain(ClockDomain::scpu, result.sa1_master_ready)
+                != CoordinatorStatus::accepted) {
+            result.status = BootProbeStatus::timing_debt;
+            return result;
+        }
+        if (!advance_spc_to(result.sa1_master_ready)) {
+            result.spc_registers = hardware_bus.spc_core()->registers();
+            result.status = BootProbeStatus::spc_step_failed;
+            return result;
+        }
+    }
+
     const auto current_frontier = BlockKey::make(
         ProcessorId::snes_cpu, 0x00d66e, false, true, false);
-    result.scpu_frontier = run_generated_until(
-        result.scpu, bus, scheduler, dispatcher, current_frontier, 4096);
+    result.scpu_frontier = live_spc
+        ? run_interleaved_until(current_frontier, 4096)
+        : run_generated_until(result.scpu, bus, scheduler, dispatcher,
+            current_frontier, 4096);
     if (result.scpu_frontier.status != GeneratedRunStatus::checkpoint_reached) {
         result.status = BootProbeStatus::scpu_frontier_failed;
         return result;
     }
 
-    // The local register model exposes the SPC IPL ready signature ($AA/$BB),
-    // but it deliberately does not echo S-CPU writes or fabricate a later
-    // acknowledgement. Execute through the upload setup and one full compare/
-    // branch trip, stopping when that real modeled state returns to $D68E.
-    const auto apu_acknowledgement_wait = BlockKey::make(
-        ProcessorId::snes_cpu, 0x00d68e, false, true, false);
-    result.scpu_apu_wait_observation = run_generated_until(
-        result.scpu, bus, scheduler, dispatcher, apu_acknowledgement_wait, 20, 20);
+    // No-IPL mode proves one bounded wait loop. Runtime-IPL mode advances both
+    // processors honestly until the IPL copies the observed $CC token to F4,
+    // causing the S-CPU to branch into the upload body at $D648.
+    const auto apu_acknowledgement_wait = BlockKey::make(ProcessorId::snes_cpu,
+        live_spc ? 0x00d648U : 0x00d68eU, false, true, false);
+    result.scpu_apu_wait_observation = live_spc
+        ? run_interleaved_until(apu_acknowledgement_wait, 4096)
+        : run_generated_until(result.scpu, bus, scheduler, dispatcher,
+            apu_acknowledgement_wait, 20, 20);
     result.apu_port0_output = hardware_bus.apu_output_ports()[0];
+    result.apu_cc_acknowledged = live_spc && result.apu_port0_output == 0xccU;
     if (result.scpu_apu_wait_observation.status
         != GeneratedRunStatus::checkpoint_reached) {
+        if (live_spc && hardware_bus.spc_core()) {
+            result.spc_registers = hardware_bus.spc_core()->registers();
+        }
         result.status = BootProbeStatus::scpu_apu_wait_observation_failed;
         return result;
     }
 
-    result.frame = SnesFrameRenderer::render(hardware_bus.ppu_state());
-    MultiClockCoordinator clocks;
-    const auto sa1_timing = clocks.account_sa1_cycles(result.sa1.cycles);
-    result.sa1_master_ready = sa1_timing.ready_at;
-    if (sa1_timing.status != CoordinatorStatus::accepted) {
-        result.timing_status = sa1_timing.status;
-        result.status = BootProbeStatus::timing_debt;
-        return result;
+    if (live_spc) {
+        // Reach the second upload iteration as needed: the first iteration's
+        // entry path skips four identities, while the genuine token/data
+        // acknowledgement loop reaches them on the next pass.
+        for (std::size_t step = 0;
+             step < 4096U
+                && result.executed_block_identities.size()
+                    < result.inventory_block_identities.size();
+             ++step) {
+            const auto impossible_checkpoint = BlockKey::make(
+                ProcessorId::snes_cpu, 0x00ffffU, false, true, false);
+            const auto one = run_interleaved_until(impossible_checkpoint, 1U);
+            result.scpu_upload_observation.last_completed = one.last_completed;
+            result.scpu_upload_observation.completed_blocks += one.completed_blocks;
+            if (one.status != GeneratedRunStatus::step_limit) {
+                result.scpu_upload_observation.status = one.status;
+                break;
+            }
+        }
+        if (result.executed_block_identities.size()
+            == result.inventory_block_identities.size()) {
+            result.scpu_upload_observation.status = GeneratedRunStatus::checkpoint_reached;
+        }
+        if (!live_spc_ok) {
+            result.spc_registers = hardware_bus.spc_core()->registers();
+            result.status = BootProbeStatus::spc_step_failed;
+            return result;
+        }
     }
 
+    result.frame = SnesFrameRenderer::render(hardware_bus.ppu_state());
+    DomainAdvanceResult scpu_timing{CoordinatorStatus::accepted, 0,
+        clocks.ready_at(ClockDomain::scpu)};
+    if (!live_spc) {
+        const auto sa1_timing = clocks.account_sa1_cycles(result.sa1.cycles);
+        result.sa1_master_ready = sa1_timing.ready_at;
+        if (sa1_timing.status != CoordinatorStatus::accepted) {
+            result.timing_status = sa1_timing.status;
+            result.status = BootProbeStatus::timing_debt;
+            return result;
+        }
+        scpu_timing = clocks.account_scpu_accesses(bus.timing_accesses());
+    }
     result.scpu_accesses_recorded = bus.accesses().size();
-    const auto scpu_timing = clocks.account_scpu_accesses(bus.timing_accesses());
     result.scpu_master_ready = scpu_timing.ready_at;
     result.timing_status = scpu_timing.status;
 
@@ -143,7 +288,8 @@ BootProbeResult run_boot_probe(
                 return result;
             }
         }
-    } else if (!timing.spc_ipl.empty() && !hardware_bus.provision_spc_ipl(timing.spc_ipl)) {
+    } else if (!live_spc && !timing.spc_ipl.empty()
+        && !hardware_bus.provision_spc_ipl(timing.spc_ipl)) {
         result.status = BootProbeStatus::spc_provision_failed;
         return result;
     }

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-13T21:57:27Z",
-    "commit": "f78d0a119c38335f010ee2b759d36c7ad3ba11da",
+    "generated_at": "2026-07-13T22:30:34Z",
+    "commit": "94a4cc8adbfa8c63a57b08125966adc67f89468c",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -55,7 +55,7 @@
         },
         {
           "id": "m3.local-verification",
-          "label": "149 Python and 20 native tests",
+          "label": "152 Python and 21 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -87,7 +87,7 @@
         },
         {
           "id": "m3.private-generated",
-          "label": "Private-generated Windows build: 20/20 tests",
+          "label": "Private-generated Windows build: 21/21 tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -150,7 +150,7 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "All observed dual-CPU identities have executable semantics; the Windows probe reaches the timed SPC/scheduler/renderer frontier.",
+      "summary": "All 254 observed dual-CPU identities execute with the real runtime IPL handshake; the first observed frame remains authentically forced blank.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
@@ -270,8 +270,8 @@
           "status": "passed"
         },
         {
-          "name": "Execute 236",
-          "status": "in_progress"
+          "name": "Execute 254",
+          "status": "passed"
         },
         {
           "name": "Verify 180",
@@ -817,20 +817,26 @@
   ],
   "blockers": [
     {
-      "id": "spc-ack-clock-phase",
+      "id": "post-first-frame-route-expansion",
       "severity": "technical",
-      "summary": "The final 18 first-frame S-CPU identities wait behind the SPC700 output-port acknowledgement; the integrated SPC/DSP clock phase must produce that event without patched memory or latches.",
-      "owner": "runtime/audio"
+      "summary": "The complete observed first-frame inventory now executes, but that hardware frame is genuinely forced blank; discovery must expand beyond the first endFrame until game code clears INIDISP and supplies a visible PPU boundary.",
+      "owner": "analysis/recompiler"
+    },
+    {
+      "id": "runtime-ipl-cli",
+      "severity": "technical",
+      "summary": "Authentic SPC interleaving accepts runtime-only IPL bytes through the boot API; the Windows CLI still needs an external IPL-file option and validation without embedding firmware.",
+      "owner": "runtime/windows"
     }
   ],
   "next_proof": {
-    "title": "Execute translated reset code through the first rendered frame",
+    "title": "Expand from the forced-blank hardware frame to the first visible frame",
     "acceptance": [
-      "Recapture CPU-to-SPC port events with master/SPC phase and close the replay divergence after SPC ordinal 2600",
-      "Add the clock-qualified SPC phase stream to the integrated S-CPU, SA-1, DMA, and first-frame master-clock coordinator",
-      "Advance the current 236/254 executed identities through the SPC acknowledgement and run all 254 through the first-frame boundary with no patched state",
-      "Match the first-frame CPU states, ordered hardware events, and master-clock checkpoint against MesenCE",
-      "Produce and compare the native framebuffer, then show the verified screenshot"
+      "Expose a validated external IPL-file option to the diagnostic and native Windows hosts without committing firmware",
+      "Capture and sanitize the route from the first endFrame through the first non-black endFrame with clock-qualified CPU/SPC events",
+      "Union, lift, generate, and execute every newly discovered identity on that route without patched state",
+      "Match the expanded CPU, PPU, event, and master-clock checkpoints against MesenCE",
+      "Feed the real boundary to VisibleFrameCapture, compare the native framebuffer, and show the verified screenshot"
     ],
     "owner": "analysis/recompiler"
   },
@@ -949,6 +955,28 @@
       "standard_native_tests": 20,
       "private_native_tests": 20,
       "python_tests": 149
+    },
+    {
+      "at": "2026-07-13T22:26:47Z",
+      "verified_blocks": 180,
+      "executed_blocks": 254,
+      "execution_remaining": 0,
+      "passing_scenarios": 0,
+      "open_divergences": 1,
+      "build_seconds": null,
+      "observed_scpu_blocks": 214,
+      "observed_sa1_blocks": 40,
+      "generated_blocks": 254,
+      "spc_start_acknowledged": 1,
+      "spc_live_instructions": 1828,
+      "spc_live_cycles": 7364,
+      "scpu_ready_master": 154442,
+      "visible_frame_capture_boundary": 1,
+      "native_frame_pixels": 61184,
+      "native_frame_nonblack_pixels": 0,
+      "standard_native_tests": 21,
+      "private_native_tests": 21,
+      "python_tests": 152
     }
   ],
   "block_map": {
@@ -3519,7 +3547,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21297,
             "evolving": true,
@@ -3532,7 +3560,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21300,
             "evolving": true,
@@ -3545,7 +3573,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21306,
             "evolving": true,
@@ -3558,7 +3586,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21308,
             "evolving": true,
@@ -3571,7 +3599,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21311,
             "evolving": true,
@@ -3584,7 +3612,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 1,
             "first_cycle": 21313,
             "evolving": true,
@@ -3597,7 +3625,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21316,
             "evolving": true,
@@ -3610,7 +3638,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21319,
             "evolving": true,
@@ -3623,7 +3651,7 @@
               "m8": false,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21324,
             "evolving": true,
@@ -3636,7 +3664,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21327,
             "evolving": true,
@@ -3649,7 +3677,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21329,
             "evolving": true,
@@ -3662,7 +3690,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21332,
             "evolving": true,
@@ -3675,7 +3703,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21335,
             "evolving": true,
@@ -3688,7 +3716,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21341,
             "evolving": true,
@@ -3701,7 +3729,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 152,
             "first_cycle": 21343,
             "evolving": true,
@@ -3714,7 +3742,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 822,
             "first_cycle": 21346,
             "evolving": true,
@@ -3727,7 +3755,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 822,
             "first_cycle": 21350,
             "evolving": true,
@@ -3740,7 +3768,7 @@
               "m8": true,
               "x8": false
             },
-            "stage": "semantics_supported",
+            "stage": "executed",
             "hits": 151,
             "first_cycle": 21387,
             "evolving": true,
@@ -3752,7 +3780,7 @@
           "lifted": 214,
           "generated": 214,
           "semantics_supported": 214,
-          "executed": 196,
+          "executed": 214,
           "reference_verified": 160
         },
         "evolving": 54,

@@ -88,6 +88,16 @@ public:
     [[nodiscard]] DomainAdvanceResult account_scpu_accesses(
         std::span<const SnesBusAccessTiming> accesses) noexcept;
 
+    // The SPC700 architectural cycle clock is 1.024 MHz. Convert it to the
+    // SNES master domain with a retained rational remainder so repeated small
+    // instruction advances cannot accumulate truncation drift.
+    [[nodiscard]] DomainAdvanceResult account_spc_cycles(std::uint64_t cycles) noexcept;
+
+    // A hardware wait may make one processor causally dependent on another
+    // domain without consuming fabricated processor cycles.
+    [[nodiscard]] CoordinatorStatus align_domain(
+        ClockDomain domain, MasterClock at) noexcept;
+
     // SPC frequency conversion belongs to the SPC clock source. This records
     // its explicit master-clock/phase position without inventing a ratio.
     [[nodiscard]] CoordinatorStatus record_spc_phase(
@@ -124,6 +134,7 @@ private:
     std::vector<CoordinatorEvent> events_{};
     std::uint64_t next_sequence_{};
     std::optional<SpcPhaseTimestamp> last_spc_phase_{};
+    std::uint64_t spc_clock_remainder_{};
 };
 
 } // namespace kss

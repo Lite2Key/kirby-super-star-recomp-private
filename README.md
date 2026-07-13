@@ -14,7 +14,9 @@ Private, ROM-free research project for statically recompiling the SNES S-CPU and
 The repository is in M3, reset-to-first-frame. The first-frame trace contains
 254 dual-CPU processor/PC/mode identities; all 254 lift and generate, and every
 observed identity now has an executable 65C816 semantic; all 256 opcodes have
-architecture-tested execution semantics. Reset DMA, shared SA-1 I-RAM/control,
+architecture-tested execution semantics. With a runtime-only authentic IPL,
+all 254 identities execute through the real SPC `$CC` acknowledgement with no
+patched state. Reset DMA, shared SA-1 I-RAM/control,
 strict Mode 1 BG1/BG2/BG3 plus OBJ main/subscreen, windows, and color math, a
 256-opcode SPC700 core with timers and DSP-register I/O, two-pad controller
 register integration, and board-accurate 8 KiB save persistence exist. The

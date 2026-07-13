@@ -58,6 +58,38 @@ DomainAdvanceResult MultiClockCoordinator::account_scpu_accesses(
     return {CoordinatorStatus::accepted, delta, cursor};
 }
 
+DomainAdvanceResult MultiClockCoordinator::account_spc_cycles(
+    std::uint64_t cycles) noexcept {
+    // NTSC SNES master clock and the S-SMP architectural cycle clock. The
+    // integer master frequency matches the runtime's master-clock contract;
+    // retaining the remainder makes the conversion deterministic.
+    constexpr std::uint64_t master_hz = 21'477'272U;
+    constexpr std::uint64_t spc_hz = 1'024'000U;
+    auto& cursor = ready_at_[domain_index(ClockDomain::spc)];
+    if (cycles == 0U) return {CoordinatorStatus::timing_debt, 0, cursor};
+    if (cycles > (std::numeric_limits<std::uint64_t>::max() - spc_clock_remainder_)
+            / master_hz) {
+        return {CoordinatorStatus::overflow, 0, cursor};
+    }
+    const auto scaled = cycles * master_hz + spc_clock_remainder_;
+    const auto delta = scaled / spc_hz;
+    const auto remainder = scaled % spc_hz;
+    if (add_overflows(cursor, delta)) {
+        return {CoordinatorStatus::overflow, 0, cursor};
+    }
+    cursor += delta;
+    spc_clock_remainder_ = remainder;
+    return {CoordinatorStatus::accepted, delta, cursor};
+}
+
+CoordinatorStatus MultiClockCoordinator::align_domain(
+    ClockDomain domain, MasterClock at) noexcept {
+    auto& cursor = ready_at_[domain_index(domain)];
+    if (at < cursor || at < master_now_) return CoordinatorStatus::past_timestamp;
+    cursor = at;
+    return CoordinatorStatus::accepted;
+}
+
 CoordinatorStatus MultiClockCoordinator::record_spc_phase(
     MasterClock at, std::uint32_t phase) noexcept {
     if (at < master_now_

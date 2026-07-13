@@ -99,6 +99,39 @@ void test_explicit_access_evidence_and_spc_phase_drive_only_requested_step() {
     assert(result.first_frame_event_seen && result.master_now == 306900U);
 }
 
+void test_runtime_ipl_clocks_real_port_ack_and_reaches_generated_upload() {
+    // Synthetic guest code: advertise AA/BB, wait for the CPU's CC token,
+    // publish it through the SPC-owned F4 output latch, then acknowledge later
+    // upload tokens by mirroring the SPC input latch from executed SPC code.
+    const auto ipl = ipl_with({
+        0xe8, 0xaa,       // MOV A,#$AA
+        0xc4, 0xf4,       // MOV $F4,A
+        0xe8, 0xbb,       // MOV A,#$BB
+        0xc4, 0xf5,       // MOV $F5,A
+        0xe4, 0xf4,       // wait: MOV A,$F4
+        0x68, 0xcc,       // CMP A,#$CC
+        0xd0, 0xfa,       // BNE wait
+        0xc4, 0xf4,       // MOV $F4,A (real CC acknowledgement)
+        0xe4, 0xf4,       // mirror: MOV A,$F4
+        0xc4, 0xf4,       // MOV $F4,A
+        0x2f, 0xfa,       // BRA mirror
+    });
+    const kss::BootProbeTimingEvidence evidence{ipl};
+    const auto result = kss::run_boot_probe(synthetic_rom(), evidence);
+    // The zero-filled synthetic cartridge does not provide KSS's upload
+    // pointer/flags, so execution honestly takes the unregistered $D695
+    // fallthrough after acknowledging CC. This test proves the cross-CPU port
+    // handshake without pretending synthetic cartridge data proves the KSS
+    // upload route.
+    assert(result.status == kss::BootProbeStatus::scpu_apu_wait_observation_failed);
+    assert(result.apu_cc_acknowledged && result.apu_port0_output == 0xccU);
+    assert(result.scpu_apu_wait_observation.status
+        == kss::GeneratedRunStatus::generated_block_failed_closed);
+    assert(result.scpu.address() == 0x00d695U);
+    assert(result.spc_steps_completed > 0U && result.spc_registers);
+    assert(result.executed_block_identities.size() == 237U);
+}
+
 void test_spc_requires_runtime_ipl_and_fails_closed() {
     const auto rom = synthetic_rom();
     constexpr std::array steps{kss::BootProbeSpcStep{50, 1}};
@@ -170,6 +203,7 @@ int main() {
 #endif
     test_default_probe_uses_local_complete_scpu_stream();
     test_explicit_access_evidence_and_spc_phase_drive_only_requested_step();
+    test_runtime_ipl_clocks_real_port_ack_and_reaches_generated_upload();
     test_spc_requires_runtime_ipl_and_fails_closed();
     test_post_frame_spc_phase_is_timing_debt_without_execution();
     test_opt_in_cpu_signal_is_applied_before_same_timestamp_frame();

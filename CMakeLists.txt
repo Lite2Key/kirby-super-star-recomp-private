@@ -31,6 +31,7 @@ add_library(kss_runtime
     src/runtime/scpu_micro_access_recorder.cpp
     src/runtime/snes_registers.cpp
     src/runtime/spc700.cpp
+    src/runtime/visible_frame_capture.cpp
     src/recompiled/reset_blocks.cpp
     src/recompiled/first_frame_blocks.cpp
 )
@@ -151,4 +152,9 @@ if(BUILD_TESTING)
     add_executable(kss-dsp-core-tests tests/runtime/dsp_core_integration_tests.cpp)
     target_link_libraries(kss-dsp-core-tests PRIVATE kss_runtime)
     add_test(NAME snes-dsp-core-integration COMMAND kss-dsp-core-tests)
+
+    add_executable(kss-visible-frame-capture-tests
+        tests/runtime/visible_frame_capture_tests.cpp)
+    target_link_libraries(kss-visible-frame-capture-tests PRIVATE kss_runtime)
+    add_test(NAME visible-frame-boundary-capture COMMAND kss-visible-frame-capture-tests)
 endif()
