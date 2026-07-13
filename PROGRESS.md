@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-13T23:05:27Z` | commit `4d9f78e381610fdb799de586197bc877f7a30da4` | tree `dirty`
+Snapshot: `2026-07-13T23:33:35Z` | commit `074ee37937e72517b11c63a0365747d96c7aea58` | tree `dirty`
 
 ## Milestone map
 
@@ -59,7 +59,7 @@ Snapshot: `2026-07-13T23:05:27Z` | commit `4d9f78e381610fdb799de586197bc877f7a30
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
 - `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
-- `m3.local-verification` [174 Python and 21 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.local-verification` [184 Python and 23 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -67,23 +67,23 @@ Snapshot: `2026-07-13T23:05:27Z` | commit `4d9f78e381610fdb799de586197bc877f7a30
 - `bootstrap.dashboard` [Progress dashboard build](progress/evidence/bootstrap-dashboard.md)
 - `bootstrap.github-ci` [Green Windows, Linux, Python, and boundary CI](progress/evidence/github-ci-bootstrap.md)
 - `m1m2.windows-native` [M1/M2 Windows native build and CTest](progress/evidence/m1-m2-verification.md)
-- `m3.private-generated` [Private-generated Windows build: 21/21 tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.private-generated` [Private-generated Windows build: 23/23 tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `runtime.windows-foundation` [Windows runtime foundation build](progress/evidence/runtime-windows.md)
 
 ## Next executable proof
 
-**Expand from the forced-blank hardware frame to the first visible frame** - owner: `analysis/recompiler`
+**Close exact first-endFrame state and event parity** - owner: `runtime/validation`
 
-- [ ] Capture and sanitize the route from the first endFrame through the first non-black endFrame with clock-qualified CPU/SPC events
-- [ ] Union, lift, generate, and execute every newly discovered identity on that route without patched state
-- [ ] Match the expanded CPU, PPU, event, and master-clock checkpoints against MesenCE
-- [ ] Feed the real boundary to VisibleFrameCapture, compare the native framebuffer, and show the verified screenshot
+- [ ] Suspend S-CPU, SA-1, and SPC at master 306900 without fabricating partial architectural state
+- [ ] Wire the canonical recorder into live bus and port execution and compare all six reference-backed chains
+- [ ] Match exact processor state, PPU/DMA events, framebuffer, and frame marker at the shared boundary
+- [ ] Then acquire and execute the post-frame route through the first genuine non-black frame
 
 ## Active blockers
 
 - **technical** `post-first-frame-route-expansion`: The complete observed first-frame inventory executes and the anchored continuation pipeline is ready, but the required Mesen capture through the first non-black endFrame has not yet been acquired. (owner: analysis/recompiler)
 - **external** `execution-reviewer-limit`: The Codex execution reviewer currently rejects the external Mesen launch and GitHub push despite valid local auth; its reported reset is July 20, 2026 at 3:39 PM. (owner: workspace authorization)
-- **technical** `shared-first-endframe-parity`: Framebuffer parity is exact, but the runtime has not yet executed S-CPU, SA-1, SPC, DMA, PPU, arbitration, and interrupts to the same first endFrame state/event boundary as Mesen. (owner: runtime/validation)
+- **technical** `shared-first-endframe-parity`: Framebuffer parity is exact and live S-CPU/SPC causally cover master 306900, while SA-1 reaches master 306896. Exact sub-instruction CPU/SPC state and the six runtime event-chain comparisons remain open. (owner: runtime/validation)
 
 Regenerate the interactive dashboard with:
 

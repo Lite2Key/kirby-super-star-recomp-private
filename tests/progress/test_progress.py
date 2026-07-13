@@ -37,6 +37,7 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(len(machine["block_map"]["processors"]["scpu"]["blocks"]), 214)
             self.assertEqual(len(machine["block_map"]["processors"]["sa1"]["blocks"]), 40)
             self.assertEqual(len(machine["workstreams"]), 7)
+            self.assertEqual(machine["boundary_sync"]["target_master"], 306900)
 
     def test_block_map_is_derived_from_sanitized_first_frame_artifacts(self):
         block_map = progress_build.load_block_map(ROOT)
@@ -67,6 +68,28 @@ class ProgressTests(unittest.TestCase):
             'data-map-filter="frontier"', 'data-map-filter="evolving"',
         ):
             self.assertIn(required, template)
+
+    def test_boundary_sync_map_is_derived_from_sanitized_audit(self):
+        sync = progress_build.load_boundary_sync(ROOT)
+        self.assertFalse(sync["full_parity_proven"])
+        self.assertEqual(
+            [(item["id"], item["value"], item["target"]) for item in sync["domains"]],
+            [("scpu", 306912, 306900), ("sa1", 306896, 306900),
+             ("spc", 306973, 306900)],
+        )
+        self.assertEqual(
+            [(item["id"], item["value"], item["target"]) for item in sync["chains"]],
+            [("cpu-writes", 0, 26906), ("spc-ports", 0, 462),
+             ("ppu-events", 0, 54), ("dma-events", 0, 23)],
+        )
+        self.assertEqual(len(sync["sources"]), 4)
+        self.assertIn("sa1-first-endframe-domain.json", sync["sources"][1])
+
+    def test_boundary_sync_template_exposes_clock_and_event_gaps(self):
+        template = (ROOT / "progress" / "template.html").read_text(encoding="utf-8")
+        self.assertIn('id="boundary-sync"', template)
+        self.assertIn("Hardware-boundary synchronization", template)
+        self.assertIn("Event-chain proof", template)
 
     def test_workstream_atlas_has_explicit_remaining_checkpoints(self):
         template = (ROOT / "progress" / "template.html").read_text(encoding="utf-8")

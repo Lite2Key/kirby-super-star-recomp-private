@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-13T23:05:27Z",
-    "commit": "4d9f78e381610fdb799de586197bc877f7a30da4",
+    "generated_at": "2026-07-13T23:33:35Z",
+    "commit": "074ee37937e72517b11c63a0365747d96c7aea58",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -55,7 +55,7 @@
         },
         {
           "id": "m3.local-verification",
-          "label": "174 Python and 21 native tests",
+          "label": "184 Python and 23 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -87,7 +87,7 @@
         },
         {
           "id": "m3.private-generated",
-          "label": "Private-generated Windows build: 21/21 tests",
+          "label": "Private-generated Windows build: 23/23 tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -150,7 +150,7 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "All 254 observed dual-CPU identities execute with the real runtime IPL handshake; the first observed frame remains authentically forced blank.",
+      "summary": "All 254 identities execute; live S-CPU/SPC cover master 306900 and SA-1 reaches the final whole-instruction boundary four clocks short, without patched state.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
@@ -309,7 +309,7 @@
         },
         {
           "name": "Frame replay parity",
-          "status": "not_started"
+          "status": "in_progress"
         }
       ]
     },
@@ -831,19 +831,19 @@
     {
       "id": "shared-first-endframe-parity",
       "severity": "technical",
-      "summary": "Framebuffer parity is exact, but the runtime has not yet executed S-CPU, SA-1, SPC, DMA, PPU, arbitration, and interrupts to the same first endFrame state/event boundary as Mesen.",
+      "summary": "Framebuffer parity is exact and live S-CPU/SPC causally cover master 306900, while SA-1 reaches master 306896. Exact sub-instruction CPU/SPC state and the six runtime event-chain comparisons remain open.",
       "owner": "runtime/validation"
     }
   ],
   "next_proof": {
-    "title": "Expand from the forced-blank hardware frame to the first visible frame",
+    "title": "Close exact first-endFrame state and event parity",
     "acceptance": [
-      "Capture and sanitize the route from the first endFrame through the first non-black endFrame with clock-qualified CPU/SPC events",
-      "Union, lift, generate, and execute every newly discovered identity on that route without patched state",
-      "Match the expanded CPU, PPU, event, and master-clock checkpoints against MesenCE",
-      "Feed the real boundary to VisibleFrameCapture, compare the native framebuffer, and show the verified screenshot"
+      "Suspend S-CPU, SA-1, and SPC at master 306900 without fabricating partial architectural state",
+      "Wire the canonical recorder into live bus and port execution and compare all six reference-backed chains",
+      "Match exact processor state, PPU/DMA events, framebuffer, and frame marker at the shared boundary",
+      "Then acquire and execute the post-frame route through the first genuine non-black frame"
     ],
-    "owner": "analysis/recompiler"
+    "owner": "runtime/validation"
   },
   "trends": [
     {

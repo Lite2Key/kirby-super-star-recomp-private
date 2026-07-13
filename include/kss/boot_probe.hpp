@@ -63,6 +63,10 @@ struct BootProbeResult {
     // generated first-frame identity has been observed or a hard boundary is
     // reached.
     GeneratedRunResult scpu_upload_observation{};
+    // Runtime-IPL mode keeps dispatching generated S-CPU blocks and stepping
+    // the real SPC core until both local clocks cover the first-frame master
+    // boundary. This is distinct from merely enqueueing the frame event.
+    GeneratedRunResult scpu_frame_observation{};
     CpuContext scpu{};
     CpuContext sa1{};
     FrameRenderResult frame{};
@@ -70,7 +74,9 @@ struct BootProbeResult {
     MasterClock scpu_master_ready{};
     std::size_t scpu_accesses_recorded{};
     MasterClock sa1_master_ready{};
+    MasterClock spc_master_ready{};
     MasterClock master_now{};
+    bool live_domains_reached_first_frame{};
     bool first_frame_event_seen{};
     std::size_t spc_steps_completed{};
     std::optional<apu::SpcStepResult> last_spc_step{};

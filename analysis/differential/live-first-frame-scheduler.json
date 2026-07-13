@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "boundary": "first_end_frame",
+  "data_boundary": {
+    "policy": "sanitized-identities-counts-and-timing-only",
+    "rom_bytes_included": false,
+    "spc_ipl_bytes_included": false,
+    "private_trace_records_included": false,
+    "patched_state": false
+  },
+  "reference": {
+    "target_master_clock": 306900,
+    "scpu_pc_at_boundary": 54873
+  },
+  "runtime": {
+    "status": "expected_frontier_reached",
+    "master_now": 306900,
+    "first_frame_event_seen": true,
+    "apu_cc_acknowledged": true,
+    "executed_generated_identities": 254,
+    "scpu": {
+      "ready_master_clock": 306912,
+      "overshoot_master_clocks": 12,
+      "identity_pc": 54872,
+      "post_inventory_blocks": 7362
+    },
+    "spc": {
+      "ready_master_clock": 306973,
+      "overshoot_master_clocks": 73,
+      "instructions": 3864,
+      "architectural_cycles": 14636
+    }
+  },
+  "claims": {
+    "live_scpu_and_spc_cover_boundary": true,
+    "exact_master_event_processed": true,
+    "exact_scpu_state_parity_proven": false,
+    "exact_spc_state_parity_proven": false,
+    "full_first_frame_parity_proven": false,
+    "hard_boundary": "whole_generated_scpu_block_and_spc_instruction_timing"
+  },
+  "residual": {
+    "reason": "the reference boundary falls between runtime whole-instruction checkpoints",
+    "required_proof": "sub-instruction suspension plus reference-ordered S-CPU/SPC event parity"
+  },
+  "sources": [
+    "analysis/differential/first-frame-reference.json",
+    "analysis/coverage/boot-probe-identity-coverage.json",
+    "include/kss/boot_probe.hpp",
+    "src/runtime/boot_probe.cpp",
+    "tests/runtime/boot_probe_clock_tests.cpp"
+  ]
+}

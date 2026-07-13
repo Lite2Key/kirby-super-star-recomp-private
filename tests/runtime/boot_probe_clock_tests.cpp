@@ -27,6 +27,16 @@ std::vector<std::uint8_t> synthetic_rom() {
     return std::vector<std::uint8_t>(kss::kExpectedRomSize);
 }
 
+std::vector<std::uint8_t> synthetic_upload_rom() {
+    auto rom = synthetic_rom();
+    // The generated upload routine reads long-indirect data beginning at
+    // $E4:0A3E (linear ROM $240A3E). A maximal synthetic transfer count keeps
+    // the genuine BVS upload route active through the frame boundary without
+    // copying cartridge content into this public test fixture.
+    std::fill(rom.begin() + 0x240a3eU, rom.begin() + 0x241a3eU, 0xffU);
+    return rom;
+}
+
 void test_default_probe_uses_local_complete_scpu_stream() {
     const auto result = kss::run_boot_probe(synthetic_rom());
     assert(result.status == kss::BootProbeStatus::expected_frontier_reached);
@@ -130,6 +140,33 @@ void test_runtime_ipl_clocks_real_port_ack_and_reaches_generated_upload() {
     assert(result.scpu.address() == 0x00d695U);
     assert(result.spc_steps_completed > 0U && result.spc_registers);
     assert(result.executed_block_identities.size() == 237U);
+    assert(!result.live_domains_reached_first_frame);
+}
+
+void test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary() {
+    const auto ipl = ipl_with({
+        0xe8, 0xaa, 0xc4, 0xf4,
+        0xe8, 0xbb, 0xc4, 0xf5,
+        0xe4, 0xf4, 0x68, 0xcc, 0xd0, 0xfa,
+        0xc4, 0xf4,
+        0xe4, 0xf4, 0xc4, 0xf4, 0x2f, 0xfa,
+    });
+    const kss::BootProbeTimingEvidence evidence{ipl};
+    const auto result = kss::run_boot_probe(synthetic_upload_rom(), evidence);
+    assert(result.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(result.apu_cc_acknowledged);
+    assert(result.scpu_upload_observation.status
+        == kss::GeneratedRunStatus::checkpoint_reached);
+    assert(result.scpu_frame_observation.status
+        == kss::GeneratedRunStatus::checkpoint_reached);
+    assert(result.scpu_frame_observation.completed_blocks > 0U);
+    assert(result.live_domains_reached_first_frame);
+    assert(result.scpu_master_ready >= kss::kSnesFirstFrameMasterClock);
+    assert(result.spc_master_ready >= kss::kSnesFirstFrameMasterClock);
+    assert(result.first_frame_event_seen
+        && result.master_now == kss::kSnesFirstFrameMasterClock);
+    assert(result.executed_block_identities.size() == 254U);
+    assert(result.missing_block_identities.empty());
 }
 
 void test_spc_requires_runtime_ipl_and_fails_closed() {
@@ -204,6 +241,7 @@ int main() {
     test_default_probe_uses_local_complete_scpu_stream();
     test_explicit_access_evidence_and_spc_phase_drive_only_requested_step();
     test_runtime_ipl_clocks_real_port_ack_and_reaches_generated_upload();
+    test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary();
     test_spc_requires_runtime_ipl_and_fails_closed();
     test_post_frame_spc_phase_is_timing_debt_without_execution();
     test_opt_in_cpu_signal_is_applied_before_same_timestamp_frame();

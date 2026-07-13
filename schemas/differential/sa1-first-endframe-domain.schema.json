@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "boundary",
+    "data_boundary",
+    "reference",
+    "runtime_start",
+    "whole_instruction_advance",
+    "residual",
+    "claims",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "boundary": {"const": "first_end_frame"},
+    "data_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy",
+        "rom_bytes_included",
+        "private_trace_records_included",
+        "architectural_state_values_included"
+      ],
+      "properties": {
+        "policy": {"const": "sanitized-identities-counts-and-timing-only"},
+        "rom_bytes_included": {"const": false},
+        "private_trace_records_included": {"const": false},
+        "architectural_state_values_included": {"const": false}
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_master_clock", "target_sa1_cycle"],
+      "properties": {
+        "target_master_clock": {"type": "integer", "minimum": 0},
+        "target_sa1_cycle": {"type": "integer", "minimum": 0}
+      }
+    },
+    "runtime_start": {"$ref": "#/$defs/domain_point"},
+    "whole_instruction_advance": {
+      "allOf": [
+        {"$ref": "#/$defs/domain_point"},
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "completed_blocks",
+            "completed_sa1_cycles",
+            "completed_master_clocks"
+          ],
+          "properties": {
+            "status": {"const": "target_inside_instruction"},
+            "completed_blocks": {"type": "integer", "minimum": 1},
+            "completed_sa1_cycles": {"type": "integer", "minimum": 1},
+            "completed_master_clocks": {"type": "integer", "minimum": 2}
+          }
+        }
+      ]
+    },
+    "residual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "master_clocks",
+        "sa1_cycles",
+        "next_whole_instruction_sa1_cycles",
+        "reason"
+      ],
+      "properties": {
+        "master_clocks": {"type": "integer", "minimum": 1},
+        "sa1_cycles": {"type": "integer", "minimum": 1},
+        "next_whole_instruction_sa1_cycles": {"type": "integer", "minimum": 1},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_boundary_reached",
+        "partial_instruction_fabricated",
+        "state_patched",
+        "hard_boundary"
+      ],
+      "properties": {
+        "exact_boundary_reached": {"const": false},
+        "partial_instruction_fabricated": {"const": false},
+        "state_patched": {"const": false},
+        "hard_boundary": {"const": "whole_instruction_timing"}
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "pc", "mode"],
+      "properties": {
+        "processor": {"const": "sa1"},
+        "pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
+        "mode": {"const": "e0m0x0"}
+      }
+    },
+    "domain_point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ready_master_clock", "sa1_cycle", "identity"],
+      "properties": {
+        "ready_master_clock": {"type": "integer", "minimum": 0},
+        "sa1_cycle": {"type": "integer", "minimum": 0},
+        "identity": {"$ref": "#/$defs/identity"},
+        "status": {"type": "string"},
+        "completed_blocks": {"type": "integer", "minimum": 0},
+        "completed_sa1_cycles": {"type": "integer", "minimum": 0},
+        "completed_master_clocks": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

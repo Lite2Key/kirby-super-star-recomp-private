@@ -25,7 +25,9 @@ add_library(kss_runtime
     src/runtime/multi_clock_coordinator.cpp
     src/runtime/native_host.cpp
     src/runtime/rom_validation.cpp
+    src/runtime/runtime_event_chain.cpp
     src/runtime/save_ram.cpp
+    src/runtime/sa1_frame_domain.cpp
     src/runtime/sa1_timing.cpp
     src/runtime/sa1_registers.cpp
     src/runtime/scpu_micro_access_recorder.cpp
@@ -84,6 +86,10 @@ if(BUILD_TESTING)
     add_executable(kss-sa1-timing-tests tests/runtime/sa1_timing_tests.cpp)
     target_link_libraries(kss-sa1-timing-tests PRIVATE kss_runtime)
     add_test(NAME sa1-reset-timing COMMAND kss-sa1-timing-tests)
+
+    add_executable(kss-sa1-frame-domain-tests tests/runtime/sa1_frame_domain_tests.cpp)
+    target_link_libraries(kss-sa1-frame-domain-tests PRIVATE kss_runtime)
+    add_test(NAME sa1-first-frame-domain COMMAND kss-sa1-frame-domain-tests)
 
     add_executable(kss-generated-block-tests tests/runtime/generated_block_tests.cpp)
     target_link_libraries(kss-generated-block-tests PRIVATE kss_runtime)
@@ -157,4 +163,9 @@ if(BUILD_TESTING)
         tests/runtime/visible_frame_capture_tests.cpp)
     target_link_libraries(kss-visible-frame-capture-tests PRIVATE kss_runtime)
     add_test(NAME visible-frame-boundary-capture COMMAND kss-visible-frame-capture-tests)
+
+    add_executable(kss-runtime-event-chain-tests
+        tests/runtime/runtime_event_chain_tests.cpp)
+    target_link_libraries(kss-runtime-event-chain-tests PRIVATE kss_runtime)
+    add_test(NAME runtime-event-chain COMMAND kss-runtime-event-chain-tests)
 endif()

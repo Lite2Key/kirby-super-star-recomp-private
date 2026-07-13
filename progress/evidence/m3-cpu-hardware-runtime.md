@@ -3,7 +3,8 @@
 This checkpoint closes the unsupported-CPU-semantic inventory observed before
 the first SNES `endFrame`, connects generated execution to the Windows runtime,
 and establishes bounded hardware and SPC700 models. M3 remains in progress:
-cross-domain scheduling and native pixel parity are not yet proven.
+the live domains now causally cover the frame timestamp, but exact
+sub-instruction state and event-chain parity are not yet proven.
 
 ## Dual-CPU generated semantics
 
@@ -165,6 +166,23 @@ current hardware-gated S-CPU checkpoint:
   S-CPU acknowledgement route in `51` blocks, and executes `25` more upload
   blocks. Result: all `254 / 254` identities observed, S-CPU `$00:D65B`, ready
   master `154442`, and no missing identity.
+- Continuing the same real handshake beyond identity coverage executes `7362`
+  additional generated upload blocks. The frame event is processed at master
+  `306900`; whole-block S-CPU execution covers it at master `306912` / `$00:D658`,
+  and whole-instruction SPC execution covers it at master `306973` after `3864`
+  instructions / `14636` architectural cycles. No CPU, memory, or port state is
+  patched. The reference samples S-CPU `$00:D659` at the exact boundary, so the
+  12/73-clock overshoots are coverage evidence, not exact state-parity claims.
+- An isolated resumable SA-1 poll lane honestly advances from master `152352`
+  to `306896` in `19318` blocks / `77272` cycles and remains at `$00:8C58`.
+  The target is four master clocks (two SA-1 cycles) inside the next modeled
+  five-cycle load; the helper reports `target_inside_instruction` and preserves
+  the last whole-instruction state rather than fabricating a partial one.
+- A canonical runtime event recorder now provides comparable count/SHA-256
+  chains for aggregate/S-CPU/SA-1 writes, derived PPU and DMA register writes,
+  and bidirectional SPC ports. It fails closed on regressing clocks/cycles.
+  Wiring those records into live execution and matching the six reference
+  chains remains open; one merged cross-domain reference stream is unavailable.
 
 The probe deliberately returns a development-frontier exit code. Its local
 generated S-CPU access timing is accepted, but full cross-domain frame parity
@@ -181,17 +199,18 @@ provenance through corpus union, lifting, and private generation.
 The sanitized first-frame parity audit proves exact framebuffer parity only:
 both surfaces are 256x239, have zero non-black pixels, and share RGBA digest
 `c664df7cb2d0d7512f75d4eb998776a29980a051456da362c8152cc14c5416ec`.
-Complete hardware-boundary parity is not yet proven: the runtime stops at the
-translated upload frontier before scheduling the frame marker, so Mesen's CPU
-final states, `26906`-write chain, `3661` SPC execution / `462` port-event
-chains, `54` PPU / `23` DMA event chains, and cross-domain timing remain gates.
+Complete hardware-boundary parity is not yet proven: S-CPU, SA-1, and SPC now
+advance causally to the boundary neighborhood, but whole-instruction execution
+cannot yet suspend at master `306900`. Mesen's exact CPU final states,
+`26906`-write chain, `3661` SPC execution / `462` port-event chains, `54` PPU /
+`23` DMA event chains, and cross-domain ordering remain gates.
 
 ## Verification
 
-- Python: `174 passed`.
+- Python: `184 passed`.
 - Windows warnings-as-errors build: passed.
-- Windows standard CTest: `21 / 21 passed`.
-- Windows private-generated CTest: `21 / 21 passed`.
+- Windows standard CTest: `23 / 23 passed`.
+- Windows private-generated CTest: `23 / 23 passed`.
 - Authorized-ROM executable probe: reached the expected hardware frontier.
 - Asset-boundary and diff checks: passed.
 

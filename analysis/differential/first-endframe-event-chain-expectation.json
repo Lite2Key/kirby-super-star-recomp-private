@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "boundary": "first_end_frame",
+  "data_boundary": "sanitized-digests-and-counts-only",
+  "chains": {
+    "cpu_writes": {
+      "records": 26906,
+      "sha256": "d92ed13ac930089c88ebbb945311f413ccddba7eeef4d26df8d3adb35740894c"
+    },
+    "scpu_writes": {
+      "records": 16902,
+      "sha256": "112ea05852789e664b40f0a0998fe63703e78fb13979caa459c00a732bc6c098"
+    },
+    "sa1_writes": {
+      "records": 10004,
+      "sha256": "9535b70e30c283b96522032701f278cc2fa4ae3e84e82642833f99ca65fc54e0"
+    },
+    "ppu_register_writes": {
+      "records": 54,
+      "sha256": "c1aef4ef534bfbd499ed84e3334a85afcb46f45a067f34d3e154d9f682cf4e66"
+    },
+    "dma_register_writes": {
+      "records": 23,
+      "sha256": "0e96ccb5a9c739a514d6f66455736ce2157903f5915ef1afa1870e4d23747977"
+    },
+    "spc_ports": {
+      "records": 462,
+      "sha256": "088a8bedbc716630f85c402207d2499b90a44c7b0716f754ed8b506df9d7293c"
+    }
+  },
+  "cross_domain_order": {
+    "available": false,
+    "reason": "reference captures do not share one master-clock-stamped event stream"
+  }
+}

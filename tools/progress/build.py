@@ -288,6 +288,105 @@ def load_block_map(root: Path) -> dict[str, Any]:
     }
 
 
+def load_boundary_sync(root: Path) -> dict[str, Any]:
+    """Derive the shared first-endFrame gap from the sanitized parity audit."""
+    path = root / "analysis" / "differential" / "first-frame-parity-audit.json"
+    audit = _read_artifact(path)
+    sa1_domain = _read_artifact(
+        root / "analysis" / "differential" / "sa1-first-endframe-domain.json"
+    )
+    chain_expectation = _read_artifact(
+        root / "analysis" / "differential"
+        / "first-endframe-event-chain-expectation.json"
+    )
+    live_scheduler = _read_artifact(
+        root / "analysis" / "differential" / "live-first-frame-scheduler.json"
+    )
+    try:
+        reference = audit["hardware_reference"]
+        runtime = audit["native_runtime_observation"]
+        target_master = reference["master_clock"]
+        timing = runtime["local_timing"]
+        live_runtime = live_scheduler["runtime"]
+        domains = [
+            {
+                "id": "scpu",
+                "label": "S-CPU whole-block time",
+                "value": live_runtime["scpu"]["ready_master_clock"],
+                "target": target_master,
+                "unit": "master clocks",
+                "note": "12 clocks past target; exact boundary state remains open",
+            },
+            {
+                "id": "sa1",
+                "label": "SA-1 whole-instruction time",
+                "value": sa1_domain["whole_instruction_advance"]["ready_master_clock"],
+                "target": target_master,
+                "unit": "master clocks",
+                "note": sa1_domain["residual"]["reason"],
+            },
+            {
+                "id": "spc",
+                "label": "SPC whole-instruction time",
+                "value": live_runtime["spc"]["ready_master_clock"],
+                "target": target_master,
+                "unit": "master clocks",
+                "note": "73 clocks past target; exact boundary state remains open",
+            },
+        ]
+        expected_chains = chain_expectation["chains"]
+        chains = [
+            {
+                "id": "cpu-writes",
+                "label": "CPU write chain",
+                "value": 0,
+                "target": expected_chains["cpu_writes"]["records"],
+            },
+            {
+                "id": "spc-ports",
+                "label": "SPC port chain",
+                "value": 0,
+                "target": expected_chains["spc_ports"]["records"],
+            },
+            {
+                "id": "ppu-events",
+                "label": "PPU event chain",
+                "value": 0,
+                "target": expected_chains["ppu_register_writes"]["records"],
+            },
+            {
+                "id": "dma-events",
+                "label": "DMA event chain",
+                "value": 0,
+                "target": expected_chains["dma_register_writes"]["records"],
+            },
+        ]
+    except (KeyError, TypeError) as exc:
+        raise ManifestError("first-frame parity audit lacks boundary-sync counters") from exc
+    for item in domains:
+        if not isinstance(item["value"], int) or not isinstance(item["target"], int) \
+                or item["value"] < 0 or item["target"] <= 0:
+            raise ManifestError("first-frame parity audit has an invalid domain counter")
+    for item in chains:
+        if not isinstance(item["value"], int) or not isinstance(item["target"], int) \
+                or item["value"] < 0 or item["target"] <= 0 \
+                or item["value"] > item["target"]:
+            raise ManifestError("first-frame parity audit has an invalid event-chain counter")
+    return {
+        "boundary": reference["boundary"],
+        "target_master": target_master,
+        "full_parity_proven": audit["verdict"]["full_first_frame_parity_proven"],
+        "domains": domains,
+        "chains": chains,
+        "sources": [
+            "analysis/differential/first-frame-parity-audit.json",
+            "analysis/differential/sa1-first-endframe-domain.json",
+            "analysis/differential/first-endframe-event-chain-expectation.json",
+            "analysis/differential/live-first-frame-scheduler.json",
+        ],
+    }
+
+
 def render_dashboard(data: dict[str, Any], template_path: Path) -> str:
     template = template_path.read_text(encoding="utf-8")
     marker = "__PROGRESS_DATA__"
@@ -352,6 +451,7 @@ def build(
     root = evidence.resolve().parent.parent
     site_data = dict(data)
     site_data["block_map"] = load_block_map(root)
+    site_data["boundary_sync"] = load_boundary_sync(root)
     outputs = {
         out_dir / "index.html": render_dashboard(site_data, template),
         out_dir / "progress.json": json.dumps(site_data, indent=2, ensure_ascii=False) + "\n",

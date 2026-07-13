@@ -255,6 +255,50 @@ BootProbeResult run_boot_probe(
             result.status = BootProbeStatus::spc_step_failed;
             return result;
         }
+
+        // Identity coverage is not a time boundary: the upload loop can reuse
+        // the same generated identities for many more iterations. Continue
+        // the actual S-CPU/SPC handshake until both modeled clocks cover the
+        // first frame. Whole generated blocks are atomic here, so the S-CPU
+        // cursor may finish its final instruction a few master clocks beyond
+        // the exact PPU event; no state is patched or rewound to hide that.
+        constexpr std::size_t frame_block_limit = 65'536U;
+        for (std::size_t step = 0;
+             clocks.ready_at(ClockDomain::scpu) < kSnesFirstFrameMasterClock
+                && step < frame_block_limit;
+             ++step) {
+            const auto impossible_checkpoint = BlockKey::make(
+                ProcessorId::snes_cpu, 0x00ffffU, false, true, false);
+            const auto one = run_interleaved_until(impossible_checkpoint, 1U);
+            result.scpu_frame_observation.last_completed = one.last_completed;
+            result.scpu_frame_observation.completed_blocks += one.completed_blocks;
+            if (one.status != GeneratedRunStatus::step_limit) {
+                result.scpu_frame_observation.status = one.status;
+                break;
+            }
+        }
+        if (clocks.ready_at(ClockDomain::scpu) >= kSnesFirstFrameMasterClock) {
+            if (!advance_spc_to(kSnesFirstFrameMasterClock)) {
+                result.spc_registers = hardware_bus.spc_core()->registers();
+                result.status = BootProbeStatus::spc_step_failed;
+                return result;
+            }
+            result.scpu_frame_observation.status = GeneratedRunStatus::checkpoint_reached;
+        } else if (result.scpu_frame_observation.status
+            == GeneratedRunStatus::step_limit) {
+            result.status = BootProbeStatus::scpu_frontier_failed;
+            result.spc_registers = hardware_bus.spc_core()->registers();
+            return result;
+        }
+        result.live_domains_reached_first_frame =
+            result.scpu_frame_observation.status
+                == GeneratedRunStatus::checkpoint_reached
+            && clocks.ready_at(ClockDomain::spc) >= kSnesFirstFrameMasterClock;
+        if (!result.live_domains_reached_first_frame) {
+            result.status = BootProbeStatus::scpu_frontier_failed;
+            result.spc_registers = hardware_bus.spc_core()->registers();
+            return result;
+        }
     }
 
     result.frame = SnesFrameRenderer::render(hardware_bus.ppu_state());
@@ -272,6 +316,7 @@ BootProbeResult run_boot_probe(
     }
     result.scpu_accesses_recorded = bus.accesses().size();
     result.scpu_master_ready = scpu_timing.ready_at;
+    result.spc_master_ready = clocks.ready_at(ClockDomain::spc);
     result.timing_status = scpu_timing.status;
 
     if (!timing.spc_steps.empty()) {

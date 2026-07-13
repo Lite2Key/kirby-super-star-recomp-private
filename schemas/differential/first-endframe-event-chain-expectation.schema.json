@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "boundary", "data_boundary", "chains", "cross_domain_order"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "boundary": {"const": "first_end_frame"},
+    "data_boundary": {"const": "sanitized-digests-and-counts-only"},
+    "chains": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpu_writes", "scpu_writes", "sa1_writes", "ppu_register_writes", "dma_register_writes", "spc_ports"],
+      "properties": {
+        "cpu_writes": {"$ref": "#/$defs/fingerprint"},
+        "scpu_writes": {"$ref": "#/$defs/fingerprint"},
+        "sa1_writes": {"$ref": "#/$defs/fingerprint"},
+        "ppu_register_writes": {"$ref": "#/$defs/fingerprint"},
+        "dma_register_writes": {"$ref": "#/$defs/fingerprint"},
+        "spc_ports": {"$ref": "#/$defs/fingerprint"}
+      }
+    },
+    "cross_domain_order": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available", "reason"],
+      "properties": {
+        "available": {"const": false},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "$defs": {
+    "fingerprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["records", "sha256"],
+      "properties": {
+        "records": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}
