@@ -132,8 +132,14 @@ namespace kss::generated {
         ])
         if identity["processor"] == "sa1":
             source.extend([
+                "    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {",
+                "        cpu.cycles += sa1_reset_release_origin_cycles();",
+                "    }",
                 "    const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);",
+                "    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);",
                 "    const auto mvn_wait = lookup_sa1_reset_mvn_wait(",
+                "        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);",
+                "    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(",
                 "        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);",
             ])
         source.extend([
@@ -145,7 +151,9 @@ namespace kss::generated {
         if identity["processor"] == "sa1":
             source.extend([
                 "    if (measured) { cpu.cycles += measured->observed_wait_cycles; }",
+                "    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }",
                 "    if (mvn_wait) { cpu.cycles += *mvn_wait; }",
+                "    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }",
             ])
         successors = sorted(outgoing.get(_identity_key(identity), []), key=_identity_key)
         if successors:

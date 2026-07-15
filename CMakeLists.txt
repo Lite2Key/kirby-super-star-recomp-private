@@ -30,9 +30,11 @@ add_library(kss_runtime
     src/runtime/sa1_frame_domain.cpp
     src/runtime/sa1_timing.cpp
     src/runtime/sa1_registers.cpp
+    src/runtime/scpu_access_boundary.cpp
     src/runtime/scpu_micro_access_recorder.cpp
     src/runtime/snes_registers.cpp
     src/runtime/spc700.cpp
+    src/runtime/spc_exact_master.cpp
     src/runtime/visible_frame_capture.cpp
     src/recompiled/reset_blocks.cpp
     src/recompiled/first_frame_blocks.cpp
@@ -111,6 +113,12 @@ if(BUILD_TESTING)
     target_link_libraries(kss-spc700-tests PRIVATE kss_runtime)
     add_test(NAME spc700-observed-slice COMMAND kss-spc700-tests)
 
+    add_executable(kss-spc-exact-master-tests
+        tests/runtime/spc_exact_master_tests.cpp)
+    target_link_libraries(kss-spc-exact-master-tests PRIVATE kss_runtime)
+    add_test(NAME spc700-exact-master-suspension
+        COMMAND kss-spc-exact-master-tests)
+
     add_executable(kss-spc-bus-integration-tests tests/runtime/spc_bus_integration_tests.cpp)
     target_link_libraries(kss-spc-bus-integration-tests PRIVATE kss_runtime)
     add_test(NAME spc700-hardware-boundary COMMAND kss-spc-bus-integration-tests)
@@ -122,6 +130,10 @@ if(BUILD_TESTING)
     add_executable(kss-scpu-access-recorder-tests tests/runtime/scpu_micro_access_recorder_tests.cpp)
     target_link_libraries(kss-scpu-access-recorder-tests PRIVATE kss_runtime)
     add_test(NAME scpu-micro-access-recorder COMMAND kss-scpu-access-recorder-tests)
+
+    add_executable(kss-scpu-access-boundary-tests tests/runtime/scpu_access_boundary_tests.cpp)
+    target_link_libraries(kss-scpu-access-boundary-tests PRIVATE kss_runtime)
+    add_test(NAME scpu-exact-access-boundary COMMAND kss-scpu-access-boundary-tests)
 
     add_executable(kss-boot-probe-clock-tests tests/runtime/boot_probe_clock_tests.cpp)
     target_link_libraries(kss-boot-probe-clock-tests PRIVATE kss_runtime)

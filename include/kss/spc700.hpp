@@ -47,6 +47,10 @@ struct SpcTimerState {
 // component; this is a dependency-free rewrite. See licenses/ares-ISC.txt.
 class Spc700Core {
 public:
+    using PortWriteSink = void (*)(
+        void* context, std::uint64_t local_cycle,
+        std::uint8_t port, std::uint8_t value) noexcept;
+
     static constexpr std::size_t kRamSize = 65536;
     static constexpr std::size_t kIplSize = 64;
 
@@ -60,6 +64,12 @@ public:
 
     void cpu_write_port(std::uint8_t port, std::uint8_t value) noexcept;
     [[nodiscard]] std::uint8_t cpu_read_port(std::uint8_t port) const noexcept;
+    // Optional, memory-only observation of SPC-origin writes to $F4-$F7.
+    // The sink is not serialized and does not own its context.
+    void set_port_write_sink(void* context, PortWriteSink sink) noexcept {
+        port_write_context_ = context;
+        port_write_sink_ = sink;
+    }
 
     [[nodiscard]] Spc700Registers& registers() noexcept { return registers_; }
     [[nodiscard]] const Spc700Registers& registers() const noexcept { return registers_; }
@@ -131,6 +141,8 @@ private:
     bool stopped_{};
     bool sleeping_{};
     bool io_fault_{};
+    void* port_write_context_{};
+    PortWriteSink port_write_sink_{};
 };
 
 } // namespace kss::apu

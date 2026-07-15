@@ -163,10 +163,50 @@ void test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary() {
     assert(result.live_domains_reached_first_frame);
     assert(result.scpu_master_ready >= kss::kSnesFirstFrameMasterClock);
     assert(result.spc_master_ready >= kss::kSnesFirstFrameMasterClock);
+    assert(result.scpu_first_frame_boundary);
+    assert(result.scpu_first_frame_boundary->target
+        == kss::kSnesFirstFrameMasterClock);
+    assert(!result.scpu_first_frame_boundary->architectural_state_committed);
+    assert(result.spc_first_frame_boundary);
+    assert(result.spc_first_frame_boundary->observed_at
+        == kss::kSnesFirstFrameMasterClock);
+    assert(result.spc_first_frame_boundary->status
+        == kss::SpcExactAdvanceStatus::target_inside_instruction
+        || result.spc_first_frame_boundary->status
+            == kss::SpcExactAdvanceStatus::target_reached);
     assert(result.first_frame_event_seen
         && result.master_now == kss::kSnesFirstFrameMasterClock);
     assert(result.executed_block_identities.size() == 254U);
     assert(result.missing_block_identities.empty());
+}
+
+void test_runtime_event_chain_observes_live_causal_path() {
+    const auto ipl = ipl_with({
+        0xe8, 0xaa, 0xc4, 0xf4,
+        0xe8, 0xbb, 0xc4, 0xf5,
+        0xe4, 0xf4, 0x68, 0xcc, 0xd0, 0xfa,
+        0xc4, 0xf4,
+        0xe4, 0xf4, 0xc4, 0xf4, 0x2f, 0xfa,
+    });
+    kss::RuntimeEventChainRecorder recorder;
+    const kss::BootProbeTimingEvidence evidence{ipl, {}, {}, &recorder};
+    const auto result = kss::run_boot_probe(synthetic_upload_rom(), evidence);
+    assert(result.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(result.event_chain_status
+        == kss::BootProbeEventChainStatus::instruction_retirement_stream);
+    assert(result.event_chain_summary);
+    const auto& chain = *result.event_chain_summary;
+    assert(chain.cpu_writes.records == 19'067U);
+    assert(chain.scpu_writes.records == 9'063U);
+    assert(chain.sa1_writes.records == 10'004U);
+    assert(chain.ppu_register_writes.records == 54U);
+    assert(chain.dma_register_writes.records == 23U);
+    assert(chain.spc_ports.records == 1'048U);
+    assert(chain.cross_domain_order.records == 20'115U);
+    assert(chain.cpu_writes.records
+        == chain.scpu_writes.records + chain.sa1_writes.records);
+    assert(chain.cross_domain_order.records
+        == chain.cpu_writes.records + chain.spc_ports.records);
 }
 
 void test_spc_requires_runtime_ipl_and_fails_closed() {
@@ -242,6 +282,7 @@ int main() {
     test_explicit_access_evidence_and_spc_phase_drive_only_requested_step();
     test_runtime_ipl_clocks_real_port_ack_and_reaches_generated_upload();
     test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary();
+    test_runtime_event_chain_observes_live_causal_path();
     test_spc_requires_runtime_ipl_and_fails_closed();
     test_post_frame_spc_phase_is_timing_debt_without_execution();
     test_opt_in_cpu_signal_is_applied_before_same_timestamp_frame();

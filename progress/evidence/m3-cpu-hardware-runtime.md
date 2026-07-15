@@ -166,23 +166,32 @@ current hardware-gated S-CPU checkpoint:
   S-CPU acknowledgement route in `51` blocks, and executes `25` more upload
   blocks. Result: all `254 / 254` identities observed, S-CPU `$00:D65B`, ready
   master `154442`, and no missing identity.
-- Continuing the same real handshake beyond identity coverage executes `7362`
+- The SA-1 reset cursor now includes the reference `1454`-cycle reset-release
+  origin, exact post-reset timing entries, and the measured `35175`-cycle wait
+  aggregate for the second MVN. The live staged probe reaches `$00:8C58` at
+  master `225694`; the first reference identity is at master `225664`.
+- Continuing the same real handshake beyond identity coverage executes `3825`
   additional generated upload blocks. The frame event is processed at master
-  `306900`; whole-block S-CPU execution covers it at master `306912` / `$00:D658`,
-  and whole-instruction SPC execution covers it at master `306973` after `3864`
-  instructions / `14636` architectural cycles. No CPU, memory, or port state is
-  patched. The reference samples S-CPU `$00:D659` at the exact boundary, so the
-  12/73-clock overshoots are coverage evidence, not exact state-parity claims.
-- An isolated resumable SA-1 poll lane honestly advances from master `152352`
-  to `306896` in `19318` blocks / `77272` cycles and remains at `$00:8C58`.
-  The target is four master clocks (two SA-1 cycles) inside the next modeled
-  five-cycle load; the helper reports `target_inside_instruction` and preserves
-  the last whole-instruction state rather than fabricating a partial one.
+  `306900`; whole-block S-CPU execution covers it at master `306908` / `$00:D662`,
+  and whole-instruction SPC execution covers it at master `307015` after `3662`
+  instructions / `14638` architectural cycles. No CPU, memory, or port state is
+  patched.
+- The live probe now records exact value-free positions at master `306900`.
+  S-CPU is at the boundary before operand access 1 of `$00:D660`, with visible
+  sequencer `$00:D661` versus reference `$00:D659`. SPC retains its entry state
+  at master `306869` / cycle `14631` and represents 31 of 146 master clocks in
+  the pending seven-cycle instruction. These are observations, not parity claims.
+- The earlier isolated SA-1 poll-advance fixture remains as a regression test
+  for whole-instruction suspension. It is no longer presented as the live SA-1
+  domain cursor; the live staged cursor exposes the missing cooperative polling
+  interval from master `225694` through `306900`.
 - A canonical runtime event recorder now provides comparable count/SHA-256
   chains for aggregate/S-CPU/SA-1 writes, derived PPU and DMA register writes,
   and bidirectional SPC ports. It fails closed on regressing clocks/cycles.
-  Wiring those records into live execution and matching the six reference
-  chains remains open; one merged cross-domain reference stream is unavailable.
+  The real-ROM live run records `18679 / 26906` CPU writes (`8675 / 16902`
+  S-CPU and `10004 / 10004` SA-1), `54 / 54` PPU writes, `23 / 23` DMA writes,
+  and `465 / 462` SPC port events. Every digest still differs. Equal counts do
+  not imply parity because CPU cycles are currently retirement timestamps.
 
 The probe deliberately returns a development-frontier exit code. Its local
 generated S-CPU access timing is accepted, but full cross-domain frame parity
@@ -199,20 +208,20 @@ provenance through corpus union, lifting, and private generation.
 The sanitized first-frame parity audit proves exact framebuffer parity only:
 both surfaces are 256x239, have zero non-black pixels, and share RGBA digest
 `c664df7cb2d0d7512f75d4eb998776a29980a051456da362c8152cc14c5416ec`.
-Complete hardware-boundary parity is not yet proven: S-CPU, SA-1, and SPC now
-advance causally to the boundary neighborhood, but whole-instruction execution
-cannot yet suspend at master `306900`. Mesen's exact CPU final states,
-`26906`-write chain, `3661` SPC execution / `462` port-event chains, `54` PPU /
-`23` DMA event chains, and cross-domain ordering remain gates.
+Complete hardware-boundary parity is not yet proven. S-CPU and SPC exact
+positions are represented at master `306900`, but the staged SA-1 phase omits
+`8227` reference S-CPU poll writes. The next causal correction is cooperative
+S-CPU/SA-1 execution through both MVNs; exact CPU states, all ordered event
+digests, and cross-domain ordering remain gates.
 
 ## Verification
 
-- Python: `184 passed`.
+- Python: `194 passed`.
 - Windows warnings-as-errors build: passed.
-- Windows standard CTest: `23 / 23 passed`.
-- Windows private-generated CTest: `23 / 23 passed`.
+- Windows standard CTest: `25 / 25 passed`.
+- Windows private-generated CTest: `25 / 25 passed`.
 - Authorized-ROM executable probe: reached the expected hardware frontier.
 - Asset-boundary and diff checks: passed.
 
-The next proof is post-first-frame route discovery through the first boundary
-where the game itself clears forced blank, followed by native pixel comparison.
+The next proof is genuine S-CPU/SA-1 reset interleaving while preserving the
+corrected timing landmarks, followed by rerunning all six first-frame chains.

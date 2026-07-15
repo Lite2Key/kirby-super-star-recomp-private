@@ -32,6 +32,18 @@ def test_live_first_frame_scheduler_is_schema_valid_and_source_anchored() -> Non
         runtime["spc"]["ready_master_clock"] - target
     )
     assert runtime["scpu"]["identity_pc"] != report["reference"]["scpu_pc_at_boundary"]
+    assert runtime["sa1"]["ready_master_clock"] == 225694
+    assert not runtime["sa1"]["interleaved_through_frame"]
+    assert runtime["scpu"]["exact_boundary"]["access_start_master_clock"] == target
+    assert runtime["scpu"]["exact_boundary"]["sequencer_pc"] != (
+        report["reference"]["scpu_pc_at_boundary"]
+    )
+    spc_exact = runtime["spc"]["exact_boundary"]
+    assert spc_exact["architectural_entry_master_clock"] < target
+    assert spc_exact["completion_master_clock"] == runtime["spc"]["ready_master_clock"]
+    assert spc_exact["elapsed_master_clocks"] == (
+        target - spc_exact["architectural_entry_master_clock"]
+    )
 
 
 def test_live_first_frame_scheduler_preserves_private_data_boundary() -> None:

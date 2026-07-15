@@ -82,6 +82,41 @@ DomainAdvanceResult MultiClockCoordinator::account_spc_cycles(
     return {CoordinatorStatus::accepted, delta, cursor};
 }
 
+SpcClockProjection MultiClockCoordinator::preview_spc_cycles(
+    std::uint64_t cycles) const noexcept {
+    constexpr std::uint64_t master_hz = 21'477'272U;
+    constexpr std::uint64_t spc_hz = 1'024'000U;
+    const auto cursor = ready_at(ClockDomain::spc);
+    SpcClockProjection result{};
+    result.architectural_cycles = cycles;
+    result.start_at = cursor;
+    result.ready_at = cursor;
+    result.start_remainder = spc_clock_remainder_;
+    result.completion_remainder = spc_clock_remainder_;
+    if (cycles == 0U) return result;
+    if (cycles > (std::numeric_limits<std::uint64_t>::max() - spc_clock_remainder_)
+            / master_hz) {
+        result.status = CoordinatorStatus::overflow;
+        return result;
+    }
+    const auto scaled = cycles * master_hz + spc_clock_remainder_;
+    result.master_clocks = scaled / spc_hz;
+    result.completion_remainder = scaled % spc_hz;
+    if (add_overflows(cursor, result.master_clocks)) {
+        result.status = CoordinatorStatus::overflow;
+        result.master_clocks = 0;
+        result.completion_remainder = spc_clock_remainder_;
+        return result;
+    }
+    result.ready_at = cursor + result.master_clocks;
+    result.status = CoordinatorStatus::accepted;
+    return result;
+}
+
+std::uint64_t MultiClockCoordinator::spc_clock_remainder() const noexcept {
+    return spc_clock_remainder_;
+}
+
 CoordinatorStatus MultiClockCoordinator::align_domain(
     ClockDomain domain, MasterClock at) noexcept {
     auto& cursor = ready_at_[domain_index(domain)];

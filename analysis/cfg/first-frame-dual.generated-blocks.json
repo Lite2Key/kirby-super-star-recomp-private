@@ -3,7 +3,7 @@
   "generator": "kssrecomp.generated_blocks-v1",
   "identity_policy": "processor-pc24-emulation-m8-x8",
   "input_sha256": "cf6d79963351d3d51aa7e6d4606b0f830e5e2a64341b020709e9864c28f6c2d0",
-  "max_blocks_per_processor": 4096,
+  "max_blocks_per_processor": 256,
   "processors": {
     "sa1": 40,
     "scpu": 214

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "boundary": "first_end_frame",
+  "evidence_kind": "rom_free_deterministic_contract_fixture",
+  "data_boundary": {
+    "policy": "sanitized-timing-and-contract-only",
+    "rom_bytes_included": false,
+    "spc_ipl_bytes_included": false,
+    "private_trace_records_included": false,
+    "architectural_state_values_included": false
+  },
+  "clock_contract": {
+    "master_hz": 21477272,
+    "spc_hz": 1024000,
+    "target_master_clock": 306900
+  },
+  "architectural_entry": {
+    "spc_cycles": 14632,
+    "ready_master_clock": 306890,
+    "rational_remainder": 83904
+  },
+  "pending_instruction": {
+    "architectural_cycles": 4,
+    "completion_master_clock": 306973,
+    "completion_rational_remainder": 1000992
+  },
+  "in_flight_observation": {
+    "observed_master_clock": 306900,
+    "elapsed_master_clocks": 10,
+    "remaining_master_clocks": 73,
+    "architectural_state_view": "instruction_entry"
+  },
+  "claims": {
+    "exact_master_observation_represented": true,
+    "real_core_mutated_by_preview": false,
+    "coordinator_advanced_by_preview": false,
+    "speculative_port_events_emitted": false,
+    "partial_architectural_state_fabricated": false,
+    "state_patched": false,
+    "state_rewound": false,
+    "private_rom_runtime_capture_claimed": false
+  },
+  "sources": [
+    "include/kss/spc_exact_master.hpp",
+    "include/kss/multi_clock_coordinator.hpp",
+    "src/runtime/spc_exact_master.cpp",
+    "src/runtime/multi_clock_coordinator.cpp",
+    "tests/runtime/spc_exact_master_tests.cpp"
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "boundary",
+    "evidence_kind",
+    "data_boundary",
+    "clock_contract",
+    "architectural_entry",
+    "pending_instruction",
+    "in_flight_observation",
+    "claims",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "boundary": {"const": "first_end_frame"},
+    "evidence_kind": {"const": "rom_free_deterministic_contract_fixture"},
+    "data_boundary": {
+      "type": "object",
+      "required": [
+        "policy",
+        "rom_bytes_included",
+        "spc_ipl_bytes_included",
+        "private_trace_records_included",
+        "architectural_state_values_included"
+      ],
+      "properties": {
+        "policy": {"const": "sanitized-timing-and-contract-only"},
+        "rom_bytes_included": {"const": false},
+        "spc_ipl_bytes_included": {"const": false},
+        "private_trace_records_included": {"const": false},
+        "architectural_state_values_included": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "clock_contract": {
+      "type": "object",
+      "required": ["master_hz", "spc_hz", "target_master_clock"],
+      "properties": {
+        "master_hz": {"const": 21477272},
+        "spc_hz": {"const": 1024000},
+        "target_master_clock": {"const": 306900}
+      },
+      "additionalProperties": false
+    },
+    "architectural_entry": {
+      "type": "object",
+      "required": ["spc_cycles", "ready_master_clock", "rational_remainder"],
+      "properties": {
+        "spc_cycles": {"const": 14632},
+        "ready_master_clock": {"const": 306890},
+        "rational_remainder": {"const": 83904}
+      },
+      "additionalProperties": false
+    },
+    "pending_instruction": {
+      "type": "object",
+      "required": [
+        "architectural_cycles",
+        "completion_master_clock",
+        "completion_rational_remainder"
+      ],
+      "properties": {
+        "architectural_cycles": {"const": 4},
+        "completion_master_clock": {"const": 306973},
+        "completion_rational_remainder": {"const": 1000992}
+      },
+      "additionalProperties": false
+    },
+    "in_flight_observation": {
+      "type": "object",
+      "required": [
+        "observed_master_clock",
+        "elapsed_master_clocks",
+        "remaining_master_clocks",
+        "architectural_state_view"
+      ],
+      "properties": {
+        "observed_master_clock": {"const": 306900},
+        "elapsed_master_clocks": {"const": 10},
+        "remaining_master_clocks": {"const": 73},
+        "architectural_state_view": {"const": "instruction_entry"}
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "object",
+      "required": [
+        "exact_master_observation_represented",
+        "real_core_mutated_by_preview",
+        "coordinator_advanced_by_preview",
+        "speculative_port_events_emitted",
+        "partial_architectural_state_fabricated",
+        "state_patched",
+        "state_rewound",
+        "private_rom_runtime_capture_claimed"
+      ],
+      "properties": {
+        "exact_master_observation_represented": {"const": true},
+        "real_core_mutated_by_preview": {"const": false},
+        "coordinator_advanced_by_preview": {"const": false},
+        "speculative_port_events_emitted": {"const": false},
+        "partial_architectural_state_fabricated": {"const": false},
+        "state_patched": {"const": false},
+        "state_rewound": {"const": false},
+        "private_rom_runtime_capture_claimed": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "additionalProperties": false
+}

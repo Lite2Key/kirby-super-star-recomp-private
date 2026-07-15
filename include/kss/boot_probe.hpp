@@ -5,8 +5,11 @@
 #include "kss/lifted_execution.hpp"
 #include "kss/multi_clock_coordinator.hpp"
 #include "kss/native_host.hpp"
+#include "kss/runtime_event_chain.hpp"
+#include "kss/scpu_access_boundary.hpp"
 #include "kss/snes_frame_renderer.hpp"
 #include "kss/spc700.hpp"
+#include "kss/spc_exact_master.hpp"
 
 #include <cstdint>
 #include <optional>
@@ -43,6 +46,15 @@ struct BootProbeTimingEvidence {
     std::span<const std::uint8_t> spc_ipl{};
     std::span<const BootProbeSpcStep> spc_steps{};
     std::span<const BootProbeCpuSignal> cpu_signals{};
+    // Optional memory-only event sink. Captured values remain owned by the
+    // caller; BootProbeResult exposes only a count/digest summary.
+    RuntimeEventChainRecorder* event_chain{};
+};
+
+enum class BootProbeEventChainStatus : std::uint8_t {
+    not_requested,
+    instruction_retirement_stream,
+    record_rejected,
 };
 
 struct BootProbeResult {
@@ -67,6 +79,13 @@ struct BootProbeResult {
     // the real SPC core until both local clocks cover the first-frame master
     // boundary. This is distinct from merely enqueueing the frame event.
     GeneratedRunResult scpu_frame_observation{};
+    // Exact value-free observation at the first endFrame master clock. This
+    // retains the preceding committed CPU context while exposing an in-flight
+    // fetch/access when the boundary falls inside a generated block.
+    std::optional<ScpuAccessBoundary> scpu_first_frame_boundary{};
+    // Side-effect-free SPC preview at the same exact master clock. The live
+    // core subsequently continues through its whole instruction as normal.
+    std::optional<SpcExactAdvanceResult> spc_first_frame_boundary{};
     CpuContext scpu{};
     CpuContext sa1{};
     FrameRenderResult frame{};
@@ -86,6 +105,9 @@ struct BootProbeResult {
     std::uint8_t sa1_poll_value{};
     std::uint8_t apu_port0_output{};
     bool apu_cc_acknowledged{};
+    BootProbeEventChainStatus event_chain_status{
+        BootProbeEventChainStatus::not_requested};
+    std::optional<RuntimeEventChainSummary> event_chain_summary{};
     // Sanitized identity-only coverage. No instruction or ROM bytes are
     // captured by this path.
     std::vector<BlockKey> inventory_block_identities{};

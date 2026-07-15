@@ -299,68 +299,85 @@ def load_boundary_sync(root: Path) -> dict[str, Any]:
         root / "analysis" / "differential"
         / "first-endframe-event-chain-expectation.json"
     )
+    chain_observation = _read_artifact(
+        root / "analysis" / "differential"
+        / "runtime-first-endframe-event-chain-observation.json"
+    )
     live_scheduler = _read_artifact(
         root / "analysis" / "differential" / "live-first-frame-scheduler.json"
     )
+    scpu_boundary = _read_artifact(
+        root / "analysis" / "differential" / "scpu-first-endframe-boundary.json"
+    )
+    scpu_origin = _read_artifact(
+        root / "analysis" / "differential" / "scpu-phase-divergence-origin.json"
+    )
+    spc_boundary = _read_artifact(
+        root / "analysis" / "differential" / "spc-first-endframe-suspension.json"
+    )
     try:
         reference = audit["hardware_reference"]
-        runtime = audit["native_runtime_observation"]
         target_master = reference["master_clock"]
-        timing = runtime["local_timing"]
-        live_runtime = live_scheduler["runtime"]
+        if any(candidate != target_master for candidate in (
+            live_scheduler["reference"]["target_master_clock"],
+            sa1_domain["reference"]["target_master_clock"],
+            scpu_boundary["target_master_clock"],
+            spc_boundary["clock_contract"]["target_master_clock"],
+        )):
+            raise ManifestError("first-frame boundary artifacts disagree on target master")
+        if scpu_origin["accumulated_checkpoint_divergence"]["master_clock_shortfall"] \
+                != 73312:
+            raise ManifestError("S-CPU phase-origin evidence has an unexpected SA-1 shortfall")
         domains = [
             {
                 "id": "scpu",
-                "label": "S-CPU whole-block time",
-                "value": live_runtime["scpu"]["ready_master_clock"],
+                "label": "S-CPU exact observation",
+                "value": scpu_boundary["target_master_clock"],
                 "target": target_master,
                 "unit": "master clocks",
-                "note": "12 clocks past target; exact boundary state remains open",
+                "note": "exact access boundary represented; sequencer is two bytes ahead of reference",
             },
             {
                 "id": "sa1",
-                "label": "SA-1 whole-instruction time",
-                "value": sa1_domain["whole_instruction_advance"]["ready_master_clock"],
+                "label": "SA-1 live staged cursor",
+                "value": live_scheduler["runtime"]["sa1"]["ready_master_clock"],
                 "target": target_master,
                 "unit": "master clocks",
-                "note": sa1_domain["residual"]["reason"],
+                "note": "reset-release and MVN timing corrected; poll-loop interleaving remains",
             },
             {
                 "id": "spc",
-                "label": "SPC whole-instruction time",
-                "value": live_runtime["spc"]["ready_master_clock"],
+                "label": "SPC exact observation",
+                "value": spc_boundary["in_flight_observation"]["observed_master_clock"],
                 "target": target_master,
                 "unit": "master clocks",
-                "note": "73 clocks past target; exact boundary state remains open",
+                "note": "pending instruction represented without mutating the core",
             },
         ]
         expected_chains = chain_expectation["chains"]
-        chains = [
-            {
-                "id": "cpu-writes",
-                "label": "CPU write chain",
-                "value": 0,
-                "target": expected_chains["cpu_writes"]["records"],
-            },
-            {
-                "id": "spc-ports",
-                "label": "SPC port chain",
-                "value": 0,
-                "target": expected_chains["spc_ports"]["records"],
-            },
-            {
-                "id": "ppu-events",
-                "label": "PPU event chain",
-                "value": 0,
-                "target": expected_chains["ppu_register_writes"]["records"],
-            },
-            {
-                "id": "dma-events",
-                "label": "DMA event chain",
-                "value": 0,
-                "target": expected_chains["dma_register_writes"]["records"],
-            },
-        ]
+        observed_chains = chain_observation["chains"]
+        chain_rows = (
+            ("cpu-writes", "CPU write chain", "cpu_writes"),
+            ("spc-ports", "SPC port chain", "spc_ports"),
+            ("ppu-events", "PPU event chain", "ppu_register_writes"),
+            ("dma-events", "DMA event chain", "dma_register_writes"),
+        )
+        chains = []
+        for row_id, label, key in chain_rows:
+            observation = observed_chains[key]
+            expected = expected_chains[key]["records"]
+            if observation["reference_records"] != expected:
+                raise ManifestError(f"event-chain reference count disagrees for {key}")
+            chains.append({
+                "id": row_id,
+                "label": label,
+                "value": observation["runtime_records"],
+                "target": expected,
+                "delta": observation["delta"],
+                "matches": observation["matches"],
+                "unit": "records",
+                "note": "count and ordered digest must both match",
+            })
     except (KeyError, TypeError) as exc:
         raise ManifestError("first-frame parity audit lacks boundary-sync counters") from exc
     for item in domains:
@@ -370,7 +387,8 @@ def load_boundary_sync(root: Path) -> dict[str, Any]:
     for item in chains:
         if not isinstance(item["value"], int) or not isinstance(item["target"], int) \
                 or item["value"] < 0 or item["target"] <= 0 \
-                or item["value"] > item["target"]:
+                or item["delta"] != item["value"] - item["target"] \
+                or not isinstance(item["matches"], bool):
             raise ManifestError("first-frame parity audit has an invalid event-chain counter")
     return {
         "boundary": reference["boundary"],
@@ -382,7 +400,11 @@ def load_boundary_sync(root: Path) -> dict[str, Any]:
             "analysis/differential/first-frame-parity-audit.json",
             "analysis/differential/sa1-first-endframe-domain.json",
             "analysis/differential/first-endframe-event-chain-expectation.json",
+            "analysis/differential/runtime-first-endframe-event-chain-observation.json",
             "analysis/differential/live-first-frame-scheduler.json",
+            "analysis/differential/scpu-first-endframe-boundary.json",
+            "analysis/differential/spc-first-endframe-suspension.json",
+            "analysis/differential/scpu-phase-divergence-origin.json",
         ],
     }
 

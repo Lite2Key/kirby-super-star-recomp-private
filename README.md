@@ -28,9 +28,21 @@ ports; execution remains paused at the explicit diagnostic frontier. Complete SP
 pixels, and gameplay remain in
 progress, so this is not yet a playable port.
 
-Open `progress/site/index.html` after running the progress generator for the visual recompilation map. It includes all 254 currently observed first-frame block identities and a 42-checkpoint port workstream atlas. See [PROGRESS.md](PROGRESS.md) for the Git-safe summary.
+Open `progress/site/index.html` after running the progress generator for the
+visual recompilation map. It includes all 254 currently observed first-frame
+block identities, a 42-checkpoint port workstream atlas, and a live
+hardware-boundary map showing each clock domain and event chain against the
+first `endFrame` target. Striped regions are measured work still remaining;
+they are not an estimate of whole-game completion. See [PROGRESS.md](PROGRESS.md)
+for the Git-safe summary.
 
 On Windows, double-click `show-progress.cmd` to regenerate and open the interactive dashboard.
+
+The `Progress dashboard` GitHub Actions workflow also rebuilds the same ROM-free
+site on each progress push and publishes it through GitHub Pages when Pages is
+enabled for the repository. It always uploads a downloadable Actions artifact
+as a fallback. Expected Pages URL:
+`https://lite2key.github.io/kirby-super-star-recomp-private/`.
 
 After building, run the translated boot probe with the default Downloads path
 or an explicit ROM path:

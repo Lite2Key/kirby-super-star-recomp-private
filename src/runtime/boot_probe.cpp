@@ -10,8 +10,36 @@
 #endif
 
 #include <algorithm>
+#include <vector>
 
 namespace kss {
+namespace {
+
+struct PendingCpuWrite {
+    ProcessorId processor{};
+    std::uint32_t address{};
+    std::uint8_t value{};
+};
+
+void capture_cpu_write(void* context, ProcessorId processor,
+    std::uint32_t address, std::uint8_t value) noexcept {
+    auto* pending = static_cast<std::vector<PendingCpuWrite>*>(context);
+    pending->push_back({processor, address, value});
+}
+
+struct PendingSpcPortWrite {
+    std::uint64_t local_cycle{};
+    std::uint8_t port{};
+    std::uint8_t value{};
+};
+
+void capture_spc_port_write(void* context, std::uint64_t local_cycle,
+    std::uint8_t port, std::uint8_t value) noexcept {
+    auto* pending = static_cast<std::vector<PendingSpcPortWrite>*>(context);
+    pending->push_back({local_cycle, port, value});
+}
+
+} // namespace
 
 BootProbeResult run_boot_probe(
     std::span<const std::uint8_t> rom,
@@ -19,6 +47,11 @@ BootProbeResult run_boot_probe(
     std::span<std::uint8_t> persistent_bwram,
     NativeHostPlatform* host) noexcept {
     BootProbeResult result{};
+    if (timing.event_chain) {
+        timing.event_chain->clear();
+        result.event_chain_status =
+            BootProbeEventChainStatus::instruction_retirement_stream;
+    }
     RomBackedDualBus hardware_bus(rom);
     const auto save_buffer_valid = persistent_bwram.empty()
         || persistent_bwram.size() == kKssSaveRamSize;
@@ -37,7 +70,8 @@ BootProbeResult run_boot_probe(
             }
         }
     } save_exporter{hardware_bus, persistent_bwram};
-    ScpuMicroAccessRecorder bus(hardware_bus);
+    ScpuMicroAccessRecorder timed_bus(hardware_bus);
+    Bus& bus = timed_bus;
     DeterministicScheduler scheduler;
     CheckedDispatcher dispatcher;
 #ifdef KSS_USE_PRIVATE_GENERATED
@@ -55,6 +89,64 @@ BootProbeResult run_boot_probe(
         result.status = BootProbeStatus::spc_provision_failed;
         return result;
     }
+    std::vector<PendingSpcPortWrite> pending_spc_writes;
+    pending_spc_writes.reserve(512U);
+    std::vector<PendingCpuWrite> pending_cpu_writes;
+    pending_cpu_writes.reserve(32'768U);
+    if (timing.event_chain) {
+        hardware_bus.set_cpu_write_sink(
+            &pending_cpu_writes, &capture_cpu_write);
+    }
+    if (timing.event_chain && hardware_bus.spc_core()) {
+        hardware_bus.spc_core()->set_port_write_sink(
+            &pending_spc_writes, &capture_spc_port_write);
+    }
+    MasterClock event_master_cursor = 0;
+    const auto reject_event = [&]() noexcept {
+        result.event_chain_status = BootProbeEventChainStatus::record_rejected;
+    };
+    const auto flush_spc_writes = [&](MasterClock proposed_master) noexcept {
+        if (!timing.event_chain) return;
+        const auto stamp = std::max(event_master_cursor, proposed_master);
+        for (const auto& write : pending_spc_writes) {
+            if (timing.event_chain->record_spc_port(
+                    SpcPortDirection::spc_to_cpu, write.local_cycle,
+                    stamp, write.port, write.value)
+                != EventRecordStatus::accepted) {
+                reject_event();
+            }
+        }
+        pending_spc_writes.clear();
+        event_master_cursor = stamp;
+    };
+    const auto flush_cpu_writes = [&](MasterClock proposed_master) noexcept {
+        if (!timing.event_chain) return;
+        const auto stamp = std::max(event_master_cursor, proposed_master);
+        const auto spc_cycle = hardware_bus.spc_core()
+            ? hardware_bus.spc_core()->registers().cycles : 0U;
+        for (const auto& write : pending_cpu_writes) {
+            const auto local_cycle = write.processor == ProcessorId::sa1
+                ? result.sa1.cycles : result.scpu.cycles;
+            if (timing.event_chain->record_cpu_write(write.processor,
+                    local_cycle, stamp, write.address, write.value)
+                != EventRecordStatus::accepted) {
+                reject_event();
+            }
+            const auto bank = static_cast<std::uint8_t>(write.address >> 16U);
+            const auto offset = static_cast<std::uint16_t>(write.address);
+            if (write.processor == ProcessorId::snes_cpu
+                && (bank & 0x40U) == 0U
+                && offset >= 0x2140U && offset <= 0x2143U
+                && timing.event_chain->record_spc_port(
+                    SpcPortDirection::cpu_to_spc, spc_cycle, stamp,
+                    static_cast<std::uint8_t>(offset - 0x2140U), write.value)
+                    != EventRecordStatus::accepted) {
+                reject_event();
+            }
+        }
+        pending_cpu_writes.clear();
+        event_master_cursor = stamp;
+    };
 
     result.scpu.processor = ProcessorId::snes_cpu;
     result.scpu.pc = 0x8004;
@@ -69,6 +161,7 @@ BootProbeResult run_boot_probe(
         ProcessorId::snes_cpu, 0x00816d, false, false, false);
     result.scpu_setup = run_generated_until(
         result.scpu, bus, scheduler, dispatcher, scpu_wait, 160, 160);
+    flush_cpu_writes(timed_bus.master_clocks());
     if (result.scpu_setup.status != GeneratedRunStatus::checkpoint_reached) {
         result.status = BootProbeStatus::scpu_setup_failed;
         return result;
@@ -81,6 +174,8 @@ BootProbeResult run_boot_probe(
         ProcessorId::sa1, 0x008c58, false, false, false);
     result.sa1_initialization = run_generated_until(
         result.sa1, bus, scheduler, dispatcher, sa1_poll, 12000);
+    flush_cpu_writes(std::max(
+        event_master_cursor, result.sa1.cycles * 2U));
     if (result.sa1_initialization.status != GeneratedRunStatus::checkpoint_reached) {
         result.status = BootProbeStatus::sa1_initialization_failed;
         return result;
@@ -90,6 +185,8 @@ BootProbeResult run_boot_probe(
     // The shared-I-RAM value is observed, never patched to force poll release.
     result.sa1_poll_observation = run_generated_until(
         result.sa1, bus, scheduler, dispatcher, sa1_poll, 2, 2);
+    flush_cpu_writes(std::max(
+        event_master_cursor, result.sa1.cycles * 2U));
     result.sa1_poll_value = hardware_bus.sa1_iram()[0x0aU];
     if (result.sa1_poll_observation.status != GeneratedRunStatus::checkpoint_reached) {
         result.status = BootProbeStatus::sa1_poll_observation_failed;
@@ -99,7 +196,7 @@ BootProbeResult run_boot_probe(
     std::size_t accounted_scpu_accesses = 0;
     bool live_spc_ok = true;
     const auto account_new_scpu_accesses = [&]() noexcept {
-        const auto accesses = bus.timing_accesses();
+        const auto accesses = timed_bus.timing_accesses();
         if (accesses.size() == accounted_scpu_accesses) return true;
         const auto advance = clocks.account_scpu_accesses(
             accesses.subspan(accounted_scpu_accesses));
@@ -114,6 +211,24 @@ BootProbeResult run_boot_probe(
         for (std::size_t count = 0;
              clocks.ready_at(ClockDomain::spc) < target && count < instruction_limit;
              ++count) {
+            if (!result.spc_first_frame_boundary
+                && clocks.ready_at(ClockDomain::spc)
+                    <= kSnesFirstFrameMasterClock) {
+                auto preview_core = *hardware_bus.spc_core();
+                preview_core.set_port_write_sink(nullptr, nullptr);
+                const auto preview_step = preview_core.step();
+                const auto projection = clocks.preview_spc_cycles(
+                    preview_step.instruction_cycles);
+                if (preview_step.status == apu::SpcStepStatus::executed
+                    && projection.status == CoordinatorStatus::accepted
+                    && projection.ready_at >= kSnesFirstFrameMasterClock) {
+                    preview_core = *hardware_bus.spc_core();
+                    preview_core.set_port_write_sink(nullptr, nullptr);
+                    auto preview_clocks = clocks;
+                    result.spc_first_frame_boundary = advance_spc_to_exact_master(
+                        preview_core, preview_clocks, kSnesFirstFrameMasterClock);
+                }
+            }
             result.last_spc_step = hardware_bus.step_spc();
             if (result.last_spc_step->status != apu::SpcStepStatus::executed) {
                 live_spc_ok = false;
@@ -125,6 +240,7 @@ BootProbeResult run_boot_probe(
                 live_spc_ok = false;
                 return false;
             }
+            flush_spc_writes(advance.ready_at);
             ++result.spc_steps_completed;
         }
         if (clocks.ready_at(ClockDomain::spc) < target) {
@@ -146,6 +262,8 @@ BootProbeResult run_boot_probe(
                 return run;
             }
             const auto before = result.scpu.block_key();
+            const auto block_access_start = accounted_scpu_accesses;
+            const auto block_master_start = clocks.ready_at(ClockDomain::scpu);
             const auto dispatch = dispatcher.dispatch(result.scpu, bus, scheduler);
             if (dispatch == DispatchStatus::unknown_block) {
                 run.status = GeneratedRunStatus::unknown_block;
@@ -162,7 +280,23 @@ BootProbeResult run_boot_probe(
             run.last_completed = before;
             ++run.completed_blocks;
             if (!account_new_scpu_accesses()
-                || !advance_spc_to(clocks.ready_at(ClockDomain::scpu))) {
+                ) {
+                run.status = GeneratedRunStatus::generated_block_failed_closed;
+                return run;
+            }
+            const auto block_master_end = clocks.ready_at(ClockDomain::scpu);
+            if (!result.scpu_first_frame_boundary
+                && block_master_start <= kSnesFirstFrameMasterClock
+                && kSnesFirstFrameMasterClock <= block_master_end) {
+                const auto accesses = timed_bus.accesses();
+                if (block_access_start <= accesses.size()) {
+                    result.scpu_first_frame_boundary = observe_scpu_access_boundary(
+                        before, accesses.subspan(block_access_start),
+                        block_master_start, kSnesFirstFrameMasterClock);
+                }
+            }
+            flush_cpu_writes(clocks.ready_at(ClockDomain::scpu));
+            if (!advance_spc_to(clocks.ready_at(ClockDomain::scpu))) {
                 run.status = GeneratedRunStatus::generated_block_failed_closed;
                 return run;
             }
@@ -202,6 +336,7 @@ BootProbeResult run_boot_probe(
         ? run_interleaved_until(current_frontier, 4096)
         : run_generated_until(result.scpu, bus, scheduler, dispatcher,
             current_frontier, 4096);
+    if (!live_spc) flush_cpu_writes(timed_bus.master_clocks());
     if (result.scpu_frontier.status != GeneratedRunStatus::checkpoint_reached) {
         result.status = BootProbeStatus::scpu_frontier_failed;
         return result;
@@ -216,6 +351,7 @@ BootProbeResult run_boot_probe(
         ? run_interleaved_until(apu_acknowledgement_wait, 4096)
         : run_generated_until(result.scpu, bus, scheduler, dispatcher,
             apu_acknowledgement_wait, 20, 20);
+    if (!live_spc) flush_cpu_writes(timed_bus.master_clocks());
     result.apu_port0_output = hardware_bus.apu_output_ports()[0];
     result.apu_cc_acknowledged = live_spc && result.apu_port0_output == 0xccU;
     if (result.scpu_apu_wait_observation.status
@@ -312,9 +448,9 @@ BootProbeResult run_boot_probe(
             result.status = BootProbeStatus::timing_debt;
             return result;
         }
-        scpu_timing = clocks.account_scpu_accesses(bus.timing_accesses());
+        scpu_timing = clocks.account_scpu_accesses(timed_bus.timing_accesses());
     }
-    result.scpu_accesses_recorded = bus.accesses().size();
+    result.scpu_accesses_recorded = timed_bus.accesses().size();
     result.scpu_master_ready = scpu_timing.ready_at;
     result.spc_master_ready = clocks.ready_at(ClockDomain::spc);
     result.timing_status = scpu_timing.status;
@@ -323,6 +459,10 @@ BootProbeResult run_boot_probe(
         if (timing.spc_ipl.empty() || !hardware_bus.provision_spc_ipl(timing.spc_ipl)) {
             result.status = BootProbeStatus::spc_provision_failed;
             return result;
+        }
+        if (timing.event_chain && hardware_bus.spc_core()) {
+            hardware_bus.spc_core()->set_port_write_sink(
+                &pending_spc_writes, &capture_spc_port_write);
         }
         for (const auto& point : timing.spc_steps) {
             if (point.at > kSnesFirstFrameMasterClock
@@ -369,6 +509,7 @@ BootProbeResult run_boot_probe(
                 result.status = BootProbeStatus::spc_step_failed;
                 return result;
             }
+            flush_spc_writes(event->at);
             ++result.spc_steps_completed;
         } else if (event->kind == CoordinatorEventKind::scpu_irq
             || event->kind == CoordinatorEventKind::scpu_nmi
@@ -378,6 +519,7 @@ BootProbeResult run_boot_probe(
                 : event->kind == CoordinatorEventKind::scpu_nmi
                     ? CpuAsyncSignal::nmi : CpuAsyncSignal::reset;
             result.last_cpu_signal = service_lifted_async_signal(result.scpu, bus, signal);
+            flush_cpu_writes(event->at);
             ++result.cpu_signals_processed;
         } else if (event->kind == CoordinatorEventKind::first_frame) {
             result.first_frame_event_seen = true;
@@ -406,6 +548,9 @@ BootProbeResult run_boot_probe(
             *host, result.frame.frame, controllers);
     }
     result.status = BootProbeStatus::expected_frontier_reached;
+    if (timing.event_chain) {
+        result.event_chain_summary = timing.event_chain->summary();
+    }
     return result;
 }
 

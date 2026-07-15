@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "boundary": "live_scpu_spc_then_scheduled_first_frame",
+  "master_clock": 306900,
+  "probe_status": "expected_frontier_reached",
+  "capture_fidelity": "instruction-retirement-cpu-and-architectural-spc-cycles",
+  "data_boundary": "sanitized-digests-and-counts-only",
+  "full_first_frame_parity_proven": false,
+  "chains": {
+    "cpu_writes": {"runtime_records": 18679, "reference_records": 26906, "delta": -8227, "runtime_sha256": "849d6247359553a61e5b2e879304ea507255d9a700ac110dfdffed7de079fac5", "matches": false},
+    "scpu_writes": {"runtime_records": 8675, "reference_records": 16902, "delta": -8227, "runtime_sha256": "195700da7c8d24732d7396c6bbc2b51f3134857cc2a17908b1fad65b2f87e8ba", "matches": false},
+    "sa1_writes": {"runtime_records": 10004, "reference_records": 10004, "delta": 0, "runtime_sha256": "adcb17f6246d00f9c0931bc2f5010747e749482b7726a199f7851cfc583a4e64", "matches": false},
+    "ppu_register_writes": {"runtime_records": 54, "reference_records": 54, "delta": 0, "runtime_sha256": "5a7fc9920e3713e343bf6ca50ff84cedb988978bbedc5987ea48cf54d1212158", "matches": false},
+    "dma_register_writes": {"runtime_records": 23, "reference_records": 23, "delta": 0, "runtime_sha256": "a442d1a89d142105e6153f5df2121d313ab3895ccffe25cf68ea71c0b1678a8c", "matches": false},
+    "spc_ports": {"runtime_records": 465, "reference_records": 462, "delta": 3, "runtime_sha256": "5ae10ce7a6bebcd609824fbd1d1b642d965a00b40df1efa027afbb09dcf26fc3", "matches": false}
+  },
+  "spc_directions": {
+    "cpu_to_spc": {"runtime_records": 310, "reference_records": 308, "delta": 2},
+    "spc_to_cpu": {"runtime_records": 155, "reference_records": 154, "delta": 1}
+  },
+  "hard_gaps": [
+    "The staged S-CPU/SA-1 boot omits 8227 reference S-CPU writes because it does not yet interleave S-CPU polling with the two long SA-1 MVN transfers.",
+    "CPU write cycles are retirement stamps, so even equal-count SA-1, PPU, and DMA subsets cannot match cycle-and-ordinal digests.",
+    "The reset-release correction leaves only 3 extra bidirectional SPC write events before the scheduled boundary, but exact SPC microphase scheduling and digest parity remain unproven."
+  ]
+}

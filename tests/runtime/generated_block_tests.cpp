@@ -127,7 +127,7 @@ void test_sa1_complete_prefix_checkpoint() {
     assert(result.status == kss::GeneratedRunStatus::checkpoint_reached);
     assert(result.completed_blocks == 18U);
     assert(cpu.processor == kss::ProcessorId::sa1 && cpu.pc == 0x8c20);
-    assert(cpu.program_bank == 0 && !cpu.emulation && cpu.cycles == 96);
+    assert(cpu.program_bank == 0 && !cpu.emulation && cpu.cycles == 1550U);
     assert(cpu.a == 0x07fe && cpu.x == 0x3000 && cpu.y == 0x3001);
     assert(cpu.status == 0x05);
 }
@@ -150,7 +150,7 @@ void test_sa1_full_reset_block_checkpoint() {
     assert(result.completed_blocks == 2065U);
     assert(cpu.address() == 0x008c23 && cpu.a == 0xffff);
     assert(cpu.x == 0x37ff && cpu.y == 0x3800 && cpu.data_bank == 0);
-    assert(cpu.cycles == 20557U && bus.writes.size() == 2055U);
+    assert(cpu.cycles == 22011U && bus.writes.size() == 2055U);
 }
 
 void test_wrong_identity_and_bounds_fail_closed() {

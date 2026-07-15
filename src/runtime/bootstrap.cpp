@@ -153,7 +153,56 @@ BootstrapExitCode run_bootstrap(
            << std::dec << std::nouppercase << std::setfill(' ') << "\n"
            << "  S-CPU timed accesses: " << probe.scpu_accesses_recorded << "\n"
            << "  S-CPU ready master: " << probe.scpu_master_ready << "\n"
-           << "  SA-1 ready master: " << probe.sa1_master_ready << "\n";
+           << "  SA-1 ready master: " << probe.sa1_master_ready << "\n"
+           << "  SPC ready master: " << probe.spc_master_ready << "\n"
+           << "  SPC instructions: " << probe.spc_steps_completed << "\n"
+           << "  SPC architectural cycles: "
+           << (probe.spc_registers ? probe.spc_registers->cycles : 0U) << "\n";
+    if (probe.live_domains_reached_first_frame) {
+        output << "  Live S-CPU/SPC covered frame master "
+               << kSnesFirstFrameMasterClock << " after "
+               << probe.scpu_frame_observation.completed_blocks
+               << " additional generated blocks\n"
+               << "  Exact S-CPU boundary observation: ";
+        if (probe.scpu_first_frame_boundary) {
+            const auto& boundary = *probe.scpu_first_frame_boundary;
+            output << "block $" << std::hex << std::uppercase << std::setfill('0')
+                   << std::setw(6) << boundary.block.address << std::dec
+                   << std::nouppercase << std::setfill(' ')
+                   << ", access " << boundary.current_access_index
+                   << ", elapsed " << boundary.elapsed_in_current_access
+                   << "/" << boundary.current_access_duration
+                   << " master clocks\n";
+        } else {
+            output << "unavailable\n";
+        }
+        output << "  Exact SPC boundary observation: ";
+        if (probe.spc_first_frame_boundary) {
+            const auto& boundary = *probe.spc_first_frame_boundary;
+            output << "status " << static_cast<unsigned>(boundary.status)
+                   << ", committed through master "
+                   << boundary.architectural_ready_at;
+            if (boundary.in_flight) {
+                output << ", elapsed " << boundary.in_flight->elapsed_master_clocks
+                       << "/"
+                       << (boundary.in_flight->elapsed_master_clocks
+                           + boundary.in_flight->remaining_master_clocks)
+                       << " master clocks, entry cycles "
+                       << boundary.in_flight->architectural_entry.cycles
+                       << ", instruction cycles "
+                       << static_cast<unsigned>(
+                           boundary.in_flight->pending_instruction.instruction_cycles)
+                       << ", completion master "
+                       << boundary.in_flight->instruction_completion
+                       << ", remainders "
+                       << boundary.in_flight->clock_remainder_at_entry << " -> "
+                       << boundary.in_flight->clock_remainder_at_completion;
+            }
+            output << "\n";
+        } else {
+            output << "unavailable\n";
+        }
+    }
     if (probe.status == BootProbeStatus::expected_frontier_reached) {
         output << "Expected hardware-gated checkpoint and local generated timing stream accepted\n";
     } else if (probe.status == BootProbeStatus::timing_debt) {

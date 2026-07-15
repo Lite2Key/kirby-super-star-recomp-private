@@ -34,6 +34,9 @@ struct DmaPortWrite {
 
 class RomBackedDualBus final : public Bus {
 public:
+    using CpuWriteSink = void (*)(void* context, ProcessorId processor,
+        std::uint32_t address, std::uint8_t value) noexcept;
+
     explicit RomBackedDualBus(std::span<const std::uint8_t> rom);
 
     [[nodiscard]] std::uint8_t read8(
@@ -76,6 +79,11 @@ public:
     [[nodiscard]] bool spc_provisioned() const noexcept;
     [[nodiscard]] apu::Spc700Core* spc_core() noexcept;
     [[nodiscard]] const apu::Spc700Core* spc_core() const noexcept;
+    // Optional memory-only observation, including DMA-origin recursive writes.
+    void set_cpu_write_sink(void* context, CpuWriteSink sink) noexcept {
+        cpu_write_context_ = context;
+        cpu_write_sink_ = sink;
+    }
 
 private:
     [[nodiscard]] static constexpr std::size_t processor_index(ProcessorId processor) noexcept {
@@ -98,6 +106,8 @@ private:
     std::uint32_t wram_port_address_{};
     std::vector<DmaTransferRecord> dma_transfers_;
     std::vector<DmaPortWrite> dma_port_writes_;
+    void* cpu_write_context_{};
+    CpuWriteSink cpu_write_sink_{};
 };
 
 } // namespace kss

@@ -18,17 +18,39 @@
     "first_frame_event_seen": true,
     "apu_cc_acknowledged": true,
     "executed_generated_identities": 254,
+    "sa1": {
+      "ready_master_clock": 225694,
+      "identity_pc": 35928,
+      "reference_first_identity_master_clock": 225664,
+      "interleaved_through_frame": false
+    },
     "scpu": {
-      "ready_master_clock": 306912,
-      "overshoot_master_clocks": 12,
-      "identity_pc": 54872,
-      "post_inventory_blocks": 7362
+      "ready_master_clock": 306908,
+      "overshoot_master_clocks": 8,
+      "identity_pc": 54882,
+      "post_inventory_blocks": 3825,
+      "exact_boundary": {
+        "block_identity_pc": 54880,
+        "access_index": 1,
+        "access_start_master_clock": 306900,
+        "elapsed_master_clocks": 0,
+        "sequencer_pc": 54881
+      }
     },
     "spc": {
-      "ready_master_clock": 306973,
-      "overshoot_master_clocks": 73,
-      "instructions": 3864,
-      "architectural_cycles": 14636
+      "ready_master_clock": 307015,
+      "overshoot_master_clocks": 115,
+      "instructions": 3662,
+      "architectural_cycles": 14638,
+      "exact_boundary": {
+        "architectural_entry_master_clock": 306869,
+        "architectural_entry_cycles": 14631,
+        "pending_instruction_cycles": 7,
+        "elapsed_master_clocks": 31,
+        "completion_master_clock": 307015,
+        "entry_rational_remainder": 110632,
+        "completion_rational_remainder": 947536
+      }
     }
   },
   "claims": {
@@ -37,17 +59,19 @@
     "exact_scpu_state_parity_proven": false,
     "exact_spc_state_parity_proven": false,
     "full_first_frame_parity_proven": false,
-    "hard_boundary": "whole_generated_scpu_block_and_spc_instruction_timing"
+    "hard_boundary": "sub_instruction_state_parity_and_cross_domain_event_order"
   },
   "residual": {
-    "reason": "the reference boundary falls between runtime whole-instruction checkpoints",
-    "required_proof": "sub-instruction suspension plus reference-ordered S-CPU/SPC event parity"
+    "reason": "exact S-CPU and SPC positions are represented, but their architectural state and cross-domain event digests do not yet match the reference",
+    "required_proof": "genuinely interleaved S-CPU/SA-1 reset execution followed by reference-ordered S-CPU/SPC event parity"
   },
   "sources": [
     "analysis/differential/first-frame-reference.json",
     "analysis/coverage/boot-probe-identity-coverage.json",
     "include/kss/boot_probe.hpp",
     "src/runtime/boot_probe.cpp",
+    "include/kss/scpu_access_boundary.hpp",
+    "include/kss/spc_exact_master.hpp",
     "tests/runtime/boot_probe_clock_tests.cpp"
   ]
 }

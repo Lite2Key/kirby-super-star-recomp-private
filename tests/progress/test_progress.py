@@ -74,15 +74,16 @@ class ProgressTests(unittest.TestCase):
         self.assertFalse(sync["full_parity_proven"])
         self.assertEqual(
             [(item["id"], item["value"], item["target"]) for item in sync["domains"]],
-            [("scpu", 306912, 306900), ("sa1", 306896, 306900),
-             ("spc", 306973, 306900)],
+            [("scpu", 306900, 306900), ("sa1", 225694, 306900),
+             ("spc", 306900, 306900)],
         )
         self.assertEqual(
             [(item["id"], item["value"], item["target"]) for item in sync["chains"]],
-            [("cpu-writes", 0, 26906), ("spc-ports", 0, 462),
-             ("ppu-events", 0, 54), ("dma-events", 0, 23)],
+            [("cpu-writes", 18679, 26906), ("spc-ports", 465, 462),
+             ("ppu-events", 54, 54), ("dma-events", 23, 23)],
         )
-        self.assertEqual(len(sync["sources"]), 4)
+        self.assertTrue(all(not item["matches"] for item in sync["chains"]))
+        self.assertEqual(len(sync["sources"]), 8)
         self.assertIn("sa1-first-endframe-domain.json", sync["sources"][1])
 
     def test_boundary_sync_template_exposes_clock_and_event_gaps(self):
@@ -90,6 +91,16 @@ class ProgressTests(unittest.TestCase):
         self.assertIn('id="boundary-sync"', template)
         self.assertIn("Hardware-boundary synchronization", template)
         self.assertIn("Event-chain proof", template)
+        self.assertIn("ordered digest", template)
+
+    def test_github_pages_workflow_publishes_only_the_rom_free_site(self):
+        workflow = (ROOT / ".github" / "workflows" / "progress-pages.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("actions/upload-pages-artifact@v3", workflow)
+        self.assertIn("actions/deploy-pages@v4", workflow)
+        self.assertIn("path: progress/site", workflow)
+        self.assertNotIn("path: .\n", workflow)
 
     def test_workstream_atlas_has_explicit_remaining_checkpoints(self):
         template = (ROOT / "progress" / "template.html").read_text(encoding="utf-8")

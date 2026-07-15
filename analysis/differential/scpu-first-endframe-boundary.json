@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "boundary": "first_end_frame",
+  "target_master_clock": 306900,
+  "data_boundary": {
+    "policy": "sanitized-identities-and-value-free-access-timing-only",
+    "rom_bytes_included": false,
+    "private_trace_records_included": false,
+    "patched_state": false
+  },
+  "runtime_access_window": {
+    "generated_block_identity_pc": 54880,
+    "generated_block_identity_hex": "00:D660",
+    "block_start_master_clock": 306892,
+    "block_end_master_clock": 306908,
+    "accesses": 2,
+    "completed_accesses_at_target": 1,
+    "current_access_index": 1,
+    "current_access_kind": "operand",
+    "current_access_address_hex": "00:D661",
+    "current_access_start_master_clock": 306900,
+    "current_access_duration_master_clocks": 8,
+    "elapsed_in_current_access_master_clocks": 0,
+    "committed_cpu_context_pc_hex": "00:D660",
+    "sequencer_pc_hex": "00:D661",
+    "architectural_state_committed": false,
+    "remaining_master_clocks": 8
+  },
+  "reference": {
+    "sequencer_pc_hex": "00:D659"
+  },
+  "claims": {
+    "exact_runtime_suspension_represented": true,
+    "whole_block_rounding_required": false,
+    "pc_or_full_state_parity_proven": false,
+    "first_hard_divergence": "After applying the reference SA-1 reset-release and post-reset wait correction, master 306900 falls exactly at the operand-fetch boundary of 00:D660 with visible PC 00:D661, while the reference reports 00:D659. The remaining two-byte lead requires genuine S-CPU/SA-1 interleaving, not a local instruction-duration patch."
+  },
+  "sources": [
+    "analysis/differential/live-first-frame-scheduler.json",
+    "analysis/differential/first-frame-reference.json",
+    "analysis/differential/scpu-phase-divergence-origin.json",
+    "include/kss/boot_probe.hpp",
+    "src/runtime/boot_probe.cpp",
+    "src/recompiled/first_frame_blocks.cpp",
+    "include/kss/scpu_access_boundary.hpp",
+    "src/runtime/scpu_access_boundary.cpp",
+    "tests/runtime/scpu_access_boundary_tests.cpp"
+  ]
+}

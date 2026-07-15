@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "boundary": "earliest_provable_scpu_phase_divergence_origin",
+  "data_boundary": {
+    "policy": "sanitized-identities-counts-and-timing-only",
+    "rom_bytes_included": false,
+    "private_trace_records_included": false,
+    "architectural_state_values_included": false,
+    "patched_state": false
+  },
+  "last_matched_sa1_slice": {
+    "entry_pc_hex": "00:8BF4",
+    "exit_pc_hex": "00:8C23",
+    "reference_cycle_start": 1454,
+    "reference_cycle_end": 22011,
+    "reference_cycle_delta": 20557,
+    "runtime_cycle_delta": 20557,
+    "instruction_and_wait_delta_match": true
+  },
+  "earliest_provable_divergences": [
+    {
+      "kind": "missing_reset_hold_origin",
+      "boundary_pc_hex": "00:8BF4",
+      "reference_first_execution_cycle": 1454,
+      "runtime_cpu_context_origin_cycle": 0,
+      "missing_sa1_cycles": 1454,
+      "missing_master_clocks": 2908,
+      "reason": "The generated reset slice preserves the measured 20557-cycle execution delta, but the runtime SA-1 CpuContext begins at cycle zero and later accounts only CpuContext.cycles. The pre-execution reset hold is therefore absent from the domain cursor."
+    },
+    {
+      "kind": "missing_post_reset_access_wait",
+      "instruction_pc_hex": "00:8C23",
+      "reference_start_cycle": 22011,
+      "reference_next_cycle": 22016,
+      "reference_instruction_cycles": 5,
+      "runtime_modeled_instruction_cycles": 3,
+      "additional_missing_sa1_cycles": 2,
+      "reason": "The first instruction after the measured reset slice uses base 65C816 timing because the SA-1 timing table has no post-reset entry. This is the first instruction-local duration divergence after normalizing away the reset hold."
+    }
+  ],
+  "accumulated_checkpoint_divergence": {
+    "identity_pc_hex": "00:8C58",
+    "runtime_sa1_cycle": 76176,
+    "runtime_ready_master_clock": 152352,
+    "reference_first_identity_cycle": 112832,
+    "reference_ready_master_clock": 225664,
+    "sa1_cycle_shortfall": 36656,
+    "master_clock_shortfall": 73312,
+    "reference_identity_at_runtime_ready_window": "00:8C2C",
+    "reason": "Missing post-reset SA-1 memory/arbitration waits accumulate across the second block move. The runtime has produced the shared-I-RAM release state and reached the poll while the reference is still executing 00:8C2C."
+  },
+  "final_upload_loop_audit": {
+    "reference_d655_to_d658_cycles": 4,
+    "runtime_d655_access_master_clocks": 30,
+    "reference_d658_taken_to_d655_cycles": 3,
+    "runtime_d658_access_master_clocks": 16,
+    "local_access_sequence_or_duration_bug_proven": false,
+    "exact_frame_runtime_sequencer_pc_hex": "00:D658",
+    "exact_frame_reference_sequencer_pc_hex": "00:D659",
+    "conclusion": "The final pair is internally consistent with the reference instruction deltas. Its one-byte frame-boundary lag cannot be repaired honestly by shortening a D655 or D658 access."
+  },
+  "causal_chain": [
+    "The SA-1 reset-release origin omits 1454 pre-execution cycles.",
+    "Post-reset SA-1 access waits first diverge at 00:8C23 and accumulate through 00:8C2C.",
+    "The runtime reaches 00:8C58 73312 master clocks before the reference identity timestamp.",
+    "The staged probe exposes shared-I-RAM completion and releases the waiting S-CPU from this early checkpoint.",
+    "The otherwise-correct upload loop therefore arrives at first endFrame with a different instruction phase."
+  ],
+  "claims": {
+    "earliest_provable_boundary_identified": true,
+    "final_d655_local_fix_justified": false,
+    "safe_local_correction_available": false,
+    "reference_timing_correction_implemented": true,
+    "remaining_interleaving_correction_implemented": false,
+    "required_correction_scope": "Model the SA-1 reset-release timestamp and post-reset access/arbitration waits in a genuinely interleaved scheduler before claiming exact S-CPU frame phase."
+  },
+  "sources": [
+    "analysis/differential/reset-block-reference.json",
+    "analysis/coverage/first-frame-dual.json",
+    "analysis/differential/sa1-first-endframe-domain.json",
+    "analysis/differential/scpu-first-endframe-boundary.json",
+    "src/runtime/boot_probe.cpp",
+    "src/runtime/sa1_timing.cpp",
+    "src/recompiled/first_frame_blocks.cpp",
+    "tests/runtime/generated_block_tests.cpp"
+  ]
+}

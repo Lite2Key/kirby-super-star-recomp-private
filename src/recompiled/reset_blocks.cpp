@@ -12,15 +12,23 @@ void block_sa1_008bf4_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x78, {0x00, 0x00, 0x00}, 0};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF5U, true, true, true)) { cpu.stopped = true; }
 }
 
@@ -31,15 +39,23 @@ void block_sa1_008bf5_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x18, {0x00, 0x00, 0x00}, 0};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF6U, true, true, true)) { cpu.stopped = true; }
 }
 
@@ -50,15 +66,23 @@ void block_sa1_008bf6_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xFB, {0x00, 0x00, 0x00}, 0};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF7U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -69,15 +93,23 @@ void block_sa1_008bf7_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xE2, {0x20, 0x00, 0x00}, 1};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF9U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -88,15 +120,23 @@ void block_sa1_008bf9_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x9C, {0x30, 0x22, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BFCU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -107,15 +147,23 @@ void block_sa1_008bfc_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x9C, {0x09, 0x22, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BFFU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -126,15 +174,23 @@ void block_sa1_008bff_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA9, {0xFF, 0x00, 0x00}, 1};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C01U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -145,15 +201,23 @@ void block_sa1_008c01_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x8D, {0x2A, 0x22, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C04U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -164,15 +228,23 @@ void block_sa1_008c04_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x9C, {0x25, 0x22, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C07U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -183,15 +255,23 @@ void block_sa1_008c07_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA9, {0x80, 0x00, 0x00}, 1};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C09U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -202,15 +282,23 @@ void block_sa1_008c09_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x8D, {0x27, 0x22, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C0CU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -221,15 +309,23 @@ void block_sa1_008c0c_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x8D, {0x0A, 0x22, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C0FU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -240,15 +336,23 @@ void block_sa1_008c0f_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x9C, {0x00, 0x30, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C12U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -259,15 +363,23 @@ void block_sa1_008c12_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x9C, {0x00, 0x60, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C15U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -278,15 +390,23 @@ void block_sa1_008c15_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xC2, {0x30, 0x00, 0x00}, 1};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C17U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -297,15 +417,23 @@ void block_sa1_008c17_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA2, {0x00, 0x30, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C1AU, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -316,15 +444,23 @@ void block_sa1_008c1a_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA0, {0x01, 0x30, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C1DU, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -335,15 +471,23 @@ void block_sa1_008c1d_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA9, {0xFE, 0x07, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C20U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -354,15 +498,23 @@ void block_sa1_008c20_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x54, {0x00, 0x00, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C20U, false, false, false) && cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C23U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -373,15 +525,23 @@ void block_sa1_008c23_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA2, {0x00, 0x60, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C26U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -392,15 +552,23 @@ void block_sa1_008c26_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA0, {0x01, 0x60, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C29U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -411,15 +579,23 @@ void block_sa1_008c29_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0xA9, {0xFE, 0x1E, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C2CU, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -430,15 +606,23 @@ void block_sa1_008c2c_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
         0x54, {0x00, 0x00, 0x00}, 2};
     observe_generated_instruction_fetches(
         bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C2CU, false, false, false)) { cpu.stopped = true; }
 }
 

@@ -78,6 +78,10 @@ void RomBackedDualBus::write8(
     std::uint32_t address,
     std::uint8_t value,
     BusAccessKind kind) {
+    address &= 0x00ff'ffffU;
+    if (cpu_write_sink_) {
+        cpu_write_sink_(cpu_write_context_, processor, address, value);
+    }
     open_bus_[processor_index(processor)] = value;
     const auto mapping = map_address(processor, address);
     if (!has_permission(mapping.permissions, MemoryPermission::write)) {

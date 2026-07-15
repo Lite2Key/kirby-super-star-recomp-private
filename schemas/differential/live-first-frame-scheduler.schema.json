@@ -28,32 +28,69 @@
     },
     "runtime": {
       "type": "object",
-      "required": ["status", "master_now", "first_frame_event_seen", "apu_cc_acknowledged", "executed_generated_identities", "scpu", "spc"],
+      "required": ["status", "master_now", "first_frame_event_seen", "apu_cc_acknowledged", "executed_generated_identities", "sa1", "scpu", "spc"],
       "properties": {
         "status": {"const": "expected_frontier_reached"},
         "master_now": {"const": 306900},
         "first_frame_event_seen": {"const": true},
         "apu_cc_acknowledged": {"const": true},
         "executed_generated_identities": {"const": 254},
+        "sa1": {
+          "type": "object",
+          "required": ["ready_master_clock", "identity_pc", "reference_first_identity_master_clock", "interleaved_through_frame"],
+          "properties": {
+            "ready_master_clock": {"type": "integer", "minimum": 1},
+            "identity_pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
+            "reference_first_identity_master_clock": {"const": 225664},
+            "interleaved_through_frame": {"const": false}
+          },
+          "additionalProperties": false
+        },
         "scpu": {
           "type": "object",
-          "required": ["ready_master_clock", "overshoot_master_clocks", "identity_pc", "post_inventory_blocks"],
+          "required": ["ready_master_clock", "overshoot_master_clocks", "identity_pc", "post_inventory_blocks", "exact_boundary"],
           "properties": {
             "ready_master_clock": {"type": "integer", "minimum": 306900},
             "overshoot_master_clocks": {"type": "integer", "minimum": 0},
             "identity_pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
-            "post_inventory_blocks": {"type": "integer", "minimum": 1}
+            "post_inventory_blocks": {"type": "integer", "minimum": 1},
+            "exact_boundary": {
+              "type": "object",
+              "required": ["block_identity_pc", "access_index", "access_start_master_clock", "elapsed_master_clocks", "sequencer_pc"],
+              "properties": {
+                "block_identity_pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
+                "access_index": {"type": "integer", "minimum": 0},
+                "access_start_master_clock": {"const": 306900},
+                "elapsed_master_clocks": {"const": 0},
+                "sequencer_pc": {"type": "integer", "minimum": 0, "maximum": 16777215}
+              },
+              "additionalProperties": false
+            }
           },
           "additionalProperties": false
         },
         "spc": {
           "type": "object",
-          "required": ["ready_master_clock", "overshoot_master_clocks", "instructions", "architectural_cycles"],
+          "required": ["ready_master_clock", "overshoot_master_clocks", "instructions", "architectural_cycles", "exact_boundary"],
           "properties": {
             "ready_master_clock": {"type": "integer", "minimum": 306900},
             "overshoot_master_clocks": {"type": "integer", "minimum": 0},
             "instructions": {"type": "integer", "minimum": 1},
-            "architectural_cycles": {"type": "integer", "minimum": 1}
+            "architectural_cycles": {"type": "integer", "minimum": 1},
+            "exact_boundary": {
+              "type": "object",
+              "required": ["architectural_entry_master_clock", "architectural_entry_cycles", "pending_instruction_cycles", "elapsed_master_clocks", "completion_master_clock", "entry_rational_remainder", "completion_rational_remainder"],
+              "properties": {
+                "architectural_entry_master_clock": {"type": "integer", "minimum": 0, "maximum": 306900},
+                "architectural_entry_cycles": {"type": "integer", "minimum": 1},
+                "pending_instruction_cycles": {"type": "integer", "minimum": 1},
+                "elapsed_master_clocks": {"type": "integer", "minimum": 0},
+                "completion_master_clock": {"type": "integer", "minimum": 306900},
+                "entry_rational_remainder": {"type": "integer", "minimum": 0},
+                "completion_rational_remainder": {"type": "integer", "minimum": 0}
+              },
+              "additionalProperties": false
+            }
           },
           "additionalProperties": false
         }
@@ -69,7 +106,7 @@
         "exact_scpu_state_parity_proven": {"const": false},
         "exact_spc_state_parity_proven": {"const": false},
         "full_first_frame_parity_proven": {"const": false},
-        "hard_boundary": {"const": "whole_generated_scpu_block_and_spc_instruction_timing"}
+        "hard_boundary": {"const": "sub_instruction_state_parity_and_cross_domain_event_order"}
       },
       "additionalProperties": false
     },

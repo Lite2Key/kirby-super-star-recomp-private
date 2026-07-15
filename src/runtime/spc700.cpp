@@ -77,7 +77,12 @@ void Spc700Core::write8(std::uint16_t address, std::uint8_t value) noexcept {
         }
         return;
     case 0x00f4: case 0x00f5: case 0x00f6: case 0x00f7:
-        spc_to_cpu_[address - 0x00f4U] = value; return;
+        spc_to_cpu_[address - 0x00f4U] = value;
+        if (port_write_sink_) {
+            port_write_sink_(port_write_context_, registers_.cycles,
+                static_cast<std::uint8_t>(address - 0x00f4U), value);
+        }
+        return;
     case 0x00f8: case 0x00f9: auxiliary_io_[address - 0x00f8U] = value; return;
     case 0x00fa: case 0x00fb: case 0x00fc:
         timers_[address - 0x00faU].target = value; return;

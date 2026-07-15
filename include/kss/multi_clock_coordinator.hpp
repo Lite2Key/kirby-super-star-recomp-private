@@ -60,6 +60,19 @@ struct DomainAdvanceResult {
     MasterClock ready_at{};
 };
 
+// A non-mutating projection from the current SPC clock-source phase.  The
+// remainder is part of the clock position: dropping it would make a later
+// instruction boundary drift by a master clock.
+struct SpcClockProjection {
+    CoordinatorStatus status{CoordinatorStatus::timing_debt};
+    std::uint64_t architectural_cycles{};
+    MasterClock start_at{};
+    MasterClock master_clocks{};
+    MasterClock ready_at{};
+    std::uint64_t start_remainder{};
+    std::uint64_t completion_remainder{};
+};
+
 struct SnesBusAccessTiming {
     std::uint32_t address{};
     bool fast_rom_enabled{};
@@ -92,6 +105,9 @@ public:
     // SNES master domain with a retained rational remainder so repeated small
     // instruction advances cannot accumulate truncation drift.
     [[nodiscard]] DomainAdvanceResult account_spc_cycles(std::uint64_t cycles) noexcept;
+    [[nodiscard]] SpcClockProjection preview_spc_cycles(
+        std::uint64_t cycles) const noexcept;
+    [[nodiscard]] std::uint64_t spc_clock_remainder() const noexcept;
 
     // A hardware wait may make one processor causally dependent on another
     // domain without consuming fabricated processor cycles.
