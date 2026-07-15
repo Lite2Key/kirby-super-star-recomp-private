@@ -22,19 +22,24 @@
       "ready_master_clock": 225694,
       "identity_pc": 35928,
       "reference_first_identity_master_clock": 225664,
+      "reset_release_master_clock": 2908,
+      "first_instruction_completion_master_clock": 2912,
+      "interleaved_reset_scpu_blocks": 8538,
+      "reset_domain_switches": 11410,
+      "interleaved_through_reset_and_mvn": true,
       "interleaved_through_frame": false
     },
     "scpu": {
-      "ready_master_clock": 306908,
-      "overshoot_master_clocks": 8,
-      "identity_pc": 54882,
-      "post_inventory_blocks": 3825,
+      "ready_master_clock": 306934,
+      "overshoot_master_clocks": 34,
+      "identity_pc": 54880,
+      "post_inventory_blocks": 3826,
       "exact_boundary": {
-        "block_identity_pc": 54880,
-        "access_index": 1,
-        "access_start_master_clock": 306900,
-        "elapsed_master_clocks": 0,
-        "sequencer_pc": 54881
+        "block_identity_pc": 54877,
+        "access_index": 0,
+        "access_start_master_clock": 306898,
+        "elapsed_master_clocks": 2,
+        "sequencer_pc": 54878
       }
     },
     "spc": {
@@ -59,11 +64,12 @@
     "exact_scpu_state_parity_proven": false,
     "exact_spc_state_parity_proven": false,
     "full_first_frame_parity_proven": false,
-    "hard_boundary": "sub_instruction_state_parity_and_cross_domain_event_order"
+    "cooperative_reset_schedule_proven": true,
+    "hard_boundary": "post_reset_sa1_polling_sub_instruction_state_parity_and_cross_domain_event_order"
   },
   "residual": {
-    "reason": "exact S-CPU and SPC positions are represented, but their architectural state and cross-domain event digests do not yet match the reference",
-    "required_proof": "genuinely interleaved S-CPU/SA-1 reset execution followed by reference-ordered S-CPU/SPC event parity"
+    "reason": "reset and both MVNs now run cooperatively, but SA-1 polling is not scheduled through the frame and exact S-CPU/SPC architectural state plus most cross-domain event digests do not yet match the reference",
+    "required_proof": "schedule the post-reset SA-1 poll through the frame, correct reset-DMA side-effect observation, and close reference-ordered S-CPU/SPC event parity"
   },
   "sources": [
     "analysis/differential/first-frame-reference.json",

@@ -38,6 +38,7 @@ ScpuAccessBoundary observe_scpu_access_boundary(
         result.status = ScpuAccessBoundaryStatus::target_before_block;
         return result;
     }
+    result.total_accesses = accesses.size();
 
     auto expected_fetch = block.address;
     bool data_phase = false;

@@ -61,6 +61,11 @@ struct BootProbeResult {
     BootProbeStatus status{BootProbeStatus::scpu_setup_failed};
     GeneratedRunResult scpu_setup{};
     GeneratedRunResult sa1_initialization{};
+    // S-CPU work performed after it first reaches the shared-I-RAM wait while
+    // SA-1 reset code is still running.  The two domains are selected by their
+    // next ready master-clock cursor; this is separate from the later SPC
+    // upload interleave.
+    GeneratedRunResult scpu_sa1_interleave{};
     // One complete trip around the hardware-gated SA-1 $300A poll. Reaching
     // the same checkpoint after two blocks proves the wait without inventing
     // the external event that releases it.
@@ -93,6 +98,12 @@ struct BootProbeResult {
     MasterClock scpu_master_ready{};
     std::size_t scpu_accesses_recorded{};
     MasterClock sa1_master_ready{};
+    MasterClock sa1_release_master{};
+    MasterClock sa1_master_at_first_completion{};
+    MasterClock scpu_master_at_sa1_first_dispatch{};
+    MasterClock scpu_master_at_sa1_checkpoint{};
+    std::size_t reset_domain_switches{};
+    bool reset_domains_interleaved{};
     MasterClock spc_master_ready{};
     MasterClock master_now{};
     bool live_domains_reached_first_frame{};

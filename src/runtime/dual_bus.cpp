@@ -135,10 +135,21 @@ void RomBackedDualBus::write_snes_register(
     snes_registers_[snes_register_index(offset)] = value;
     snes_io_.write(offset, value);
     switch (offset) {
-    case 0x2180: // WMDATA
-        wram_[wram_port_address_ & 0x1ffffU] = value;
+    case 0x2180: { // WMDATA
+        const auto physical_address = wram_port_address_ & 0x1ffffU;
+        wram_[physical_address] = value;
+        // A WMDATA access is observable first at the B-bus port and then at
+        // the physical WRAM location it updates.  write8() has already
+        // reported the port access; mirror the resulting memory-side event so
+        // the runtime stream has the same callback semantics as hardware
+        // traces, including DMA-origin WMDATA transfers.
+        if (cpu_write_sink_) {
+            cpu_write_sink_(cpu_write_context_, ProcessorId::snes_cpu,
+                0x007e'0000U | physical_address, value);
+        }
         wram_port_address_ = (wram_port_address_ + 1U) & 0x1ffffU;
         break;
+    }
     case 0x2181: // WMADDL
         wram_port_address_ = (wram_port_address_ & 0x1ff00U) | value;
         break;

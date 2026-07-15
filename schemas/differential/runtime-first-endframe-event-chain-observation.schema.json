@@ -8,7 +8,7 @@
     "boundary": {"const": "live_scpu_spc_then_scheduled_first_frame"},
     "master_clock": {"const": 306900},
     "probe_status": {"const": "expected_frontier_reached"},
-    "capture_fidelity": {"const": "instruction-retirement-cpu-and-architectural-spc-cycles"},
+    "capture_fidelity": {"const": "cooperative-reset-whole-instruction-cpu-and-architectural-spc-cycles"},
     "data_boundary": {"const": "sanitized-digests-and-counts-only"},
     "full_first_frame_parity_proven": {"const": false},
     "chains": {"type": "object", "minProperties": 6, "maxProperties": 6, "additionalProperties": {"$ref": "#/$defs/chain"}},

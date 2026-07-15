@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "boundary", "repeat_captures", "frame_marker", "master_clock", "width", "height", "source_pixel_format", "artifact_format", "nonzero_pixels", "png_sha256", "scpu_cycle_observations", "claims", "data_boundary"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source_format": {"const": "kss-mesen-visible-frame-v1"},
+    "boundary": {"const": "first_nonblack_end_frame"},
+    "repeat_captures": {"type": "integer", "minimum": 2},
+    "frame_marker": {"type": "integer", "minimum": 2},
+    "master_clock": {"type": "integer", "minimum": 306901},
+    "width": {"const": 256},
+    "height": {"const": 239},
+    "source_pixel_format": {"const": "argb8888"},
+    "artifact_format": {"const": "png-rgba8888"},
+    "nonzero_pixels": {"type": "integer", "minimum": 1, "maximum": 61184},
+    "png_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "scpu_cycle_observations": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"type": "integer", "minimum": 1}
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["master_clock_and_pixels_repeat_stable", "scpu_callback_cycle_repeat_stable", "visual_identity"],
+      "properties": {
+        "master_clock_and_pixels_repeat_stable": {"const": true},
+        "scpu_callback_cycle_repeat_stable": {"const": false},
+        "visual_identity": {"type": "string", "minLength": 1}
+      }
+    },
+    "data_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "pixel_payload_included", "private_paths_included", "rom_bytes_included"],
+      "properties": {
+        "policy": {"const": "sanitized-counts-timing-and-digest-only"},
+        "pixel_payload_included": {"const": false},
+        "private_paths_included": {"const": false},
+        "rom_bytes_included": {"const": false}
+      }
+    }
+  }
+}

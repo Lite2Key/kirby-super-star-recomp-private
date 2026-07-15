@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-07-15T01:38:43Z` | commit `6a1680c21f7f6e28b3e8a3d3aab028976c458fea` | tree `dirty`
+Snapshot: `2026-07-15T02:53:15Z` | commit `d697d0b04ba12f9369c51593c83e052a1ef3b347` | tree `dirty`
 
 ## Milestone map
 
@@ -27,17 +27,17 @@ Snapshot: `2026-07-15T01:38:43Z` | commit `6a1680c21f7f6e28b3e8a3d3aab028976c458
 |---|---|---:|---|
 | ROM and address map | classified banks | 0 / 64 | `fixed` |
 | Route coverage corpus | captured required routes | 1 / 14 | `fixed` |
-| Route coverage corpus | union observed identities | 254 / 254 | `evolving` |
-| S-CPU control flow | observed mode-aware blocks | 214 / 214 | `evolving` |
-| S-CPU control flow | verified blocks | 1 / 214 | `evolving` |
-| S-CPU control flow | semantics-supported identities | 214 / 214 | `evolving` |
-| SA-1 control flow | observed mode-aware blocks | 40 / 40 | `evolving` |
-| SA-1 control flow | verified blocks | 1 / 40 | `evolving` |
-| SA-1 control flow | semantics-supported identities | 40 / 40 | `evolving` |
+| Route coverage corpus | union observed identities | 2273 / 2273 | `evolving` |
+| S-CPU control flow | observed mode-aware blocks | 1032 / 1032 | `evolving` |
+| S-CPU control flow | verified blocks | 1 / 1032 | `evolving` |
+| S-CPU control flow | semantics-supported identities | 214 / 1032 | `evolving` |
+| SA-1 control flow | observed mode-aware blocks | 1241 / 1241 | `evolving` |
+| SA-1 control flow | verified blocks | 1 / 1241 | `evolving` |
+| SA-1 control flow | semantics-supported identities | 40 / 1241 | `evolving` |
 | 65C816 decoder and lifter | opcode definitions | 256 / 256 | `fixed` |
 | 65C816 decoder and lifter | executable opcode semantics | 256 / 256 | `fixed` |
-| 65C816 decoder and lifter | private generated block functions | 254 / 254 | `evolving` |
-| Deterministic scheduler | synchronization classes | 4 / 8 | `fixed` |
+| 65C816 decoder and lifter | private generated block functions | 254 / 2273 | `evolving` |
+| Deterministic scheduler | synchronization classes | 5 / 8 | `fixed` |
 | S-CPU and SA-1 address spaces | synthetic mapping groups | 7 / 7 | `fixed` |
 | PPU, DMA, APU, input, and save | validated subsystems | 5 / 5 | `fixed` |
 | PPU, DMA, APU, input, and save | SPC700 opcode semantics | 256 / 256 | `fixed` |
@@ -59,7 +59,8 @@ Snapshot: `2026-07-15T01:38:43Z` | commit `6a1680c21f7f6e28b3e8a3d3aab028976c458
 - `m2.reset-prefix` [MesenCE-matched S-CPU reset prefix](progress/evidence/m2-reset-prefix.md)
 - `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
-- `m3.local-verification` [194 Python and 25 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.first-visible-route` [Compact first-visible route and repeat-stable visual oracle](analysis/coverage/first-visible-route-coverage.json)
+- `m3.local-verification` [212 Python and 25 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -72,17 +73,17 @@ Snapshot: `2026-07-15T01:38:43Z` | commit `6a1680c21f7f6e28b3e8a3d3aab028976c458
 
 ## Next executable proof
 
-**Interleave S-CPU and SA-1 through reset** - owner: `runtime/validation`
+**Close post-reset polling and import the visible route** - owner: `runtime/validation`
 
-- [ ] Run S-CPU polling concurrently with both long SA-1 MVN transfers instead of staging the processors
-- [ ] Preserve the corrected SA-1 reset-release timestamp and post-reset arbitration waits in the cooperative schedule
-- [ ] Match exact processor state, PPU/DMA events, framebuffer, and frame marker at the shared boundary
-- [ ] Then acquire and execute the post-frame route through the first genuine non-black frame
+- [ ] Continue SA-1 polling concurrently from $8C58 through the first endFrame instead of stopping that domain at its first checkpoint
+- [ ] Resolve the remaining two extra CPU-to-SPC and one extra SPC-to-CPU events at exact microphase boundaries
+- [ ] Preserve exact PPU parity while matching processor state plus CPU, SA-1, DMA, and SPC ordered digests
+- [ ] Decode, lift, privately generate, and execute the 2019 newly discovered first-visible-route identities
 
 ## Active blockers
 
-- **technical** `post-first-frame-route-expansion`: The complete observed first-frame inventory executes and the anchored continuation pipeline is ready, but the required Mesen capture through the first non-black endFrame has not yet been acquired. (owner: analysis/recompiler)
-- **technical** `shared-first-endframe-parity`: Framebuffer parity is exact, S-CPU/SPC positions at master 306900 are represented without state fabrication, and all six live chains are comparable. S-CPU/SA-1 reset interleaving and every ordered digest remain open. (owner: runtime/validation)
+- **technical** `post-first-frame-route-expansion`: The compact reset-to-visible corpus contains 2273 identities and 2440 edges. The remaining route blocker is decoding, lifting, privately generating, and executing the 2019 identities beyond the original 254-block seed. (owner: analysis/recompiler)
+- **technical** `shared-first-endframe-parity`: Cooperative reset/MVN scheduling is live, reset-DMA side effects are fully observed, and the PPU chain matches exactly. CPU/S-CPU counts are now only +2, while post-reset SA-1 polling and CPU/DMA/SPC digests remain open. (owner: runtime/validation)
 
 Regenerate the interactive dashboard with:
 

@@ -168,7 +168,9 @@ void test_translated_boot_probe_reaches_explicit_frontier() {
     assert(result.timing_status == kss::CoordinatorStatus::accepted);
     assert(result.scpu_setup.completed_blocks == 160U);
     assert(result.sa1_initialization.completed_blocks == 10018U);
-    assert(result.scpu_frontier.completed_blocks == 18U);
+    assert(result.scpu_frontier.completed_blocks == 16U);
+    assert(result.scpu_sa1_interleave.completed_blocks > 18U);
+    assert(result.reset_domains_interleaved);
     assert(result.scpu.address() == 0x00d68eU);
     assert(result.sa1.address() == 0x008c58U);
     assert(result.frame.status == kss::FrameRenderStatus::rendered);

@@ -41,7 +41,7 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(machine["boundary_sync"]["target_master"], 306900)
             summary = (out / "summary.svg").read_text(encoding="utf-8")
             ET.fromstring(summary)
-            self.assertEqual(summary.count('class="identity"'), 254)
+            self.assertEqual(summary.count('class="identity"'), 2273)
             self.assertEqual(summary.count('class="checkpoint"'), 42)
             self.assertNotIn("<script", summary)
             self.assertNotIn("<image", summary)
@@ -86,10 +86,13 @@ class ProgressTests(unittest.TestCase):
         )
         self.assertEqual(
             [(item["id"], item["value"], item["target"]) for item in sync["chains"]],
-            [("cpu-writes", 18679, 26906), ("spc-ports", 465, 462),
+            [("cpu-writes", 26908, 26906), ("spc-ports", 465, 462),
              ("ppu-events", 54, 54), ("dma-events", 23, 23)],
         )
-        self.assertTrue(all(not item["matches"] for item in sync["chains"]))
+        self.assertEqual(
+            [item["id"] for item in sync["chains"] if item["matches"]],
+            ["ppu-events"],
+        )
         self.assertEqual(len(sync["sources"]), 8)
         self.assertIn("sa1-first-endframe-domain.json", sync["sources"][1])
 
@@ -134,7 +137,7 @@ class ProgressTests(unittest.TestCase):
         output = progress_build.render_markdown(self.manifest)
         self.assertIn("not estimates of total project completion", output)
         self.assertIn("`evolving`", output)
-        self.assertIn("S-CPU control flow | observed mode-aware blocks | 214 / 214 | `evolving`", output)
+        self.assertIn("S-CPU control flow | observed mode-aware blocks | 1032 / 1032 | `evolving`", output)
 
     def test_duplicate_ids_are_rejected(self):
         bad = copy.deepcopy(self.manifest)

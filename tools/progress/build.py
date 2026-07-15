@@ -335,15 +335,15 @@ def load_boundary_sync(root: Path) -> dict[str, Any]:
                 "value": scpu_boundary["target_master_clock"],
                 "target": target_master,
                 "unit": "master clocks",
-                "note": "exact access boundary represented; sequencer is two bytes ahead of reference",
+                "note": "exact access boundary represented; sequencer is five bytes ahead of reference",
             },
             {
                 "id": "sa1",
-                "label": "SA-1 live staged cursor",
+                "label": "SA-1 post-reset poll frontier",
                 "value": live_scheduler["runtime"]["sa1"]["ready_master_clock"],
                 "target": target_master,
                 "unit": "master clocks",
-                "note": "reset-release and MVN timing corrected; poll-loop interleaving remains",
+                "note": "reset and both MVNs are cooperative; poll-loop scheduling through the frame remains",
             },
             {
                 "id": "spc",
@@ -492,18 +492,38 @@ def render_summary_svg(data: dict[str, Any]) -> str:
 
     block_map = data["block_map"]
     all_blocks = block_map["processors"]["scpu"]["blocks"] + block_map["processors"]["sa1"]["blocks"]
+    components = {component["id"]: component for component in data["components"]}
+    metrics = {
+        component_id: {metric["label"]: metric for metric in component["metrics"]}
+        for component_id, component in components.items()
+    }
+    route_total = metrics["route-corpus"]["union observed identities"]["value"]
+    generated_total = metrics["decoder-lifter"]["private generated block functions"]["value"]
+    semantic_total = (
+        metrics["s-cpu"]["semantics-supported identities"]["value"]
+        + metrics["sa-1"]["semantics-supported identities"]["value"]
+    )
+    reference_total = sum(
+        processor["counts"]["reference_verified"]
+        for processor in block_map["processors"].values()
+    )
     parts.extend((
         '<rect x="28" y="145" width="1144" height="150" rx="12" class="panel"/>',
-        '<text x="48" y="171" class="head">254-identity proof wall</text>',
-        '<text x="48" y="190" class="muted small">One tile per observed processor + PC + mode identity</text>',
+        f'<text x="48" y="171" class="head">{route_total:,}-identity first-visible route wall</text>',
+        f'<text x="48" y="190" class="muted small">One tile per processor + PC + mode identity · {route_total - generated_total:,} newly discovered tiles remain</text>',
     ))
-    for index, block in enumerate(all_blocks):
-        x = 48 + (index % 42) * 10
-        y = 202 + (index // 42) * 12
-        parts.append(f'<rect class="identity" x="{x}" y="{y}" width="8" height="9" rx="1" fill="{colors[block["stage"]]}"/>')
+    for index in range(route_total):
+        x = 48 + (index % 100) * 5
+        y = 198 + (index // 100) * 4
+        stage = (
+            "reference_verified" if index < reference_total else
+            "executed" if index < generated_total else "not_started"
+        )
+        parts.append(f'<rect class="identity" x="{x}" y="{y}" width="4" height="3" rx="0.5" fill="{colors[stage]}"/>')
     proof_counts = {
-        stage: sum(processor["counts"][stage] for processor in block_map["processors"].values())
-        for stage in ("semantics_supported", "executed", "reference_verified")
+        "semantics_supported": semantic_total,
+        "executed": generated_total,
+        "reference_verified": reference_total,
     }
     for index, (stage, label) in enumerate((
         ("semantics_supported", "Semantic execution"),
@@ -515,8 +535,8 @@ def render_summary_svg(data: dict[str, Any]) -> str:
         parts.extend((
             f'<text x="505" y="{y + 10}" class="label">{label}</text>',
             f'<rect x="665" y="{y}" width="390" height="13" rx="6" class="track"/>',
-            f'<rect x="665" y="{y}" width="{390 * value / len(all_blocks):.1f}" height="13" rx="6" fill="{colors[stage]}"/>',
-            f'<text x="1070" y="{y + 11}" class="count">{value} / {len(all_blocks)}</text>',
+            f'<rect x="665" y="{y}" width="{390 * value / route_total:.1f}" height="13" rx="6" fill="{colors[stage]}"/>',
+            f'<text x="1070" y="{y + 11}" class="count">{value} / {route_total}</text>',
         ))
 
     sync = data["boundary_sync"]

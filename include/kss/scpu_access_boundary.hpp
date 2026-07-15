@@ -29,6 +29,7 @@ struct ScpuAccessBoundary {
     MasterClock block_start{};
     MasterClock target{};
     MasterClock block_end{};
+    std::size_t total_accesses{};
     std::size_t completed_accesses{};
     std::size_t current_access_index{};
     ScpuMicroAccess current_access{};

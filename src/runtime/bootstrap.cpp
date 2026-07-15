@@ -146,6 +146,14 @@ BootstrapExitCode run_bootstrap(
     output << "Translated boot probe:\n"
            << "  S-CPU setup blocks: " << probe.scpu_setup.completed_blocks << "\n"
            << "  SA-1 initialization blocks: " << probe.sa1_initialization.completed_blocks << "\n"
+           << "  Cooperative reset S-CPU blocks: "
+           << probe.scpu_sa1_interleave.completed_blocks << "\n"
+           << "  SA-1 reset release master: " << probe.sa1_release_master << "\n"
+           << "  SA-1 first completion master: "
+           << probe.sa1_master_at_first_completion << "\n"
+           << "  S-CPU master at first SA-1 dispatch: "
+           << probe.scpu_master_at_sa1_first_dispatch << "\n"
+           << "  Reset-domain switches: " << probe.reset_domain_switches << "\n"
            << "  S-CPU post-wait blocks: " << probe.scpu_frontier.completed_blocks << "\n"
            << "  S-CPU PC: $" << std::hex << std::uppercase << std::setfill('0')
            << std::setw(6) << probe.scpu.address() << "\n"
@@ -170,9 +178,18 @@ BootstrapExitCode run_bootstrap(
                    << std::setw(6) << boundary.block.address << std::dec
                    << std::nouppercase << std::setfill(' ')
                    << ", access " << boundary.current_access_index
+                   << " of " << boundary.total_accesses
                    << ", elapsed " << boundary.elapsed_in_current_access
                    << "/" << boundary.current_access_duration
-                   << " master clocks\n";
+                   << " master clocks, block " << boundary.block_start
+                   << ".." << boundary.block_end
+                   << ", access start " << boundary.current_access_start
+                   << ", access address $" << std::hex << std::uppercase
+                   << std::setfill('0') << std::setw(6)
+                   << boundary.current_access.address
+                   << ", sequencer $" << std::setw(6)
+                   << boundary.sequencer_address << std::dec
+                   << std::nouppercase << std::setfill(' ') << "\n";
         } else {
             output << "unavailable\n";
         }

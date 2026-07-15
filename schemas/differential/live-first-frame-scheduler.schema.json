@@ -37,11 +37,16 @@
         "executed_generated_identities": {"const": 254},
         "sa1": {
           "type": "object",
-          "required": ["ready_master_clock", "identity_pc", "reference_first_identity_master_clock", "interleaved_through_frame"],
+          "required": ["ready_master_clock", "identity_pc", "reference_first_identity_master_clock", "reset_release_master_clock", "first_instruction_completion_master_clock", "interleaved_reset_scpu_blocks", "reset_domain_switches", "interleaved_through_reset_and_mvn", "interleaved_through_frame"],
           "properties": {
             "ready_master_clock": {"type": "integer", "minimum": 1},
             "identity_pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
             "reference_first_identity_master_clock": {"const": 225664},
+            "reset_release_master_clock": {"const": 2908},
+            "first_instruction_completion_master_clock": {"type": "integer", "minimum": 2908},
+            "interleaved_reset_scpu_blocks": {"type": "integer", "minimum": 1},
+            "reset_domain_switches": {"type": "integer", "minimum": 2},
+            "interleaved_through_reset_and_mvn": {"const": true},
             "interleaved_through_frame": {"const": false}
           },
           "additionalProperties": false
@@ -60,8 +65,8 @@
               "properties": {
                 "block_identity_pc": {"type": "integer", "minimum": 0, "maximum": 16777215},
                 "access_index": {"type": "integer", "minimum": 0},
-                "access_start_master_clock": {"const": 306900},
-                "elapsed_master_clocks": {"const": 0},
+                "access_start_master_clock": {"type": "integer", "minimum": 0, "maximum": 306900},
+                "elapsed_master_clocks": {"type": "integer", "minimum": 0},
                 "sequencer_pc": {"type": "integer", "minimum": 0, "maximum": 16777215}
               },
               "additionalProperties": false
@@ -99,14 +104,15 @@
     },
     "claims": {
       "type": "object",
-      "required": ["live_scpu_and_spc_cover_boundary", "exact_master_event_processed", "exact_scpu_state_parity_proven", "exact_spc_state_parity_proven", "full_first_frame_parity_proven", "hard_boundary"],
+      "required": ["live_scpu_and_spc_cover_boundary", "exact_master_event_processed", "exact_scpu_state_parity_proven", "exact_spc_state_parity_proven", "full_first_frame_parity_proven", "cooperative_reset_schedule_proven", "hard_boundary"],
       "properties": {
         "live_scpu_and_spc_cover_boundary": {"const": true},
         "exact_master_event_processed": {"const": true},
         "exact_scpu_state_parity_proven": {"const": false},
         "exact_spc_state_parity_proven": {"const": false},
         "full_first_frame_parity_proven": {"const": false},
-        "hard_boundary": {"const": "sub_instruction_state_parity_and_cross_domain_event_order"}
+        "cooperative_reset_schedule_proven": {"const": true},
+        "hard_boundary": {"const": "post_reset_sa1_polling_sub_instruction_state_parity_and_cross_domain_event_order"}
       },
       "additionalProperties": false
     },

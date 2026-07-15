@@ -9,22 +9,22 @@
     "patched_state": false
   },
   "runtime_access_window": {
-    "generated_block_identity_pc": 54880,
-    "generated_block_identity_hex": "00:D660",
-    "block_start_master_clock": 306892,
-    "block_end_master_clock": 306908,
-    "accesses": 2,
-    "completed_accesses_at_target": 1,
-    "current_access_index": 1,
-    "current_access_kind": "operand",
-    "current_access_address_hex": "00:D661",
-    "current_access_start_master_clock": 306900,
+    "generated_block_identity_pc": 54877,
+    "generated_block_identity_hex": "00:D65D",
+    "block_start_master_clock": 306898,
+    "block_end_master_clock": 306934,
+    "accesses": 5,
+    "completed_accesses_at_target": 0,
+    "current_access_index": 0,
+    "current_access_kind": "opcode",
+    "current_access_address_hex": "00:D65D",
+    "current_access_start_master_clock": 306898,
     "current_access_duration_master_clocks": 8,
-    "elapsed_in_current_access_master_clocks": 0,
-    "committed_cpu_context_pc_hex": "00:D660",
-    "sequencer_pc_hex": "00:D661",
+    "elapsed_in_current_access_master_clocks": 2,
+    "committed_cpu_context_pc_hex": "00:D65D",
+    "sequencer_pc_hex": "00:D65E",
     "architectural_state_committed": false,
-    "remaining_master_clocks": 8
+    "remaining_master_clocks": 34
   },
   "reference": {
     "sequencer_pc_hex": "00:D659"
@@ -33,7 +33,7 @@
     "exact_runtime_suspension_represented": true,
     "whole_block_rounding_required": false,
     "pc_or_full_state_parity_proven": false,
-    "first_hard_divergence": "After applying the reference SA-1 reset-release and post-reset wait correction, master 306900 falls exactly at the operand-fetch boundary of 00:D660 with visible PC 00:D661, while the reference reports 00:D659. The remaining two-byte lead requires genuine S-CPU/SA-1 interleaving, not a local instruction-duration patch."
+    "first_hard_divergence": "After cooperative S-CPU/SA-1 reset and MVN scheduling, master 306900 falls two master clocks into the opcode fetch at 00:D65D with visible sequencer 00:D65E, while the reference reports 00:D659. The remaining five-byte lead now requires post-reset SA-1 poll scheduling and exact shared-bus microphase arbitration, not another aggregate duration patch."
   },
   "sources": [
     "analysis/differential/live-first-frame-scheduler.json",

@@ -62,7 +62,9 @@ def test_runtime_sources_retain_the_exposed_causal_boundary() -> None:
     timing = (ROOT / "src/runtime/sa1_timing.cpp").read_text(encoding="utf-8")
     generated = (ROOT / "src/recompiled/first_frame_blocks.cpp").read_text(encoding="utf-8")
     assert "result.sa1.pc = 0x8bf4" in boot
-    assert "account_sa1_cycles(result.sa1.cycles)" in boot
+    assert "align_domain(ClockDomain::sa1, result.sa1_release_master)" in boot
+    assert "elapsed - release_cycles" in boot
+    assert "reset_domain_switches" in boot
     assert "sa1_reset_release_origin_cycles" in timing_header
     assert "sa1_reset_release_origin_cycles" in generated
     assert "lookup_sa1_post_reset_timing" in generated

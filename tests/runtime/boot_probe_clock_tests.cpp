@@ -46,7 +46,15 @@ void test_default_probe_uses_local_complete_scpu_stream() {
     assert(result.sa1_poll_observation.status
         == kss::GeneratedRunStatus::checkpoint_reached);
     assert(result.sa1_poll_observation.completed_blocks == 2U);
-    assert(result.scpu_frontier.completed_blocks == 18U);
+    assert(result.scpu_frontier.completed_blocks == 16U);
+    assert(result.scpu_sa1_interleave.status
+        == kss::GeneratedRunStatus::checkpoint_reached);
+    assert(result.scpu_sa1_interleave.completed_blocks > 18U);
+    assert(result.sa1_release_master == 2908U);
+    assert(result.sa1_master_at_first_completion >= result.sa1_release_master);
+    assert(result.scpu_master_at_sa1_first_dispatch >= result.sa1_release_master);
+    assert(result.scpu_master_at_sa1_checkpoint >= 225664U);
+    assert(result.reset_domains_interleaved && result.reset_domain_switches > 100U);
     assert(result.scpu_apu_wait_observation.status
         == kss::GeneratedRunStatus::checkpoint_reached);
     assert(result.scpu_apu_wait_observation.completed_blocks == 20U);
@@ -196,13 +204,13 @@ void test_runtime_event_chain_observes_live_causal_path() {
         == kss::BootProbeEventChainStatus::instruction_retirement_stream);
     assert(result.event_chain_summary);
     const auto& chain = *result.event_chain_summary;
-    assert(chain.cpu_writes.records == 19'067U);
-    assert(chain.scpu_writes.records == 9'063U);
+    assert(chain.cpu_writes.records == 27'296U);
+    assert(chain.scpu_writes.records == 17'292U);
     assert(chain.sa1_writes.records == 10'004U);
     assert(chain.ppu_register_writes.records == 54U);
     assert(chain.dma_register_writes.records == 23U);
     assert(chain.spc_ports.records == 1'048U);
-    assert(chain.cross_domain_order.records == 20'115U);
+    assert(chain.cross_domain_order.records == 28'344U);
     assert(chain.cpu_writes.records
         == chain.scpu_writes.records + chain.sa1_writes.records);
     assert(chain.cross_domain_order.records

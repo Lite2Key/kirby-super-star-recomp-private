@@ -21,10 +21,12 @@ def test_scpu_exact_boundary_artifact_exposes_phase_difference() -> None:
         target - window["current_access_start_master_clock"]
         == window["elapsed_in_current_access_master_clocks"]
     )
-    assert window["committed_cpu_context_pc_hex"] == "00:D660"
-    assert window["sequencer_pc_hex"] == "00:D661"
-    assert window["current_access_start_master_clock"] == target
-    assert window["elapsed_in_current_access_master_clocks"] == 0
+    assert window["committed_cpu_context_pc_hex"] == "00:D65D"
+    assert window["sequencer_pc_hex"] == "00:D65E"
+    assert window["current_access_index"] == 0
+    assert window["accesses"] == 5
+    assert window["current_access_start_master_clock"] == 306898
+    assert window["elapsed_in_current_access_master_clocks"] == 2
     assert artifact["reference"]["sequencer_pc_hex"] == "00:D659"
     assert artifact["claims"] == {
         "exact_runtime_suspension_represented": True,
@@ -44,5 +46,6 @@ def test_scpu_boundary_helper_is_value_free_and_non_mutating() -> None:
     assert "read8(" not in implementation
     assert "write8(" not in implementation
     assert "target == cursor" in implementation
+    assert "result.total_accesses = accesses.size()" in implementation
     boot = (ROOT / "src/runtime/boot_probe.cpp").read_text(encoding="utf-8")
     assert "result.scpu_first_frame_boundary = observe_scpu_access_boundary" in boot

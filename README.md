@@ -24,9 +24,10 @@ Windows executables run the verified external ROM through S-CPU setup, SA-1
 initialization, the current hardware-gated checkpoint, and an exact value-free
 generated S-CPU access stream. `kss-native.exe` presents the resulting 256x239
 surface at integer scale and maps keyboard/XInput state onto both SNES controller
-ports; execution remains paused at the explicit diagnostic frontier. Complete SPC port replay, visible reference
-pixels, and gameplay remain in
-progress, so this is not yet a playable port.
+ports; execution remains paused at the explicit diagnostic frontier. The first
+visible Mesen reference frame is now repeat-stable and kept private, but matching
+recompiled pixels, complete SPC port replay, and gameplay remain in progress, so
+this is not yet a playable port.
 
 Open `progress/site/index.html` after running the progress generator for the
 visual recompilation map. It includes all 254 currently observed first-frame

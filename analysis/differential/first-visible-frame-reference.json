@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source_format": "kss-mesen-visible-frame-v1",
+  "boundary": "first_nonblack_end_frame",
+  "repeat_captures": 2,
+  "frame_marker": 108,
+  "master_clock": 38545064,
+  "width": 256,
+  "height": 239,
+  "source_pixel_format": "argb8888",
+  "artifact_format": "png-rgba8888",
+  "nonzero_pixels": 3032,
+  "png_sha256": "4616557be730adcf4c51cd17c442c02f3b0b9282a7e3c50001d03eead8dc3f04",
+  "scpu_cycle_observations": [4953680, 4953675],
+  "claims": {
+    "master_clock_and_pixels_repeat_stable": true,
+    "scpu_callback_cycle_repeat_stable": false,
+    "visual_identity": "first Nintendo/HALKEN startup-logo pose"
+  },
+  "data_boundary": {
+    "policy": "sanitized-counts-timing-and-digest-only",
+    "pixel_payload_included": false,
+    "private_paths_included": false,
+    "rom_bytes_included": false
+  }
+}

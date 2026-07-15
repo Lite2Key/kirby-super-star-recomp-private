@@ -4,6 +4,7 @@
 #include "kss/dispatcher.hpp"
 #include "kss/dual_bus.hpp"
 #include "kss/generated_first_frame_blocks.hpp"
+#include "kss/sa1_timing.hpp"
 #include "kss/scpu_micro_access_recorder.hpp"
 #ifdef KSS_USE_PRIVATE_GENERATED
 #include "kss/generated_private_first_frame_blocks.hpp"
@@ -157,44 +158,7 @@ BootProbeResult run_boot_probe(
     result.sa1.status = 0x34;
     result.sa1.emulation = true;
 
-    const auto scpu_wait = BlockKey::make(
-        ProcessorId::snes_cpu, 0x00816d, false, false, false);
-    result.scpu_setup = run_generated_until(
-        result.scpu, bus, scheduler, dispatcher, scpu_wait, 160, 160);
-    flush_cpu_writes(timed_bus.master_clocks());
-    if (result.scpu_setup.status != GeneratedRunStatus::checkpoint_reached) {
-        result.status = BootProbeStatus::scpu_setup_failed;
-        return result;
-    }
-
-    // The reset trace proves that shared-I-RAM production is the causal event
-    // which releases the S-CPU wait. Exact CPU interleaving/master clocks are
-    // deliberately not inferred by this staged diagnostic.
-    const auto sa1_poll = BlockKey::make(
-        ProcessorId::sa1, 0x008c58, false, false, false);
-    result.sa1_initialization = run_generated_until(
-        result.sa1, bus, scheduler, dispatcher, sa1_poll, 12000);
-    flush_cpu_writes(std::max(
-        event_master_cursor, result.sa1.cycles * 2U));
-    if (result.sa1_initialization.status != GeneratedRunStatus::checkpoint_reached) {
-        result.status = BootProbeStatus::sa1_initialization_failed;
-        return result;
-    }
-
-    // Execute the load and taken branch once, returning to the same identity.
-    // The shared-I-RAM value is observed, never patched to force poll release.
-    result.sa1_poll_observation = run_generated_until(
-        result.sa1, bus, scheduler, dispatcher, sa1_poll, 2, 2);
-    flush_cpu_writes(std::max(
-        event_master_cursor, result.sa1.cycles * 2U));
-    result.sa1_poll_value = hardware_bus.sa1_iram()[0x0aU];
-    if (result.sa1_poll_observation.status != GeneratedRunStatus::checkpoint_reached) {
-        result.status = BootProbeStatus::sa1_poll_observation_failed;
-        return result;
-    }
-
     std::size_t accounted_scpu_accesses = 0;
-    bool live_spc_ok = true;
     const auto account_new_scpu_accesses = [&]() noexcept {
         const auto accesses = timed_bus.timing_accesses();
         if (accesses.size() == accounted_scpu_accesses) return true;
@@ -203,6 +167,185 @@ BootProbeResult run_boot_probe(
         accounted_scpu_accesses = accesses.size();
         return advance.status == CoordinatorStatus::accepted;
     };
+
+    const auto scpu_wait = BlockKey::make(
+        ProcessorId::snes_cpu, 0x00816d, false, false, false);
+    const auto sa1_poll = BlockKey::make(
+        ProcessorId::sa1, 0x008c58, false, false, false);
+    const auto scpu_wait_released = BlockKey::make(
+        ProcessorId::snes_cpu, 0x008172, false, false, false);
+    const auto current_frontier = BlockKey::make(
+        ProcessorId::snes_cpu, 0x00d66e, false, true, false);
+    result.sa1_release_master =
+        static_cast<MasterClock>(sa1_reset_release_origin_cycles()) * 2U;
+    if (clocks.align_domain(ClockDomain::sa1, result.sa1_release_master)
+        != CoordinatorStatus::accepted) {
+        result.status = BootProbeStatus::timing_debt;
+        return result;
+    }
+
+    // Reset is a cooperative two-domain run.  SA-1 remains in reset until the
+    // measured release timestamp, then the earliest ready domain executes one
+    // restartable generated instruction.  Both MVNs therefore expose their
+    // shared-I-RAM writes to the polling S-CPU incrementally instead of as one
+    // already-completed staged transfer.  The aggregate-only second-MVN wait
+    // remains attached to its proven final iteration by generated code.
+    constexpr std::size_t reset_interleave_limit = 65'536U;
+    std::optional<ProcessorId> previous_reset_domain;
+    bool saw_scpu_at_sa1_start = false;
+    for (std::size_t step = 0; step < reset_interleave_limit; ++step) {
+        const bool scpu_done = result.scpu_sa1_interleave.status
+            == GeneratedRunStatus::checkpoint_reached;
+        const bool sa1_done = result.sa1_initialization.status
+            == GeneratedRunStatus::checkpoint_reached;
+        if (scpu_done && sa1_done) break;
+
+        const auto scpu_ready = clocks.ready_at(ClockDomain::scpu);
+        const auto sa1_ready = clocks.ready_at(ClockDomain::sa1);
+        const bool sa1_released = scpu_ready >= result.sa1_release_master;
+        const bool run_scpu = !scpu_done
+            && (sa1_done || !sa1_released || scpu_ready <= sa1_ready);
+        const auto selected = run_scpu ? ProcessorId::snes_cpu : ProcessorId::sa1;
+        if (previous_reset_domain && *previous_reset_domain != selected) {
+            ++result.reset_domain_switches;
+        }
+        previous_reset_domain = selected;
+
+        if (run_scpu) {
+            if (result.scpu.stopped) {
+                result.scpu_setup.status = GeneratedRunStatus::cpu_stopped;
+                break;
+            }
+            const auto before = result.scpu.block_key();
+            const auto dispatch = dispatcher.dispatch(result.scpu, bus, scheduler);
+            if (dispatch != DispatchStatus::executed || result.scpu.stopped) {
+                const auto failure = dispatch == DispatchStatus::unknown_block
+                    ? GeneratedRunStatus::unknown_block
+                    : dispatch == DispatchStatus::cpu_stopped
+                        ? GeneratedRunStatus::cpu_stopped
+                        : GeneratedRunStatus::generated_block_failed_closed;
+                if (result.scpu_setup.status != GeneratedRunStatus::checkpoint_reached) {
+                    result.scpu_setup.status = failure;
+                } else {
+                    result.scpu_sa1_interleave.status = failure;
+                }
+                break;
+            }
+            if (!account_new_scpu_accesses()) {
+                if (result.scpu_setup.status != GeneratedRunStatus::checkpoint_reached) {
+                    result.scpu_setup.status = GeneratedRunStatus::generated_block_failed_closed;
+                } else {
+                    result.scpu_sa1_interleave.status =
+                        GeneratedRunStatus::generated_block_failed_closed;
+                }
+                break;
+            }
+            flush_cpu_writes(clocks.ready_at(ClockDomain::scpu));
+            if (result.scpu_setup.status != GeneratedRunStatus::checkpoint_reached) {
+                result.scpu_setup.last_completed = before;
+                ++result.scpu_setup.completed_blocks;
+                if (result.scpu_setup.completed_blocks >= 160U
+                    && result.scpu.block_key() == scpu_wait) {
+                    result.scpu_setup.status = GeneratedRunStatus::checkpoint_reached;
+                }
+            } else {
+                result.scpu_sa1_interleave.last_completed = before;
+                ++result.scpu_sa1_interleave.completed_blocks;
+                if (result.scpu.block_key() == scpu_wait_released) {
+                    result.scpu_sa1_interleave.status =
+                        GeneratedRunStatus::checkpoint_reached;
+                }
+            }
+        } else {
+            if (!saw_scpu_at_sa1_start) {
+                result.scpu_master_at_sa1_first_dispatch = scpu_ready;
+                saw_scpu_at_sa1_start = true;
+            }
+            const auto before = result.sa1.block_key();
+            const auto cycles_before = result.sa1.cycles;
+            const auto dispatch = dispatcher.dispatch(result.sa1, bus, scheduler);
+            if (dispatch != DispatchStatus::executed || result.sa1.stopped) {
+                result.sa1_initialization.status = dispatch == DispatchStatus::unknown_block
+                    ? GeneratedRunStatus::unknown_block
+                    : dispatch == DispatchStatus::cpu_stopped
+                        ? GeneratedRunStatus::cpu_stopped
+                        : GeneratedRunStatus::generated_block_failed_closed;
+                break;
+            }
+            const auto elapsed = result.sa1.cycles - cycles_before;
+            // CpuContext cycles are absolute in the measured SA-1 domain.  Its
+            // first generated instruction adds the pre-release hold to that
+            // absolute cursor, while the coordinator was already aligned to
+            // the same release timestamp. Account only executable cycles here
+            // so the hold is represented exactly once.
+            const auto first_sa1_dispatch =
+                result.sa1_initialization.completed_blocks == 0U;
+            const auto release_cycles = sa1_reset_release_origin_cycles();
+            if (first_sa1_dispatch && elapsed < release_cycles) {
+                result.sa1_initialization.status =
+                    GeneratedRunStatus::generated_block_failed_closed;
+                break;
+            }
+            const auto elapsed_after_release = first_sa1_dispatch
+                ? elapsed - release_cycles : elapsed;
+            const auto advance = clocks.account_sa1_cycles(elapsed_after_release);
+            if (advance.status != CoordinatorStatus::accepted) {
+                result.sa1_initialization.status =
+                    GeneratedRunStatus::generated_block_failed_closed;
+                break;
+            }
+            if (first_sa1_dispatch) {
+                result.sa1_master_at_first_completion = advance.ready_at;
+                if (advance.ready_at < result.sa1_release_master) {
+                    result.sa1_initialization.status =
+                        GeneratedRunStatus::generated_block_failed_closed;
+                    break;
+                }
+            }
+            flush_cpu_writes(advance.ready_at);
+            result.sa1_initialization.last_completed = before;
+            ++result.sa1_initialization.completed_blocks;
+            if (result.sa1.block_key() == sa1_poll) {
+                result.sa1_initialization.status = GeneratedRunStatus::checkpoint_reached;
+                result.scpu_master_at_sa1_checkpoint =
+                    clocks.ready_at(ClockDomain::scpu);
+            }
+        }
+    }
+    result.reset_domains_interleaved = result.reset_domain_switches > 1U;
+    if (result.scpu_setup.status != GeneratedRunStatus::checkpoint_reached) {
+        result.status = BootProbeStatus::scpu_setup_failed;
+        return result;
+    }
+    if (result.sa1_initialization.status != GeneratedRunStatus::checkpoint_reached) {
+        result.status = BootProbeStatus::sa1_initialization_failed;
+        return result;
+    }
+    if (result.scpu_sa1_interleave.status != GeneratedRunStatus::checkpoint_reached) {
+        result.status = BootProbeStatus::scpu_frontier_failed;
+        return result;
+    }
+
+    // Execute the load and taken branch once, returning to the same identity.
+    // The shared-I-RAM value is observed, never patched to force poll release.
+    const auto sa1_poll_cycles_before = result.sa1.cycles;
+    result.sa1_poll_observation = run_generated_until(
+        result.sa1, bus, scheduler, dispatcher, sa1_poll, 2, 2);
+    const auto sa1_poll_timing = clocks.account_sa1_cycles(
+        result.sa1.cycles - sa1_poll_cycles_before);
+    if (sa1_poll_timing.status != CoordinatorStatus::accepted) {
+        result.status = BootProbeStatus::timing_debt;
+        return result;
+    }
+    result.sa1_master_ready = sa1_poll_timing.ready_at;
+    flush_cpu_writes(sa1_poll_timing.ready_at);
+    result.sa1_poll_value = hardware_bus.sa1_iram()[0x0aU];
+    if (result.sa1_poll_observation.status != GeneratedRunStatus::checkpoint_reached) {
+        result.status = BootProbeStatus::sa1_poll_observation_failed;
+        return result;
+    }
+
+    bool live_spc_ok = true;
     const auto advance_spc_to = [&](MasterClock target) noexcept {
         // One first-frame synchronization never needs remotely this many SPC
         // instructions (the reset-to-frame reference is under four thousand).
@@ -311,32 +454,26 @@ BootProbeResult run_boot_probe(
     };
 
     if (live_spc) {
-        if (!account_new_scpu_accesses()) {
-            result.status = BootProbeStatus::timing_debt;
-            return result;
-        }
-        const auto sa1_timing = clocks.account_sa1_cycles(result.sa1.cycles);
-        result.sa1_master_ready = sa1_timing.ready_at;
-        if (sa1_timing.status != CoordinatorStatus::accepted
-            || clocks.align_domain(ClockDomain::scpu, result.sa1_master_ready)
-                != CoordinatorStatus::accepted) {
-            result.status = BootProbeStatus::timing_debt;
-            return result;
-        }
-        if (!advance_spc_to(result.sa1_master_ready)) {
+        const auto reset_ready = std::max(
+            clocks.ready_at(ClockDomain::scpu), result.sa1_master_ready);
+        if (!advance_spc_to(reset_ready)) {
             result.spc_registers = hardware_bus.spc_core()->registers();
             result.status = BootProbeStatus::spc_step_failed;
             return result;
         }
     }
 
-    const auto current_frontier = BlockKey::make(
-        ProcessorId::snes_cpu, 0x00d66e, false, true, false);
     result.scpu_frontier = live_spc
         ? run_interleaved_until(current_frontier, 4096)
         : run_generated_until(result.scpu, bus, scheduler, dispatcher,
             current_frontier, 4096);
-    if (!live_spc) flush_cpu_writes(timed_bus.master_clocks());
+    if (!live_spc) {
+        if (!account_new_scpu_accesses()) {
+            result.status = BootProbeStatus::timing_debt;
+            return result;
+        }
+        flush_cpu_writes(clocks.ready_at(ClockDomain::scpu));
+    }
     if (result.scpu_frontier.status != GeneratedRunStatus::checkpoint_reached) {
         result.status = BootProbeStatus::scpu_frontier_failed;
         return result;
@@ -440,16 +577,6 @@ BootProbeResult run_boot_probe(
     result.frame = SnesFrameRenderer::render(hardware_bus.ppu_state());
     DomainAdvanceResult scpu_timing{CoordinatorStatus::accepted, 0,
         clocks.ready_at(ClockDomain::scpu)};
-    if (!live_spc) {
-        const auto sa1_timing = clocks.account_sa1_cycles(result.sa1.cycles);
-        result.sa1_master_ready = sa1_timing.ready_at;
-        if (sa1_timing.status != CoordinatorStatus::accepted) {
-            result.timing_status = sa1_timing.status;
-            result.status = BootProbeStatus::timing_debt;
-            return result;
-        }
-        scpu_timing = clocks.account_scpu_accesses(timed_bus.timing_accesses());
-    }
     result.scpu_accesses_recorded = timed_bus.accesses().size();
     result.scpu_master_ready = scpu_timing.ready_at;
     result.spc_master_ready = clocks.ready_at(ClockDomain::spc);

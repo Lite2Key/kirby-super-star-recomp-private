@@ -22,7 +22,12 @@ def test_runtime_event_chain_observation_is_valid_and_reference_anchored() -> No
     for name, chain in observation["chains"].items():
         assert chain["reference_records"] == expectation["chains"][name]["records"]
         assert chain["delta"] == chain["runtime_records"] - chain["reference_records"]
-        assert not chain["matches"]
+        assert chain["matches"] == (
+            chain["runtime_records"] == chain["reference_records"]
+            and chain["runtime_sha256"] == expectation["chains"][name]["sha256"]
+        )
+    assert observation["chains"]["ppu_register_writes"]["matches"]
+    assert sum(chain["matches"] for chain in observation["chains"].values()) == 1
     directions = observation["spc_directions"]
     assert sum(item["runtime_records"] for item in directions.values()) == (
         observation["chains"]["spc_ports"]["runtime_records"]

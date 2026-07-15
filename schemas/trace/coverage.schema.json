@@ -13,11 +13,12 @@
       "additionalProperties": false,
       "required": ["limit", "event_count", "end_reason", "bounded"],
       "properties": {
-        "limit": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 5000000 },
         "event_count": { "type": "integer", "minimum": 1 },
         "end_reason": { "enum": ["limit", "complete", "missing_end_marker"] },
         "bounded": { "const": true },
-        "route_segment": { "$ref": "#/$defs/routeSegment" }
+        "route_segment": { "$ref": "#/$defs/routeSegment" },
+        "route_capture": { "$ref": "#/$defs/routeCapture" }
       }
     },
     "processors": {
@@ -80,6 +81,31 @@
         },
         "visible_frame": {
           "type": "object", "additionalProperties": false,
+          "required": ["width", "height", "pixel_count", "nonblack_pixels"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 },
+            "pixel_count": { "type": "integer", "minimum": 1 },
+            "nonblack_pixels": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "routeCapture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "aggregation", "start_event", "stop_event", "frames_elapsed", "unique_blocks", "unique_edges", "visible_frame"],
+      "properties": {
+        "contract": { "const": "reset-to-first-visible-v1" },
+        "aggregation": { "const": "in_emulator" },
+        "start_event": { "const": "reset" },
+        "stop_event": { "const": "first_visible_end_frame" },
+        "frames_elapsed": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "unique_blocks": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "unique_edges": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+        "visible_frame": {
+          "type": "object",
+          "additionalProperties": false,
           "required": ["width", "height", "pixel_count", "nonblack_pixels"],
           "properties": {
             "width": { "type": "integer", "minimum": 1 },

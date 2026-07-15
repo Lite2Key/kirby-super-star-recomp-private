@@ -3,24 +3,24 @@
   "boundary": "live_scpu_spc_then_scheduled_first_frame",
   "master_clock": 306900,
   "probe_status": "expected_frontier_reached",
-  "capture_fidelity": "instruction-retirement-cpu-and-architectural-spc-cycles",
+  "capture_fidelity": "cooperative-reset-whole-instruction-cpu-and-architectural-spc-cycles",
   "data_boundary": "sanitized-digests-and-counts-only",
   "full_first_frame_parity_proven": false,
   "chains": {
-    "cpu_writes": {"runtime_records": 18679, "reference_records": 26906, "delta": -8227, "runtime_sha256": "849d6247359553a61e5b2e879304ea507255d9a700ac110dfdffed7de079fac5", "matches": false},
-    "scpu_writes": {"runtime_records": 8675, "reference_records": 16902, "delta": -8227, "runtime_sha256": "195700da7c8d24732d7396c6bbc2b51f3134857cc2a17908b1fad65b2f87e8ba", "matches": false},
-    "sa1_writes": {"runtime_records": 10004, "reference_records": 10004, "delta": 0, "runtime_sha256": "adcb17f6246d00f9c0931bc2f5010747e749482b7726a199f7851cfc583a4e64", "matches": false},
-    "ppu_register_writes": {"runtime_records": 54, "reference_records": 54, "delta": 0, "runtime_sha256": "5a7fc9920e3713e343bf6ca50ff84cedb988978bbedc5987ea48cf54d1212158", "matches": false},
-    "dma_register_writes": {"runtime_records": 23, "reference_records": 23, "delta": 0, "runtime_sha256": "a442d1a89d142105e6153f5df2121d313ab3895ccffe25cf68ea71c0b1678a8c", "matches": false},
-    "spc_ports": {"runtime_records": 465, "reference_records": 462, "delta": 3, "runtime_sha256": "5ae10ce7a6bebcd609824fbd1d1b642d965a00b40df1efa027afbb09dcf26fc3", "matches": false}
+    "cpu_writes": {"runtime_records": 26908, "reference_records": 26906, "delta": 2, "runtime_sha256": "f9fe38bfb0f54d70387ec7a49e87c3c275d0497c0a9a9fa6d4a5911e0cac7fc0", "matches": false},
+    "scpu_writes": {"runtime_records": 16904, "reference_records": 16902, "delta": 2, "runtime_sha256": "27a986e163cab514a87ea5d7878f3e68c313d7900b7de7599e45407e74aeef52", "matches": false},
+    "sa1_writes": {"runtime_records": 10004, "reference_records": 10004, "delta": 0, "runtime_sha256": "3a51501b5be5fb4350d8479e8d72d0f713951d36c22f99b133ddfa143c5fa451", "matches": false},
+    "ppu_register_writes": {"runtime_records": 54, "reference_records": 54, "delta": 0, "runtime_sha256": "c1aef4ef534bfbd499ed84e3334a85afcb46f45a067f34d3e154d9f682cf4e66", "matches": true},
+    "dma_register_writes": {"runtime_records": 23, "reference_records": 23, "delta": 0, "runtime_sha256": "34ba9f97600006a202486a7acf158ae57bd8d059838610d6ffa113484ed73e7d", "matches": false},
+    "spc_ports": {"runtime_records": 465, "reference_records": 462, "delta": 3, "runtime_sha256": "719d77226c49dc24d0ec20569bc67a4d1cddfaadc1b6b342783eeed622fde10b", "matches": false}
   },
   "spc_directions": {
     "cpu_to_spc": {"runtime_records": 310, "reference_records": 308, "delta": 2},
     "spc_to_cpu": {"runtime_records": 155, "reference_records": 154, "delta": 1}
   },
   "hard_gaps": [
-    "The staged S-CPU/SA-1 boot omits 8227 reference S-CPU writes because it does not yet interleave S-CPU polling with the two long SA-1 MVN transfers.",
-    "CPU write cycles are retirement stamps, so even equal-count SA-1, PPU, and DMA subsets cannot match cycle-and-ordinal digests.",
+    "Reset DMA observation now records all 8229 WMDATA port writes and all 8229 corresponding physical-WRAM side effects. The CPU/S-CPU count gap is reduced from -8227 to exactly +2, matching the two extra CPU-to-SPC records.",
+    "CPU write cycles are retirement stamps, so equal-count SA-1 and DMA subsets cannot yet match cycle-and-ordinal digests; the PPU subset now matches in both count and ordered digest.",
     "The reset-release correction leaves only 3 extra bidirectional SPC write events before the scheduled boundary, but exact SPC microphase scheduling and digest parity remain unproven."
   ]
 }

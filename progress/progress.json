@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-15T01:38:43Z",
-    "commit": "6a1680c21f7f6e28b3e8a3d3aab028976c458fea",
+    "generated_at": "2026-07-15T02:53:15Z",
+    "commit": "d697d0b04ba12f9369c51593c83e052a1ef3b347",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -54,8 +54,13 @@
           "path": "progress/evidence/m3-first-frame-frontier.md"
         },
         {
+          "id": "m3.first-visible-route",
+          "label": "Compact first-visible route and repeat-stable visual oracle",
+          "path": "analysis/coverage/first-visible-route-coverage.json"
+        },
+        {
           "id": "m3.local-verification",
-          "label": "194 Python and 25 native tests",
+          "label": "212 Python and 25 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -150,7 +155,7 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "All 254 identities execute; exact S-CPU/SPC boundary positions and live event chains are recorded, while genuine S-CPU/SA-1 reset interleaving remains open.",
+      "summary": "All 254 identities execute; S-CPU/SA-1 reset and both MVNs now run cooperatively, the PPU event chain matches, and a repeat-stable first-visible reference is captured. Post-reset SA-1 polling and remaining event/state parity stay open.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
@@ -162,6 +167,11 @@
           "id": "m3.cpu-hardware-runtime",
           "label": "CPU closure, hardware boundary, and executable boot probe",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
+        },
+        {
+          "id": "m3.first-visible-route",
+          "label": "First-visible route: 2273 mode-aware identities",
+          "path": "analysis/coverage/first-visible-route-coverage.json"
         }
       ]
     },
@@ -335,7 +345,7 @@
         },
         {
           "name": "First visible frame",
-          "status": "not_started"
+          "status": "in_progress"
         },
         {
           "name": "Route pixel parity",
@@ -456,7 +466,7 @@
       "name": "Route coverage corpus",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The reset-rooted first-frame capture seeds a deterministic corpus; future bounded routes can be conservatively unioned with per-block and per-edge provenance.",
+      "summary": "Compact in-emulator aggregation now captures reset through the first visible frame in one deterministic identity/edge corpus without emitting millions of instruction lines.",
       "metrics": [
         {
           "label": "captured required routes",
@@ -467,8 +477,8 @@
         },
         {
           "label": "union observed identities",
-          "value": 254,
-          "total": 254,
+          "value": 2273,
+          "total": 2273,
           "denominator": "evolving",
           "note": "The denominator grows only from bounded captures sharing the same reset roots."
         }
@@ -479,28 +489,28 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "All 214 first-frame S-CPU identities lift, generate, execute, and have Mesen architectural-state oracle coverage; shared-boundary native parity remains separate.",
+      "summary": "The first-visible route exposes 1032 S-CPU identities; the original 214 first-frame identities lift, generate, execute, and have architectural-state oracle coverage.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
-          "value": 214,
-          "total": 214,
+          "value": 1032,
+          "total": 1032,
           "denominator": "evolving",
           "note": "Current bounded trace inventory; the denominator grows when new routes reveal additional blocks."
         },
         {
           "label": "verified blocks",
           "value": 1,
-          "total": 214,
+          "total": 1032,
           "denominator": "evolving",
           "note": "The reset block from 00:8004 through the first taken BPL edge passed generated state, direct-write, and cycle verification."
         },
         {
           "label": "semantics-supported identities",
           "value": 214,
-          "total": 214,
+          "total": 1032,
           "denominator": "evolving",
-          "note": "Every identity in the current first-frame trace has an executable opcode semantic; this is not a whole-game denominator."
+          "note": "The 214-identity first-frame seed is executable; the 818 newly observed S-CPU identities now enter decode/lift/generate triage."
         }
       ],
       "evidence": [
@@ -526,28 +536,28 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "All 40 first-frame SA-1 identities execute; 34 have architectural-state/write oracle coverage and the remaining six have identity/order evidence only.",
+      "summary": "The first-visible route exposes 1241 SA-1 identities; all 40 first-frame identities execute, 34 with architectural-state/write oracle coverage.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
-          "value": 40,
-          "total": 40,
+          "value": 1241,
+          "total": 1241,
           "denominator": "evolving",
           "note": "Current bounded trace inventory; the denominator grows when new routes reveal additional blocks."
         },
         {
           "label": "verified blocks",
           "value": 1,
-          "total": 40,
+          "total": 1241,
           "denominator": "evolving",
           "note": "The reset block from 00:8BF4 through MVN exit at 00:8C23 passed generated state, ordered-write, and evidence-bound cycle verification."
         },
         {
           "label": "semantics-supported identities",
           "value": 40,
-          "total": 40,
+          "total": 1241,
           "denominator": "evolving",
-          "note": "Every identity in the current first-frame trace has an executable opcode semantic; this is not a whole-game denominator."
+          "note": "The 40-identity first-frame seed is executable; the 1201 newly observed SA-1 identities now enter decode/lift/generate triage."
         }
       ],
       "evidence": [
@@ -592,7 +602,7 @@
         {
           "label": "private generated block functions",
           "value": 254,
-          "total": 254,
+          "total": 2273,
           "denominator": "evolving",
           "note": "Deterministically regenerated from the authorized ROM and current sanitized route corpus; this denominator grows with route discovery."
         }
@@ -603,14 +613,14 @@
       "name": "Deterministic scheduler",
       "group": "runtime",
       "status": "in_progress",
-      "summary": "The boot probe records the generated S-CPU micro-access stream, uses exact SA-1 2:1 conversion, and orders explicit SPC plus timestamped IRQ/NMI/reset events without inferred instruction timing.",
+      "summary": "The boot probe records generated S-CPU micro-accesses, uses exact SA-1 2:1 conversion, and cooperatively schedules reset plus both MVNs at whole-instruction boundaries before continuing the S-CPU/SPC path.",
       "metrics": [
         {
           "label": "synchronization classes",
-          "value": 4,
+          "value": 5,
           "total": 8,
           "denominator": "fixed",
-          "note": "Frames, value-free S-CPU bus timing, APU-port ordering, and timestamped CPU signals are validated. Shared-memory/DMA contention, device timers, and full wait-state integration remain."
+          "note": "Frames, value-free S-CPU bus timing, cooperative reset/MVN scheduling, APU-port ordering, and timestamped CPU signals are validated. Post-reset SA-1 polling, device timers, and full micro-access arbitration remain."
         }
       ]
     },
@@ -672,7 +682,7 @@
       "name": "Differential validator",
       "group": "validation",
       "status": "in_progress",
-      "summary": "Reset and two post-reset CPU slices pass, the first-frame oracle is deterministic, and SPC replay matches through ordinal 2600; timed full-frame comparison remains active.",
+      "summary": "Reset and two post-reset CPU slices pass, the forced-blank and first-visible oracles are repeat-stable, and the live PPU event chain now matches exactly; CPU/DMA/SPC state and ordered timing remain active.",
       "metrics": [
         {
           "label": "passing required scenarios",
@@ -819,23 +829,23 @@
     {
       "id": "post-first-frame-route-expansion",
       "severity": "technical",
-      "summary": "The complete observed first-frame inventory executes and the anchored continuation pipeline is ready, but the required Mesen capture through the first non-black endFrame has not yet been acquired.",
+      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges. The remaining route blocker is decoding, lifting, privately generating, and executing the 2019 identities beyond the original 254-block seed.",
       "owner": "analysis/recompiler"
     },
     {
       "id": "shared-first-endframe-parity",
       "severity": "technical",
-      "summary": "Framebuffer parity is exact, S-CPU/SPC positions at master 306900 are represented without state fabrication, and all six live chains are comparable. S-CPU/SA-1 reset interleaving and every ordered digest remain open.",
+      "summary": "Cooperative reset/MVN scheduling is live, reset-DMA side effects are fully observed, and the PPU chain matches exactly. CPU/S-CPU counts are now only +2, while post-reset SA-1 polling and CPU/DMA/SPC digests remain open.",
       "owner": "runtime/validation"
     }
   ],
   "next_proof": {
-    "title": "Interleave S-CPU and SA-1 through reset",
+    "title": "Close post-reset polling and import the visible route",
     "acceptance": [
-      "Run S-CPU polling concurrently with both long SA-1 MVN transfers instead of staging the processors",
-      "Preserve the corrected SA-1 reset-release timestamp and post-reset arbitration waits in the cooperative schedule",
-      "Match exact processor state, PPU/DMA events, framebuffer, and frame marker at the shared boundary",
-      "Then acquire and execute the post-frame route through the first genuine non-black frame"
+      "Continue SA-1 polling concurrently from $8C58 through the first endFrame instead of stopping that domain at its first checkpoint",
+      "Resolve the remaining two extra CPU-to-SPC and one extra SPC-to-CPU events at exact microphase boundaries",
+      "Preserve exact PPU parity while matching processor state plus CPU, SA-1, DMA, and SPC ordered digests",
+      "Decode, lift, privately generate, and execute the 2019 newly discovered first-visible-route identities"
     ],
     "owner": "runtime/validation"
   },
@@ -1013,6 +1023,24 @@
       "standard_native_tests": 21,
       "private_native_tests": 21,
       "python_tests": 174
+    },
+    {
+      "at": "2026-07-15T02:58:00Z",
+      "verified_blocks": 248,
+      "executed_blocks": 254,
+      "observed_blocks": 2273,
+      "new_route_blocks_remaining": 2019,
+      "passing_scenarios": 0,
+      "open_divergences": 2,
+      "first_visible_route_capture": 1,
+      "first_visible_route_events": 4571378,
+      "first_visible_route_edges": 2440,
+      "cooperative_reset_scheduler": 1,
+      "ppu_event_chain_parity": 1,
+      "cpu_write_count_delta": 2,
+      "standard_native_tests": 25,
+      "private_native_tests": 25,
+      "python_tests": 212
     }
   ]
 }
