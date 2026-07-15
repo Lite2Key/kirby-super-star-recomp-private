@@ -34,17 +34,23 @@ jobs:
         run: python tools/progress/build.py --evidence progress/progress.json --out progress/site --markdown PROGRESS.md
       - name: Verify no prohibited assets are present
         run: python scripts/check-asset-boundary.py
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: progress/site
       - uses: actions/upload-artifact@v4
         with:
           name: kss-progress-dashboard
           path: progress/site
           if-no-files-found: error
+      - name: Note Pages availability
+        if: github.event.repository.has_pages != true
+        run: echo "::notice::GitHub Pages is not enabled; the downloadable dashboard artifact is still available from this run."
+      - uses: actions/configure-pages@v5
+        if: github.event.repository.has_pages == true
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event.repository.has_pages == true
+        with:
+          path: progress/site
 
   deploy:
+    if: github.event.repository.has_pages == true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

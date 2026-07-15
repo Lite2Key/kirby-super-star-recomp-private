@@ -461,6 +461,111 @@ def render_markdown(data: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def render_summary_svg(data: dict[str, Any]) -> str:
+    """Render a script-free GitHub README summary from sanitized counters."""
+    width, height = 1200, 720
+    colors = {
+        "passed": "#64d883", "in_progress": "#62d6b5",
+        "blocked": "#ff6b82", "failed": "#ff6b82",
+        "not_started": "#52617e", "observed": "#66738c",
+        "lifted": "#3e91c9", "generated": "#8b67d5",
+        "semantics_supported": "#4fb6a4", "executed": "#e99a45",
+        "reference_verified": "#50c878",
+    }
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        "<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#eef3ff}.muted{fill:#9cacca}.small{font-size:12px}.label{font-size:13px}.head{font-size:18px;font-weight:700}.title{font-size:27px;font-weight:800}.count{font-size:13px;font-weight:700}.panel{fill:#151c31;stroke:#2b395c;stroke-width:1}.track{fill:#0a0f1e}.identity,.checkpoint{stroke:#0b1020;stroke-width:1}</style>",
+        f'<rect width="{width}" height="{height}" fill="#0b1020"/>',
+        '<rect width="1200" height="150" fill="#101a31"/>',
+        '<text x="42" y="42" class="title">Kirby Super Star static recompilation</text>',
+        f'<text x="42" y="64" class="muted small">ROM-free evidence snapshot {html.escape(data["snapshot"]["generated_at"])} · M3 reset-to-first-frame</text>',
+    ]
+    for index, milestone in enumerate(data["milestones"]):
+        x = 42 + index * 94
+        color = colors[milestone["status"]]
+        parts.extend((
+            f'<rect x="{x}" y="82" width="89" height="43" rx="7" fill="#151c31" stroke="{color}"/>',
+            f'<circle cx="{x + 12}" cy="95" r="5" fill="{color}"/>',
+            f'<text x="{x + 22}" y="99" class="count">{html.escape(milestone["id"])}</text>',
+            f'<text x="{x + 8}" y="116" class="small muted">{html.escape(milestone["status"].replace("_", " "))}</text>',
+        ))
+
+    block_map = data["block_map"]
+    all_blocks = block_map["processors"]["scpu"]["blocks"] + block_map["processors"]["sa1"]["blocks"]
+    parts.extend((
+        '<rect x="28" y="145" width="1144" height="150" rx="12" class="panel"/>',
+        '<text x="48" y="171" class="head">254-identity proof wall</text>',
+        '<text x="48" y="190" class="muted small">One tile per observed processor + PC + mode identity</text>',
+    ))
+    for index, block in enumerate(all_blocks):
+        x = 48 + (index % 42) * 10
+        y = 202 + (index // 42) * 12
+        parts.append(f'<rect class="identity" x="{x}" y="{y}" width="8" height="9" rx="1" fill="{colors[block["stage"]]}"/>')
+    proof_counts = {
+        stage: sum(processor["counts"][stage] for processor in block_map["processors"].values())
+        for stage in ("semantics_supported", "executed", "reference_verified")
+    }
+    for index, (stage, label) in enumerate((
+        ("semantics_supported", "Semantic execution"),
+        ("executed", "Runtime execution"),
+        ("reference_verified", "Reference oracle"),
+    )):
+        y = 201 + index * 29
+        value = proof_counts[stage]
+        parts.extend((
+            f'<text x="505" y="{y + 10}" class="label">{label}</text>',
+            f'<rect x="665" y="{y}" width="390" height="13" rx="6" class="track"/>',
+            f'<rect x="665" y="{y}" width="{390 * value / len(all_blocks):.1f}" height="13" rx="6" fill="{colors[stage]}"/>',
+            f'<text x="1070" y="{y + 11}" class="count">{value} / {len(all_blocks)}</text>',
+        ))
+
+    sync = data["boundary_sync"]
+    parts.extend((
+        '<rect x="28" y="307" width="557" height="185" rx="12" class="panel"/>',
+        '<rect x="597" y="307" width="575" height="185" rx="12" class="panel"/>',
+        '<text x="48" y="336" class="head">Clock domains at master 306,900</text>',
+        '<text x="617" y="336" class="head">Ordered event chains</text>',
+    ))
+
+    def add_bar(x: int, y: int, bar_width: int, item: dict[str, Any], mismatch: bool) -> None:
+        ratio = min(1.0, item["value"] / item["target"])
+        fill = "#ff6b82" if mismatch else "#62d6b5"
+        parts.extend((
+            f'<text x="{x}" y="{y}" class="label">{html.escape(item["label"])}</text>',
+            f'<text x="{x + bar_width}" y="{y}" text-anchor="end" class="count">{item["value"]:,} / {item["target"]:,}</text>',
+            f'<rect x="{x}" y="{y + 7}" width="{bar_width}" height="11" rx="5" class="track"/>',
+            f'<rect x="{x}" y="{y + 7}" width="{bar_width * ratio:.1f}" height="11" rx="5" fill="{fill}"/>',
+        ))
+
+    for index, item in enumerate(sync["domains"]):
+        add_bar(48, 365 + index * 39, 505, item, False)
+    for index, item in enumerate(sync["chains"]):
+        add_bar(617, 365 + index * 31, 523, item, not item["matches"])
+
+    parts.extend((
+        '<rect x="28" y="504" width="557" height="190" rx="12" class="panel"/>',
+        '<rect x="597" y="504" width="575" height="190" rx="12" class="panel"/>',
+        '<text x="48" y="533" class="head">42-checkpoint port atlas</text>',
+        '<text x="617" y="533" class="head">Next executable proof</text>',
+    ))
+    for row, stream in enumerate(data["workstreams"]):
+        y = 555 + row * 19
+        parts.append(f'<text x="48" y="{y + 10}" class="small">{html.escape(stream["name"])}</text>')
+        for column, checkpoint in enumerate(stream["checkpoints"]):
+            x = 245 + column * 49
+            parts.append(f'<rect class="checkpoint" x="{x}" y="{y}" width="45" height="13" rx="3" fill="{colors[checkpoint["status"]]}"/>')
+    proof = data["next_proof"]
+    parts.append(f'<text x="617" y="562" class="head" fill="#62d6b5">{html.escape(proof["title"])}</text>')
+    for index, criterion in enumerate(proof["acceptance"][:4]):
+        clipped = criterion if len(criterion) <= 76 else criterion[:73] + "..."
+        parts.append(f'<text x="625" y="{591 + index * 24}" class="label">• {html.escape(clipped)}</text>')
+    parts.extend((
+        '<text x="617" y="681" class="small muted">Green = proven · teal = active · red = mismatch · gray = remaining</text>',
+        '</svg>\n',
+    ))
+    return "".join(parts)
+
+
 def build(
     evidence: Path,
     out_dir: Path,
@@ -477,6 +582,7 @@ def build(
     outputs = {
         out_dir / "index.html": render_dashboard(site_data, template),
         out_dir / "progress.json": json.dumps(site_data, indent=2, ensure_ascii=False) + "\n",
+        out_dir / "summary.svg": render_summary_svg(site_data),
     }
     if markdown is not None:
         outputs[markdown] = render_markdown(data)

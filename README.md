@@ -1,6 +1,6 @@
 # Kirby Super Star Static Recompilation
 
-Private, ROM-free research project for statically recompiling the SNES S-CPU and SA-1 program streams into portable C++20. The original game ROM is never committed; local tools accept a user-supplied verified ROM and keep all derived material under ignored directories.
+Public, ROM-free research project for statically recompiling the SNES S-CPU and SA-1 program streams into portable C++20. The original game ROM is never committed; local tools accept a user-supplied verified ROM and keep all derived material under ignored directories.
 
 ## Accepted reference image
 
@@ -38,11 +38,12 @@ for the Git-safe summary.
 
 On Windows, double-click `show-progress.cmd` to regenerate and open the interactive dashboard.
 
+![Current ROM-free recompilation progress](progress/site/summary.svg)
+
 The `Progress dashboard` GitHub Actions workflow also rebuilds the same ROM-free
-site on each progress push and publishes it through GitHub Pages when Pages is
-enabled for the repository. It always uploads a downloadable Actions artifact
-as a fallback. Expected Pages URL:
-`https://lite2key.github.io/kirby-super-star-recomp-private/`.
+site on each progress push and publishes it through GitHub Pages. It always
+uploads a downloadable Actions artifact as a fallback. Follow the live tracker
+at [lite2key.github.io/kirby-super-star-recomp-private](https://lite2key.github.io/kirby-super-star-recomp-private/).
 
 After building, run the translated boot probe with the default Downloads path
 or an explicit ROM path:

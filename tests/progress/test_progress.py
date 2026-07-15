@@ -3,6 +3,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest import mock
 from pathlib import Path
 
@@ -38,6 +39,12 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(len(machine["block_map"]["processors"]["sa1"]["blocks"]), 40)
             self.assertEqual(len(machine["workstreams"]), 7)
             self.assertEqual(machine["boundary_sync"]["target_master"], 306900)
+            summary = (out / "summary.svg").read_text(encoding="utf-8")
+            ET.fromstring(summary)
+            self.assertEqual(summary.count('class="identity"'), 254)
+            self.assertEqual(summary.count('class="checkpoint"'), 42)
+            self.assertNotIn("<script", summary)
+            self.assertNotIn("<image", summary)
 
     def test_block_map_is_derived_from_sanitized_first_frame_artifacts(self):
         block_map = progress_build.load_block_map(ROOT)
