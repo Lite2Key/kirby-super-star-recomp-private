@@ -33,6 +33,21 @@ def test_runtime_event_chain_observation_is_valid_and_reference_anchored() -> No
         observation["chains"]["spc_ports"]["runtime_records"]
     ) == 463
     assert sum(item["reference_records"] for item in directions.values()) == 462
+    assert directions["cpu_to_spc"] == {
+        "runtime_records": 308,
+        "reference_records": 308,
+        "delta": 0,
+    }
+    assert directions["spc_to_cpu"] == {
+        "runtime_records": 155,
+        "reference_records": 154,
+        "delta": 1,
+    }
+    # The current evidence boundary isolates one extra output-latch
+    # acknowledgement after an otherwise exact 462-event prefix. Keep this
+    # directional assertion explicit so a future change cannot silently turn
+    # the known microphase gap into a broad SPC count drift.
+    assert observation["chains"]["spc_ports"]["delta"] == 1
     assert observation["cross_domain_order_records"] == (
         observation["chains"]["cpu_writes"]["runtime_records"]
         + observation["chains"]["spc_ports"]["runtime_records"]

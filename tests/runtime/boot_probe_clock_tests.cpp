@@ -240,6 +240,62 @@ void test_post_frame_route_opt_in_keeps_event_chain_first_frame_bounded() {
     assert(result.event_chain_summary);
 }
 
+void test_post_frame_route_only_microphase_is_separate_from_event_capture() {
+    const auto ipl = ipl_with({
+        0xe8, 0xaa, 0xc4, 0xf4,
+        0xe8, 0xbb, 0xc4, 0xf5,
+        0xe4, 0xf4, 0x68, 0xcc, 0xd0, 0xfa,
+        0xc4, 0xf4,
+        0xe4, 0xf4, 0xc4, 0xf4, 0x2f, 0xfa,
+    });
+
+    // A route-only development run is allowed to finish the whole SPC
+    // instruction that straddles endFrame. Its architectural cursor is
+    // therefore a post-boundary continuation, not first-frame evidence.
+    kss::BootProbeTimingEvidence route_evidence{ipl};
+    route_evidence.continue_route_after_first_frame = true;
+    route_evidence.post_frame_route_block_budget = 1U;
+    const auto route = kss::run_boot_probe(synthetic_upload_rom(), route_evidence);
+    assert(route.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(route.spc_master_ready > kss::kSnesFirstFrameMasterClock);
+    assert(route.scpu_master_ready > kss::kSnesFirstFrameMasterClock);
+    assert(route.post_frame_route_observation.completed_blocks > 0U);
+    assert(route.post_frame_route_observation.completed_blocks
+        <= route_evidence.post_frame_route_block_budget);
+    // The synthetic route has already observed every registered identity by
+    // the first-frame checkpoint, so the bounded continuation closes its
+    // identity frontier on the first post-frame block.
+    assert(route.post_frame_route_observation.status
+        == kss::GeneratedRunStatus::checkpoint_reached);
+    // Route continuation must not rewrite the fixed first-frame SA-1 view.
+    assert(route.sa1_frame_observation.ready_at == 306894U);
+    assert(route.sa1_frame_observation.shortfall == 6U);
+    assert(!route.event_chain_summary);
+
+    // Attaching the recorder changes only the evidence boundary: even when
+    // route continuation is requested, every published SPC event stays at or
+    // before endFrame. The underlying whole-instruction cursor may still be
+    // a few clocks beyond the boundary, so this checks microphase policy
+    // without manufacturing a partial SPC state.
+    kss::RuntimeEventChainRecorder recorder;
+    kss::BootProbeTimingEvidence bounded{ipl, {}, {}, &recorder};
+    bounded.continue_route_after_first_frame = true;
+    const auto first_frame = kss::run_boot_probe(
+        synthetic_upload_rom(), bounded);
+    assert(first_frame.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(first_frame.event_chain_status
+        == kss::BootProbeEventChainStatus::instruction_retirement_stream);
+    assert(first_frame.event_chain_summary);
+    assert(std::all_of(recorder.spc_ports().begin(), recorder.spc_ports().end(),
+        [](const auto& event) {
+            return event.master_clock <= kss::kSnesFirstFrameMasterClock;
+        }));
+    assert(std::all_of(recorder.cpu_writes().begin(), recorder.cpu_writes().end(),
+        [](const auto& event) {
+            return event.master_clock <= kss::kSnesFirstFrameMasterClock;
+        }));
+}
+
 void test_runtime_event_chain_observes_live_causal_path() {
     const auto ipl = ipl_with({
         0xe8, 0xaa, 0xc4, 0xf4,
@@ -343,6 +399,7 @@ int main() {
     test_runtime_ipl_clocks_real_port_ack_and_reaches_generated_upload();
     test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary();
     test_post_frame_route_opt_in_keeps_event_chain_first_frame_bounded();
+    test_post_frame_route_only_microphase_is_separate_from_event_capture();
     test_runtime_event_chain_observes_live_causal_path();
     test_spc_requires_runtime_ipl_and_fails_closed();
     test_post_frame_spc_phase_is_timing_debt_without_execution();

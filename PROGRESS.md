@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-08-01T22:19:44Z` | commit `fcf38a224df0e8982e6422e9e7a4df8cc272713f` | tree `clean`
+Snapshot: `2026-08-01T22:58:46Z` | commit `bfbc6258b75e264b934c05c1714fa9e80367c254` | tree `clean`
 
 ## Milestone map
 
@@ -30,13 +30,13 @@ Snapshot: `2026-08-01T22:19:44Z` | commit `fcf38a224df0e8982e6422e9e7a4df8cc2727
 | Route coverage corpus | union observed identities | 2273 / 2273 | `evolving` |
 | S-CPU control flow | observed mode-aware blocks | 1032 / 1032 | `evolving` |
 | S-CPU control flow | verified blocks | 1 / 1032 | `evolving` |
-| S-CPU control flow | semantics-supported identities | 1017 / 1032 | `evolving` |
+| S-CPU control flow | semantics-supported identities | 1032 / 1032 | `evolving` |
 | SA-1 control flow | observed mode-aware blocks | 1241 / 1241 | `evolving` |
 | SA-1 control flow | verified blocks | 1 / 1241 | `evolving` |
 | SA-1 control flow | semantics-supported identities | 1241 / 1241 | `evolving` |
 | 65C816 decoder and lifter | opcode definitions | 256 / 256 | `fixed` |
 | 65C816 decoder and lifter | executable opcode semantics | 256 / 256 | `fixed` |
-| 65C816 decoder and lifter | private generated block functions | 2258 / 2273 | `evolving` |
+| 65C816 decoder and lifter | private generated block functions | 2273 / 2273 | `evolving` |
 | Deterministic scheduler | synchronization classes | 6 / 8 | `fixed` |
 | S-CPU and SA-1 address spaces | synthetic mapping groups | 7 / 7 | `fixed` |
 | PPU, DMA, APU, input, and save | validated subsystems | 5 / 5 | `fixed` |
@@ -60,7 +60,8 @@ Snapshot: `2026-08-01T22:19:44Z` | commit `fcf38a224df0e8982e6422e9e7a4df8cc2727
 - `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
 - `m3.first-visible-route` [Compact first-visible route and repeat-stable visual oracle](analysis/coverage/first-visible-route-coverage.json)
-- `m3.local-verification` [221 Python and 25 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.wram-postframe-route` [Private WRAM witness closure and bounded post-frame route probe](progress/evidence/m3-wram-postframe-route.md)
+- `m3.local-verification` [226 Python and 25 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
@@ -73,17 +74,17 @@ Snapshot: `2026-08-01T22:19:44Z` | commit `fcf38a224df0e8982e6422e9e7a4df8cc2727
 
 ## Next executable proof
 
-**Import executable WRAM and advance the visible route** - owner: `runtime/validation`
+**Close the S-CPU/SPC upload handshake** - owner: `runtime/validation`
 
-- [ ] Capture private byte witnesses and fail-closed generated functions for the 15 executable S-CPU WRAM identities
-- [ ] Execute the 2258 generated route identities beyond the current 254-identity runtime frontier through the first visible frame
+- [ ] Model the $D655 upload wait against private Mesen port ordering without changing the first-frame event-chain clamp
+- [ ] Advance the opt-in CPU/SA-1 route beyond the 279-identity bounded frontier and reduce the 1994 missing identities using bounded handshake evidence
 - [ ] Resolve the one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle
 - [ ] Close ordered CPU, SA-1, DMA, PPU, and SPC digest parity without patching architectural state
 
 ## Active blockers
 
-- **technical** `post-first-frame-route-expansion`: The compact reset-to-visible corpus contains 2273 identities and 2440 edges. Static generation now covers 2258; the remaining 15 are executable S-CPU WRAM identities that need private byte witnesses, and runtime execution still stops at the original 254-identity first-frame slice. (owner: analysis/recompiler)
-- **technical** `shared-first-endframe-parity`: Cooperative reset/MVN and post-reset SA-1 scheduling reach the first frame; reset-DMA side effects and PPU parity are exact, CPU/S-CPU/SA-1/DMA counts match, and only ordered digests plus SPC microphase remain open. (owner: runtime/validation)
+- **technical** `post-first-frame-route-expansion`: The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation now covers all 2273. A real private route probe inventories all 2273, executes 279, and misses 1994 after a bounded 131072-block continuation that crosses the upload phase into S-CPU $D5E9; the next SPC/CPU wait remains open. (owner: analysis/recompiler)
+- **technical** `shared-first-endframe-parity`: Cooperative reset/MVN and post-reset SA-1 scheduling reach the first frame; reset-DMA side effects and PPU parity are exact, and CPU/S-CPU/SA-1/DMA counts match. The remaining work is the post-frame CPU/SA-1 upload handshake, one trailing SPC acknowledgement, and ordered digest parity. (owner: runtime/validation)
 
 Regenerate the interactive dashboard with:
 

@@ -117,6 +117,8 @@ BootProbeResult run_boot_probe(
     dispatcher.set_execution_identity_sink(&result.executed_block_identities);
     MultiClockCoordinator clocks;
     const bool live_spc = !timing.spc_ipl.empty() && timing.spc_steps.empty();
+    const bool route_only = timing.continue_route_after_first_frame
+        && timing.event_chain == nullptr;
     if (live_spc && !hardware_bus.provision_spc_ipl(timing.spc_ipl)) {
         result.status = BootProbeStatus::spc_provision_failed;
         return result;
@@ -375,7 +377,8 @@ BootProbeResult run_boot_probe(
     result.sa1_frame_observation.ready_at = result.sa1_master_ready;
     result.sa1_frame_observation.target = kSnesFirstFrameMasterClock;
     result.sa1_frame_observation.shortfall =
-        kSnesFirstFrameMasterClock - result.sa1_master_ready;
+        result.sa1_master_ready < kSnesFirstFrameMasterClock
+        ? kSnesFirstFrameMasterClock - result.sa1_master_ready : 0U;
     flush_cpu_writes(sa1_poll_timing.ready_at);
     result.sa1_poll_value = hardware_bus.sa1_iram()[0x0aU];
     if (result.sa1_poll_observation.status != GeneratedRunStatus::checkpoint_reached) {
@@ -384,8 +387,16 @@ BootProbeResult run_boot_probe(
     }
 
     bool live_sa1_ok = true;
+    // Keep the fixed first-frame SA-1 observation bounded until the explicit
+    // post-frame route loop begins. Route-only SPC continuation may run while
+    // the S-CPU finishes a boundary-crossing block, but the SA-1 evidence must
+    // still retain its exact 306900-master-clock contract.
+    bool route_post_frame_active = false;
     const auto advance_sa1_to = [&](MasterClock requested_target) noexcept {
-        const auto target = std::min(requested_target, kSnesFirstFrameMasterClock);
+        const auto target = route_only && route_post_frame_active
+            ? requested_target
+            : std::min(requested_target, kSnesFirstFrameMasterClock);
+        const bool first_frame_target = target <= kSnesFirstFrameMasterClock;
         const auto current = clocks.ready_at(ClockDomain::sa1);
         if (current >= target) return true;
 
@@ -393,17 +404,22 @@ BootProbeResult run_boot_probe(
         const auto advance = advance_sa1_poll_to(
             result.sa1, bus, scheduler, dispatcher,
             current, target, poll_block_limit);
-        result.sa1_frame_observation.completed_blocks += advance.completed_blocks;
-        result.sa1_frame_observation.completed_cycles += advance.completed_cycles;
-        result.sa1_frame_observation.ready_at = advance.ready_at;
-        result.sa1_frame_observation.target = kSnesFirstFrameMasterClock;
-        result.sa1_frame_observation.shortfall =
-            kSnesFirstFrameMasterClock - advance.ready_at;
-        result.sa1_frame_observation.status = advance.status;
+        if (first_frame_target) {
+            result.sa1_frame_observation.completed_blocks += advance.completed_blocks;
+            result.sa1_frame_observation.completed_cycles += advance.completed_cycles;
+            result.sa1_frame_observation.ready_at = advance.ready_at;
+            result.sa1_frame_observation.target = kSnesFirstFrameMasterClock;
+            result.sa1_frame_observation.shortfall =
+                advance.ready_at < kSnesFirstFrameMasterClock
+                ? kSnesFirstFrameMasterClock - advance.ready_at : 0U;
+            result.sa1_frame_observation.status = advance.status;
+        }
         if (advance.completed_blocks > 0U) {
-            result.sa1_frame_observation.last_completed = advance.last_completed;
-            ++result.sa1_frame_sync_points;
-            result.sa1_last_sync_target = target;
+            if (first_frame_target) {
+                result.sa1_frame_observation.last_completed = advance.last_completed;
+                ++result.sa1_frame_sync_points;
+                result.sa1_last_sync_target = target;
+            }
         }
 
         const auto accounted = clocks.account_sa1_cycles(advance.completed_cycles);
@@ -433,8 +449,7 @@ BootProbeResult run_boot_probe(
         // continuing the live SPC handshake beyond that boundary, but only
         // when no event recorder is attached (the public evidence contract
         // remains first-frame bounded).
-        const auto target = timing.continue_route_after_first_frame
-                && timing.event_chain == nullptr
+        const auto target = route_only
             ? requested_target
             : std::min(requested_target, kSnesFirstFrameMasterClock);
         // One first-frame synchronization never needs remotely this many SPC
@@ -701,6 +716,41 @@ BootProbeResult run_boot_probe(
         result.status = BootProbeStatus::timing_debt;
         return result;
     }
+
+    if (route_only && live_spc) {
+        route_post_frame_active = true;
+        // The first-frame proof above is deliberately complete before this
+        // branch. Route-only development runs may then continue whole S-CPU
+        // blocks with the live SA-1 poll and SPC clock domains, but they must
+        // stop at a finite boundary when the upload handshake has no next
+        // causal edge. This keeps a stalled $D655 wait observable rather than
+        // turning a diagnostic mode into an unbounded emulator loop.
+        const auto post_frame_block_limit = std::min<std::size_t>(
+            timing.post_frame_route_block_budget, 1'048'576U);
+        const auto impossible_checkpoint = BlockKey::make(
+            ProcessorId::snes_cpu, 0x00ffffU, false, true, false);
+        for (std::size_t step = 0; step < post_frame_block_limit; ++step) {
+            const auto one = run_interleaved_until(impossible_checkpoint, 1U);
+            result.post_frame_route_observation.last_completed = one.last_completed;
+            result.post_frame_route_observation.completed_blocks += one.completed_blocks;
+            if (one.status != GeneratedRunStatus::step_limit) {
+                result.post_frame_route_observation.status = one.status;
+                break;
+            }
+            if (result.executed_block_identities.size()
+                == result.inventory_block_identities.size()) {
+                result.post_frame_route_observation.status =
+                    GeneratedRunStatus::checkpoint_reached;
+                break;
+            }
+        }
+    }
+
+    // The CC acknowledgement field above records the upload-start edge. The
+    // port value exposed in the result is the final live latch, so route-only
+    // diagnostics do not mistake that initial acknowledgement for the later
+    // transfer-counter state.
+    if (live_spc) result.apu_port0_output = hardware_bus.apu_output_ports()[0];
 
     result.frame = SnesFrameRenderer::render(hardware_bus.ppu_state());
     DomainAdvanceResult scpu_timing{CoordinatorStatus::accepted, 0,

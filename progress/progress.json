@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-01T22:19:44Z",
-    "commit": "fcf38a224df0e8982e6422e9e7a4df8cc272713f",
+    "generated_at": "2026-08-01T22:58:46Z",
+    "commit": "bfbc6258b75e264b934c05c1714fa9e80367c254",
     "dirty": false,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -59,8 +59,13 @@
           "path": "analysis/coverage/first-visible-route-coverage.json"
         },
         {
+          "id": "m3.wram-postframe-route",
+          "label": "Private WRAM witness closure and bounded post-frame route probe",
+          "path": "progress/evidence/m3-wram-postframe-route.md"
+        },
+        {
           "id": "m3.local-verification",
-          "label": "221 Python and 25 native tests",
+          "label": "226 Python and 25 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -155,7 +160,7 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "The first-frame runtime still executes 254 identities, while the private route generator now covers 2258 of the 2273-identity reset-to-visible corpus. Reset, both MVNs, and post-reset SA-1 polling run cooperatively through the frame; PPU parity and CPU/S-CPU/SA-1/DMA counts are exact, with SPC microphase and full route execution still open.",
+      "summary": "Static generation now covers all 2273 identities in the compact reset-to-visible corpus, including 15 executable S-CPU WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities; a bounded route-only continuation reaches 279 identities after the first frame, while the remaining CPU/SA-1 route is still in the upload handshake.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
@@ -172,6 +177,11 @@
           "id": "m3.first-visible-route",
           "label": "First-visible route: 2273 mode-aware identities",
           "path": "analysis/coverage/first-visible-route-coverage.json"
+        },
+        {
+          "id": "m3.wram-postframe-route",
+          "label": "WRAM witness closure and bounded post-frame route probe",
+          "path": "progress/evidence/m3-wram-postframe-route.md"
         }
       ]
     },
@@ -272,11 +282,11 @@
           "status": "passed"
         },
         {
-          "name": "Lift 2258",
+          "name": "Lift 2273",
           "status": "passed"
         },
         {
-          "name": "Generate 2258",
+          "name": "Generate 2273",
           "status": "passed"
         },
         {
@@ -489,7 +499,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-visible route exposes 1032 S-CPU identities; 1017 now lift and generate safely, while the runtime still executes the original 254-identity first-frame slice.",
+      "summary": "The first-visible route exposes 1032 S-CPU identities; all now lift and generate safely, including 15 executable-WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities, and the bounded private continuation reaches 279 before the next upload wait.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -507,10 +517,10 @@
         },
         {
           "label": "semantics-supported identities",
-          "value": 1017,
+          "value": 1032,
           "total": 1032,
           "denominator": "evolving",
-          "note": "2258 private blocks are generated overall; the 15 remaining unresolved identities are executable S-CPU WRAM code, so generated coverage is 1017/1032 for this processor."
+          "note": "All 2273 private blocks are generated overall; the 15 executable S-CPU WRAM identities decode only from an ignored private witness map, so no ROM-derived bytes enter the repository."
         }
       ],
       "evidence": [
@@ -601,10 +611,10 @@
         },
         {
           "label": "private generated block functions",
-          "value": 2258,
+          "value": 2273,
           "total": 2273,
           "denominator": "evolving",
-          "note": "Deterministically regenerated from the authorized ROM and current sanitized route corpus: 2258/2273 generated, with 15 executable-WRAM identities still requiring private witnesses."
+          "note": "Deterministically regenerated from the authorized ROM and current sanitized route corpus: all 2273/2273 generated; 15 executable-WRAM identities decode from an ignored private witness map and remain absent from Git."
         }
       ]
     },
@@ -613,7 +623,7 @@
       "name": "Deterministic scheduler",
       "group": "runtime",
       "status": "in_progress",
-      "summary": "The boot probe records generated S-CPU micro-accesses, uses exact SA-1 2:1 conversion, and cooperatively schedules reset plus both MVNs at whole-instruction boundaries before continuing the S-CPU/SPC path.",
+      "summary": "The boot probe records generated S-CPU micro-accesses, uses exact SA-1 2:1 conversion, and cooperatively schedules reset plus both MVNs at whole-instruction boundaries. An explicit route-only mode lets SPC continue past the first-frame event boundary; CPU/SA-1 continuation remains a separate handshake phase.",
       "metrics": [
         {
           "label": "synchronization classes",
@@ -829,21 +839,21 @@
     {
       "id": "post-first-frame-route-expansion",
       "severity": "technical",
-      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges. Static generation now covers 2258; the remaining 15 are executable S-CPU WRAM identities that need private byte witnesses, and runtime execution still stops at the original 254-identity first-frame slice.",
+      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation now covers all 2273. A real private route probe inventories all 2273, executes 279, and misses 1994 after a bounded 131072-block continuation that crosses the upload phase into S-CPU $D5E9; the next SPC/CPU wait remains open.",
       "owner": "analysis/recompiler"
     },
     {
       "id": "shared-first-endframe-parity",
       "severity": "technical",
-      "summary": "Cooperative reset/MVN and post-reset SA-1 scheduling reach the first frame; reset-DMA side effects and PPU parity are exact, CPU/S-CPU/SA-1/DMA counts match, and only ordered digests plus SPC microphase remain open.",
+      "summary": "Cooperative reset/MVN and post-reset SA-1 scheduling reach the first frame; reset-DMA side effects and PPU parity are exact, and CPU/S-CPU/SA-1/DMA counts match. The remaining work is the post-frame CPU/SA-1 upload handshake, one trailing SPC acknowledgement, and ordered digest parity.",
       "owner": "runtime/validation"
     }
   ],
   "next_proof": {
-    "title": "Import executable WRAM and advance the visible route",
+    "title": "Close the S-CPU/SPC upload handshake",
     "acceptance": [
-      "Capture private byte witnesses and fail-closed generated functions for the 15 executable S-CPU WRAM identities",
-      "Execute the 2258 generated route identities beyond the current 254-identity runtime frontier through the first visible frame",
+      "Model the $D655 upload wait against private Mesen port ordering without changing the first-frame event-chain clamp",
+      "Advance the opt-in CPU/SA-1 route beyond the 279-identity bounded frontier and reduce the 1994 missing identities using bounded handshake evidence",
       "Resolve the one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle",
       "Close ordered CPU, SA-1, DMA, PPU, and SPC digest parity without patching architectural state"
     ],
@@ -1043,12 +1053,30 @@
       "python_tests": 212
     },
     {
-      "at": "2026-08-01T22:19:44Z",
+      "at": "2026-08-01T22:58:46Z",
       "verified_blocks": 248,
       "executed_blocks": 254,
       "observed_blocks": 2273,
-      "generated_blocks": 2258,
-      "new_route_blocks_remaining": 15,
+      "generated_blocks": 2273,
+      "new_route_blocks_remaining": 0,
+      "runtime_route_blocks_remaining": 1994,
+      "private_wram_witnesses": 15,
+      "wram_unresolved_blocks": 0,
+      "post_frame_route_mode": 1,
+      "route_probe_inventory": 2273,
+      "route_probe_executed": 279,
+      "route_probe_missing": 1994,
+      "route_probe_upload_blocks": 4096,
+      "route_probe_upload_status": 4,
+      "route_probe_post_blocks": 131072,
+      "route_probe_post_status": 4,
+      "route_probe_scpu_pc": "00D5E9",
+      "route_probe_scpu_counter": 65534,
+      "route_probe_spc_y": 0,
+      "route_probe_final_apu_port0": 0,
+      "route_probe_spc_cycles": 155855,
+      "route_probe_postfrontier_executed": 25,
+      "upload_handshake_block": 1,
       "passing_scenarios": 0,
       "open_divergences": 2,
       "first_visible_route_capture": 1,
@@ -1067,7 +1095,7 @@
       "spc_reference_prefix": 462,
       "standard_native_tests": 25,
       "private_native_tests": 25,
-      "python_tests": 221
+      "python_tests": 226
     }
   ]
 }

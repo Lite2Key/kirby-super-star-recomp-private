@@ -12,6 +12,7 @@
 #include "kss/spc700.hpp"
 #include "kss/spc_exact_master.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <span>
@@ -56,6 +57,11 @@ struct BootProbeTimingEvidence {
     // first-frame clamp regardless of this flag so post-boundary records
     // cannot be mistaken for first-frame evidence.
     bool continue_route_after_first_frame{};
+    // Finite development-only CPU/SA-1 continuation budget after the first
+    // frame. Public/default probes keep this small; private route probes may
+    // raise it to cross a measured upload phase without permitting an
+    // unbounded loop.
+    std::size_t post_frame_route_block_budget{4'096U};
 };
 
 enum class BootProbeEventChainStatus : std::uint8_t {
@@ -95,6 +101,10 @@ struct BootProbeResult {
     // the real SPC core until both local clocks cover the first-frame master
     // boundary. This is distinct from merely enqueueing the frame event.
     GeneratedRunResult scpu_frame_observation{};
+    // Development-only route continuation after the first-frame boundary.
+    // This is populated only by the explicit route-only mode and remains a
+    // bounded diagnostic when the live upload handshake has no next edge.
+    GeneratedRunResult post_frame_route_observation{};
     // Exact value-free observation at the first endFrame master clock. This
     // retains the preceding committed CPU context while exposing an in-flight
     // fetch/access when the boundary falls inside a generated block.

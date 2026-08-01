@@ -13,12 +13,14 @@ Public, ROM-free research project for statically recompiling the SNES S-CPU and 
 
 The repository is in M3, reset-to-first-frame. The compact reset-to-visible
 trace contains 2,273 dual-CPU processor/PC/mode identities and 2,440 observed
-edges. The private static generator now lifts and emits 2,258 of them: 1,017
-S-CPU and 1,241 SA-1 identities. The remaining 15 are executable S-CPU WRAM
-identities whose bytes are runtime-generated and therefore require private
-witness capture. The current runtime executes the original 254-identity
-first-frame slice; extending execution through the generated visible-route
-corpus is the next implementation gate. All 256 opcodes have
+edges. The private static generator now lifts and emits all 2,273 of them: 1,032
+S-CPU and 1,241 SA-1 identities. The 15 executable S-CPU WRAM identities are
+decoded from an ignored private witness map; their ROM-derived bytes never enter
+the public repository. The current first-frame runtime executes its original
+254-identity slice. A route-only development probe can continue whole
+CPU/SA-1/SPC instructions without contaminating first-frame evidence: with a
+finite 131,072-block budget it reaches 279 identities and the next upload phase
+at S-CPU `$D5E9`, leaving 1,994 route identities unexecuted. All 256 opcodes have
 architecture-tested execution semantics. With a runtime-only authentic IPL,
 the 254 runtime identities execute through the real SPC `$CC` acknowledgement
 with no patched state. Reset DMA, shared SA-1 I-RAM/control,
@@ -80,7 +82,7 @@ the authorized ROM, run:
 .\build-private-recomp.cmd "C:\path\to\Kirby Super Star (USA).sfc"
 ```
 
-This produces 2,258 generated route block functions below `.private/generated`,
+This produces 2,273 generated route block functions below `.private/generated`,
 builds them in the separate `build/windows-private` tree, and runs the same
 native verification suite. No ROM-derived source is added to Git.
 

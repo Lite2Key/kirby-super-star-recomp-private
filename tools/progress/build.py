@@ -501,7 +501,20 @@ def render_summary_svg(data: dict[str, Any]) -> str:
     }
     route_total = metrics["route-corpus"]["union observed identities"]["value"]
     generated_total = metrics["decoder-lifter"]["private generated block functions"]["value"]
-    runtime_total = block_map["execution_count"]
+    # The first-frame identity artifact remains the exact event-chain map, but
+    # the route wall should show the newest bounded private continuation when
+    # one is recorded in the manifest. This keeps the visual route counter
+    # honest without pretending that post-frame identities are first-frame
+    # event evidence.
+    latest_route = next(
+        (trend for trend in reversed(data.get("trends", []))
+         if isinstance(trend, dict) and "route_probe_executed" in trend),
+        None,
+    )
+    runtime_total = (
+        latest_route["route_probe_executed"]
+        if latest_route else block_map["execution_count"]
+    )
     semantic_total = (
         metrics["s-cpu"]["semantics-supported identities"]["value"]
         + metrics["sa-1"]["semantics-supported identities"]["value"]
