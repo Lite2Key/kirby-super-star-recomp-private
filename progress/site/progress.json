@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-01T23:07:56Z",
-    "commit": "f98cf6cd0c3c728e183f13ca8b3d984a663954f3",
+    "generated_at": "2026-08-02T00:50:00Z",
+    "commit": "b00d81acdde10896a3c021acbc5e4bedee53c084",
     "dirty": false,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -160,7 +160,7 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "Static generation now covers all 2273 identities in the compact reset-to-visible corpus, including 15 executable S-CPU WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities; a bounded route-only continuation reaches 279 identities after the first frame, while the remaining CPU/SA-1 route is still in the upload handshake.",
+      "summary": "Static generation now covers all 2273 identities in the compact reset-to-visible corpus, including 15 executable S-CPU WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities; a bounded route-only continuation reaches 388 identities after the first frame and follows the generated post-frame SA-1 handoff, while the remaining CPU/SA-1 route is still open.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
@@ -499,7 +499,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-visible route exposes 1032 S-CPU identities; all now lift and generate safely, including 15 executable-WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities, and the bounded private continuation reaches 279 before the next upload wait.",
+      "summary": "The first-visible route exposes 1032 S-CPU identities; all now lift and generate safely, including 15 executable-WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities, and the bounded private continuation reaches 388 through the post-frame SA-1 handoff before the next dynamic-return boundary.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -839,7 +839,7 @@
     {
       "id": "post-first-frame-route-expansion",
       "severity": "technical",
-      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation now covers all 2273. A real private route probe inventories all 2273, executes 279, and misses 1994 after a bounded 131072-block continuation that crosses the upload phase into S-CPU $D5E9; the next SPC/CPU wait remains open.",
+      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation now covers all 2273. A real private route probe inventories all 2273, executes 388, and misses 1885 after a bounded 4194304-block continuation that follows the post-frame SA-1 handoff to SA-1 $8A01 and S-CPU $0014; the next dynamic-return boundary remains open.",
       "owner": "analysis/recompiler"
     },
     {
@@ -852,8 +852,7 @@
   "next_proof": {
     "title": "Close the S-CPU/SPC upload handshake",
     "acceptance": [
-      "Model the $D655 upload wait against private Mesen port ordering without changing the first-frame event-chain clamp",
-      "Advance the opt-in CPU/SA-1 route beyond the 279-identity bounded frontier and reduce the 1994 missing identities using bounded handshake evidence",
+      "Advance the opt-in CPU/SA-1 route beyond the 388-identity bounded frontier and reduce the 1885 missing identities using a new causal route scenario",
       "Resolve the one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle",
       "Close ordered CPU, SA-1, DMA, PPU, and SPC digest parity without patching architectural state"
     ],
@@ -1053,29 +1052,29 @@
       "python_tests": 212
     },
     {
-      "at": "2026-08-01T22:58:46Z",
+      "at": "2026-08-02T00:50:00Z",
       "verified_blocks": 248,
       "executed_blocks": 254,
       "observed_blocks": 2273,
       "generated_blocks": 2273,
       "new_route_blocks_remaining": 0,
-      "runtime_route_blocks_remaining": 1994,
+      "runtime_route_blocks_remaining": 1885,
       "private_wram_witnesses": 15,
       "wram_unresolved_blocks": 0,
       "post_frame_route_mode": 1,
       "route_probe_inventory": 2273,
-      "route_probe_executed": 279,
-      "route_probe_missing": 1994,
+      "route_probe_executed": 388,
+      "route_probe_missing": 1885,
       "route_probe_upload_blocks": 4096,
       "route_probe_upload_status": 4,
-      "route_probe_post_blocks": 131072,
+      "route_probe_post_blocks": 4194304,
       "route_probe_post_status": 4,
-      "route_probe_scpu_pc": "00D5E9",
-      "route_probe_scpu_counter": 65534,
+      "route_probe_scpu_pc": "000014",
+      "route_probe_scpu_counter": 15,
       "route_probe_spc_y": 0,
-      "route_probe_final_apu_port0": 0,
-      "route_probe_spc_cycles": 155855,
-      "route_probe_postfrontier_executed": 25,
+      "route_probe_final_apu_port0": 114,
+      "route_probe_spc_cycles": 5198846,
+      "route_probe_postfrontier_executed": 34,
       "upload_handshake_block": 1,
       "passing_scenarios": 0,
       "open_divergences": 2,

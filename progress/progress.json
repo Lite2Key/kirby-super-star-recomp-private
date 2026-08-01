@@ -2,7 +2,7 @@
   "schema_version": 1,
   "snapshot": {
     "generated_at": "2026-08-02T00:50:00Z",
-    "commit": "572cbedb6cf12b06c4ce34991cde4e340906e632",
+    "commit": "b00d81acdde10896a3c021acbc5e4bedee53c084",
     "dirty": false,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
