@@ -54,6 +54,40 @@ void test_boundaries_and_completion_are_distinct() {
     assert(complete.architectural_state_committed);
 }
 
+void test_event_writes_are_limited_to_completed_accesses() {
+    constexpr auto store = kss::BlockKey::make(
+        kss::ProcessorId::snes_cpu, 0x00d65dU, false, false, false);
+    constexpr std::array accesses{
+        kss::ScpuMicroAccess{0x00d65dU, kss::BusAccessKind::opcode,
+            kss::BusAccessDirection::read, false},
+        kss::ScpuMicroAccess{0x00d65eU, kss::BusAccessKind::operand,
+            kss::BusAccessDirection::read, false},
+        kss::ScpuMicroAccess{0x00d65fU, kss::BusAccessKind::operand,
+            kss::BusAccessDirection::read, false},
+        kss::ScpuMicroAccess{0x002140U, kss::BusAccessKind::data,
+            kss::BusAccessDirection::write, false},
+        kss::ScpuMicroAccess{0x002141U, kss::BusAccessKind::data,
+            kss::BusAccessDirection::write, false},
+    };
+    constexpr std::size_t block_access_start = 100U;
+
+    const auto opcode_in_flight = kss::observe_scpu_access_boundary(
+        store, accesses, 306898U, 306900U);
+    assert(opcode_in_flight.completed_accesses == 0U);
+    assert(!kss::scpu_write_access_completed_at_boundary(
+        opcode_in_flight, block_access_start, block_access_start + 4U));
+    assert(!kss::scpu_write_access_completed_at_boundary(
+        opcode_in_flight, block_access_start, block_access_start + 5U));
+
+    const auto first_write_complete = kss::observe_scpu_access_boundary(
+        store, accesses, 306898U, 306930U);
+    assert(first_write_complete.completed_accesses == 4U);
+    assert(kss::scpu_write_access_completed_at_boundary(
+        first_write_complete, block_access_start, block_access_start + 4U));
+    assert(!kss::scpu_write_access_completed_at_boundary(
+        first_write_complete, block_access_start, block_access_start + 5U));
+}
+
 void test_malformed_or_out_of_range_streams_fail_closed() {
     auto malformed = kFinalCmpAccesses;
     malformed[1].address = 0x00d657U;
@@ -78,5 +112,6 @@ void test_malformed_or_out_of_range_streams_fail_closed() {
 int main() {
     test_exact_first_endframe_suspends_without_rounding_or_pc_patch();
     test_boundaries_and_completion_are_distinct();
+    test_event_writes_are_limited_to_completed_accesses();
     test_malformed_or_out_of_range_streams_fail_closed();
 }

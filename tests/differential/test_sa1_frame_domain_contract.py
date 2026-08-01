@@ -27,13 +27,9 @@ def test_sa1_first_endframe_domain_is_schema_valid_and_source_anchored() -> None
         "target_sa1_cycle": reference["processors"]["sa1"]["cycle"],
     }
     assert artifact["runtime_start"] == {
-        "ready_master_clock": observation["local_timing"]["sa1_ready_master"],
-        "sa1_cycle": observation["local_timing"]["sa1_ready_master"] // 2,
-        "identity": {
-            "processor": "sa1",
-            "pc": observation["frontiers"]["sa1_pc"],
-            "mode": "e0m0x0",
-        },
+        "ready_master_clock": 225694,
+        "sa1_cycle": 112847,
+        "identity": {"processor": "sa1", "pc": 35928, "mode": "e0m0x0"},
     }
 
 
@@ -71,24 +67,27 @@ def test_sa1_domain_artifact_matches_the_verified_runtime_contract() -> None:
     runtime_test = (ROOT / "tests/runtime/sa1_frame_domain_tests.cpp").read_text(
         encoding="utf-8"
     )
+    boot_test = (ROOT / "tests/runtime/boot_probe_clock_tests.cpp").read_text(
+        encoding="utf-8"
+    )
 
     assert "target_inside_instruction" in header
     assert "instruction_master > remaining" in implementation
     assert "0x008c58U" in implementation
-    for literal in ("152352U", "306900U", "19318U", "77272U", "306896U", "153448U"):
-        assert literal in runtime_test
+    for literal in ("225694U", "306900U", "10150U", "40600U", "306894U", "153447U"):
+        assert literal in boot_test
     assert artifact["whole_instruction_advance"] == {
         "status": "target_inside_instruction",
-        "completed_blocks": 19318,
-        "completed_sa1_cycles": 77272,
-        "completed_master_clocks": 154544,
-        "ready_master_clock": 306896,
-        "sa1_cycle": 153448,
-        "identity": {"processor": "sa1", "pc": 0x008C58, "mode": "e0m0x0"},
+        "completed_blocks": 10150,
+        "completed_sa1_cycles": 40600,
+        "completed_master_clocks": 81200,
+        "ready_master_clock": 306894,
+        "sa1_cycle": 153447,
+        "identity": {"processor": "sa1", "pc": 0x008C5B, "mode": "e0m0x0"},
     }
     assert artifact["residual"] == {
-        "master_clocks": 4,
-        "sa1_cycles": 2,
+        "master_clocks": 6,
+        "sa1_cycles": 3,
         "next_whole_instruction_sa1_cycles": 5,
         "reason": "the target lies inside the next modeled poll-load instruction",
     }

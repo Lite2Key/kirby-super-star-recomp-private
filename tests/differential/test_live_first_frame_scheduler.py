@@ -36,7 +36,17 @@ def test_live_first_frame_scheduler_is_schema_valid_and_source_anchored() -> Non
     assert runtime["sa1"]["reset_release_master_clock"] == 2908
     assert runtime["sa1"]["interleaved_through_reset_and_mvn"]
     assert runtime["sa1"]["reset_domain_switches"] > 100
-    assert not runtime["sa1"]["interleaved_through_frame"]
+    assert runtime["sa1"]["interleaved_through_frame"]
+    assert runtime["sa1"]["frame_observation"] == {
+        "start_master_clock": 225694,
+        "ready_master_clock": 306894,
+        "target_master_clock": 306900,
+        "status": "target_inside_instruction",
+        "completed_blocks": 10150,
+        "completed_sa1_cycles": 40600,
+        "residual_master_clocks": 6,
+        "residual_sa1_cycles": 3,
+    }
     scpu_exact = runtime["scpu"]["exact_boundary"]
     assert scpu_exact["access_start_master_clock"] <= target
     assert scpu_exact["elapsed_master_clocks"] == (

@@ -6,6 +6,7 @@
 #include "kss/multi_clock_coordinator.hpp"
 #include "kss/native_host.hpp"
 #include "kss/runtime_event_chain.hpp"
+#include "kss/sa1_frame_domain.hpp"
 #include "kss/scpu_access_boundary.hpp"
 #include "kss/snes_frame_renderer.hpp"
 #include "kss/spc700.hpp"
@@ -70,6 +71,10 @@ struct BootProbeResult {
     // the same checkpoint after two blocks proves the wait without inventing
     // the external event that releases it.
     GeneratedRunResult sa1_poll_observation{};
+    // Whole-instruction continuation of the same $8C58/$8C5B poll through
+    // the first-frame interval. The result retains the exact final SA-1
+    // boundary and any residual when endFrame falls inside an instruction.
+    Sa1PollAdvanceResult sa1_frame_observation{};
     GeneratedRunResult scpu_frontier{};
     // The upload setup plus one complete $2140 acknowledgement comparison.
     // Without a runtime IPL it returns to $D68E while the modeled output latch
@@ -98,6 +103,9 @@ struct BootProbeResult {
     MasterClock scpu_master_ready{};
     std::size_t scpu_accesses_recorded{};
     MasterClock sa1_master_ready{};
+    MasterClock sa1_frame_observation_start{};
+    std::size_t sa1_frame_sync_points{};
+    MasterClock sa1_last_sync_target{};
     MasterClock sa1_release_master{};
     MasterClock sa1_master_at_first_completion{};
     MasterClock scpu_master_at_sa1_first_dispatch{};

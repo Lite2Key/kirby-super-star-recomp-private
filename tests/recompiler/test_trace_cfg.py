@@ -95,3 +95,24 @@ def test_real_sanitized_capture_emits_schema_valid_rom_free_artifact() -> None:
     assert "opcode" not in rendered and "operand_hex" not in rendered
     committed = json.loads((ROOT / "analysis/cfg/bootstrap-dual.trace-cfg.json").read_text())
     assert committed == result
+
+
+def test_first_visible_route_converts_all_identities_without_rom_values() -> None:
+    source = json.loads(
+        (ROOT / "analysis/coverage/first-visible-route-coverage.json").read_text()
+    )
+    result = build_trace_seeded_cfg(source)
+    assert len(result["cfg"]["blocks"]) == 2273
+    assert sum(len(block["edges"]) for block in result["cfg"]["blocks"]) == 2440
+    assert result["processors"] == {
+        "scpu": {"events": 1271467, "unique_blocks": 1032},
+        "sa1": {"events": 3299911, "unique_blocks": 1241},
+    }
+    rendered = json.dumps(result)
+    assert all(token not in rendered for token in (
+        "opcode", "bytes_hex", "operand_hex", "mnemonic", "rom_offset"
+    ))
+    committed = json.loads(
+        (ROOT / "analysis/cfg/first-visible-route.trace-cfg.json").read_text()
+    )
+    assert committed == result

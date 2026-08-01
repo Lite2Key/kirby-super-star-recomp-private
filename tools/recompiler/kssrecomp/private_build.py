@@ -15,6 +15,7 @@ from typing import Any, Mapping
 
 from .generated_blocks import render as render_generated_blocks
 from .coverage_corpus import merge_coverages
+from .frontier import build_frontier
 from .reset_lift import lift_reset_paths
 from .rom import identify
 from .trace_cfg import build_trace_seeded_cfg
@@ -42,6 +43,7 @@ def build_outputs(
     *,
     expected_sha256: str = EXPECTED_KSS_SHA256,
     max_blocks_per_processor: int = 4096,
+    baseline: Mapping[str, Any] | None = None,
 ) -> dict[str, str]:
     identity = identify(rom)
     if identity.sha256.upper() != expected_sha256.upper():
@@ -51,6 +53,8 @@ def build_outputs(
     lifted = lift_reset_paths(
         vectors, trace_cfg, rom,
         max_blocks_per_processor=max_blocks_per_processor,
+        allow_observed_dynamic_control_flow=True,
+        analyze_all_observed_identities=True,
     )
     header, source, generated_manifest = render_generated_blocks(
         lifted,
@@ -60,6 +64,10 @@ def build_outputs(
     )
     decoded = sum(item.get("status") == "decoded" for item in lifted["blocks"])
     unresolved = len(lifted["blocks"]) - decoded
+    frontier = build_frontier(
+        coverage, lifted,
+        baseline if baseline is not None else {"schema_version": 1, "blocks": []},
+    )
     summary = {
         "schema_version": 1,
         "rom_id": f"kss-usa-rev0-sha256:{identity.sha256[:8].lower()}...{identity.sha256[-5:].lower()}",
@@ -76,6 +84,7 @@ def build_outputs(
     return {
         "trace-cfg.json": _json(trace_cfg),
         "lifted.json": _json(lifted),
+        "frontier.json": _json(frontier),
         "include/kss/generated_private_first_frame_blocks.hpp": header,
         "src/private_first_frame_blocks.cpp": source,
         "manifest.json": _json(generated_manifest),
@@ -106,10 +115,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--coverage", type=Path, action="append")
     parser.add_argument("--out", type=Path, default=Path(".private/generated/first-frame"))
     parser.add_argument("--max-blocks", type=int, default=4096)
+    parser.add_argument(
+        "--baseline", type=Path,
+        default=Path("analysis/cfg/first-frame-dual.lifted.json"),
+    )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     try:
-        coverage_paths = args.coverage or [Path("analysis/coverage/first-frame-dual.json")]
+        coverage_paths = args.coverage or [
+            Path("analysis/coverage/first-visible-route-coverage.json")
+        ]
         route_documents = [
             (path.stem, json.loads(path.read_text(encoding="utf-8")))
             for path in coverage_paths
@@ -121,6 +136,7 @@ def main(argv: list[str] | None = None) -> int:
             json.loads(args.vectors.read_text(encoding="utf-8")),
             coverage,
             max_blocks_per_processor=args.max_blocks,
+            baseline=json.loads(args.baseline.read_text(encoding="utf-8")),
         )
         write_outputs(args.out, outputs, check=args.check)
     except (OSError, json.JSONDecodeError, ValueError) as error:

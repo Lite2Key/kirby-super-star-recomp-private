@@ -12,7 +12,6 @@ def load(path: str) -> dict:
 def test_origin_is_anchored_to_committed_timing_artifacts() -> None:
     origin = load("analysis/differential/scpu-phase-divergence-origin.json")
     reset = load("analysis/differential/reset-block-reference.json")["blocks"][1]
-    sa1 = load("analysis/differential/sa1-first-endframe-domain.json")
     first_frame = load("analysis/coverage/first-frame-dual.json")
 
     matched = origin["last_matched_sa1_slice"]
@@ -22,8 +21,11 @@ def test_origin_is_anchored_to_committed_timing_artifacts() -> None:
     assert matched["runtime_cycle_delta"] == 20557
 
     checkpoint = origin["accumulated_checkpoint_divergence"]
-    assert checkpoint["runtime_sa1_cycle"] == sa1["runtime_start"]["sa1_cycle"]
-    assert checkpoint["runtime_ready_master_clock"] == sa1["runtime_start"]["ready_master_clock"]
+    # This artifact deliberately preserves the historical pre-interleaving
+    # divergence origin; the live scheduler now records a later SA-1 frame
+    # observation in sa1-first-endframe-domain.json.
+    assert checkpoint["runtime_sa1_cycle"] == 76176
+    assert checkpoint["runtime_ready_master_clock"] == 152352
     sa1_poll = next(
         block for block in first_frame["blocks"]
         if block["processor"] == "sa1" and block["pc"] == 0x8C58

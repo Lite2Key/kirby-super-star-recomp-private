@@ -11,12 +11,17 @@ Public, ROM-free research project for statically recompiling the SNES S-CPU and 
 
 ## Current state
 
-The repository is in M3, reset-to-first-frame. The first-frame trace contains
-254 dual-CPU processor/PC/mode identities; all 254 lift and generate, and every
-observed identity now has an executable 65C816 semantic; all 256 opcodes have
+The repository is in M3, reset-to-first-frame. The compact reset-to-visible
+trace contains 2,273 dual-CPU processor/PC/mode identities and 2,440 observed
+edges. The private static generator now lifts and emits 2,258 of them: 1,017
+S-CPU and 1,241 SA-1 identities. The remaining 15 are executable S-CPU WRAM
+identities whose bytes are runtime-generated and therefore require private
+witness capture. The current runtime executes the original 254-identity
+first-frame slice; extending execution through the generated visible-route
+corpus is the next implementation gate. All 256 opcodes have
 architecture-tested execution semantics. With a runtime-only authentic IPL,
-all 254 identities execute through the real SPC `$CC` acknowledgement with no
-patched state. Reset DMA, shared SA-1 I-RAM/control,
+the 254 runtime identities execute through the real SPC `$CC` acknowledgement
+with no patched state. Reset DMA, shared SA-1 I-RAM/control,
 strict Mode 1 BG1/BG2/BG3 plus OBJ main/subscreen, windows, and color math, a
 256-opcode SPC700 core with timers and DSP-register I/O, two-pad controller
 register integration, and board-accurate 8 KiB save persistence exist. The
@@ -30,7 +35,7 @@ recompiled pixels, complete SPC port replay, and gameplay remain in progress, so
 this is not yet a playable port.
 
 Open `progress/site/index.html` after running the progress generator for the
-visual recompilation map. It includes all 254 currently observed first-frame
+visual recompilation map. It includes all 2,273 observed reset-to-visible
 block identities, a 42-checkpoint port workstream atlas, and a live
 hardware-boundary map showing each clock domain and event chain against the
 first `endFrame` target. Striped regions are measured work still remaining;
@@ -75,7 +80,7 @@ the authorized ROM, run:
 .\build-private-recomp.cmd "C:\path\to\Kirby Super Star (USA).sfc"
 ```
 
-This produces 254 first-frame block functions below `.private/generated`,
+This produces 2,258 generated route block functions below `.private/generated`,
 builds them in the separate `build/windows-private` tree, and runs the same
 native verification suite. No ROM-derived source is added to Git.
 

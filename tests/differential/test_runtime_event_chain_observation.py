@@ -31,8 +31,12 @@ def test_runtime_event_chain_observation_is_valid_and_reference_anchored() -> No
     directions = observation["spc_directions"]
     assert sum(item["runtime_records"] for item in directions.values()) == (
         observation["chains"]["spc_ports"]["runtime_records"]
-    ) == 465
+    ) == 463
     assert sum(item["reference_records"] for item in directions.values()) == 462
+    assert observation["cross_domain_order_records"] == (
+        observation["chains"]["cpu_writes"]["runtime_records"]
+        + observation["chains"]["spc_ports"]["runtime_records"]
+    ) == 27369
 
 
 def test_runtime_event_chain_observation_contains_no_private_records() -> None:

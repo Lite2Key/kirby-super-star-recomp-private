@@ -275,6 +275,8 @@ def load_block_map(root: Path) -> dict[str, Any]:
         "boundary": frontier.get("boundary"),
         "stages": list(BLOCK_STAGES),
         "processors": processors,
+        "execution_count": execution_count,
+        "observed_count": len(observed),
         "sources": [
             "analysis/cfg/first-frame-dual.trace-cfg.json",
             "analysis/cfg/first-frame-dual.lifted.json",
@@ -340,10 +342,10 @@ def load_boundary_sync(root: Path) -> dict[str, Any]:
             {
                 "id": "sa1",
                 "label": "SA-1 post-reset poll frontier",
-                "value": live_scheduler["runtime"]["sa1"]["ready_master_clock"],
+                "value": live_scheduler["runtime"]["sa1"]["frame_observation"]["ready_master_clock"],
                 "target": target_master,
                 "unit": "master clocks",
-                "note": "reset and both MVNs are cooperative; poll-loop scheduling through the frame remains",
+                "note": "reset, both MVNs, and the post-reset poll are cooperative through the frame; six master clocks remain inside the next whole instruction",
             },
             {
                 "id": "spc",
@@ -499,6 +501,7 @@ def render_summary_svg(data: dict[str, Any]) -> str:
     }
     route_total = metrics["route-corpus"]["union observed identities"]["value"]
     generated_total = metrics["decoder-lifter"]["private generated block functions"]["value"]
+    runtime_total = block_map["execution_count"]
     semantic_total = (
         metrics["s-cpu"]["semantics-supported identities"]["value"]
         + metrics["sa-1"]["semantics-supported identities"]["value"]
@@ -517,12 +520,13 @@ def render_summary_svg(data: dict[str, Any]) -> str:
         y = 198 + (index // 100) * 4
         stage = (
             "reference_verified" if index < reference_total else
-            "executed" if index < generated_total else "not_started"
+            "executed" if index < runtime_total else
+            "semantics_supported" if index < semantic_total else "not_started"
         )
         parts.append(f'<rect class="identity" x="{x}" y="{y}" width="4" height="3" rx="0.5" fill="{colors[stage]}"/>')
     proof_counts = {
         "semantics_supported": semantic_total,
-        "executed": generated_total,
+        "executed": runtime_total,
         "reference_verified": reference_total,
     }
     for index, (stage, label) in enumerate((

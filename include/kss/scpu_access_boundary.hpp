@@ -51,4 +51,14 @@ struct ScpuAccessBoundary {
     MasterClock block_start,
     MasterClock target) noexcept;
 
+// A captured S-CPU write identifies the global access count immediately after
+// ScpuMicroAccessRecorder observed its bus access.  This helper determines
+// whether that access completed by an exact boundary inside the current block.
+// Writes from the in-flight or later accesses must not enter a boundary-limited
+// event chain even though the functional probe executes the whole instruction.
+[[nodiscard]] bool scpu_write_access_completed_at_boundary(
+    const ScpuAccessBoundary& boundary,
+    std::size_t block_access_start,
+    std::size_t captured_access_count) noexcept;
+
 } // namespace kss

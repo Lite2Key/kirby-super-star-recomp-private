@@ -66,9 +66,16 @@ def build_frontier(
                 for (opcode, mnemonic), count in sorted(opcode_counts.items())
             ],
         }
+    route_capture = coverage.get("capture", {}).get("route_capture", {})
+    boundary = (
+        "first-visible-end-frame"
+        if isinstance(route_capture, Mapping)
+        and route_capture.get("contract") == "reset-to-first-visible-v1"
+        else "first-snes-end-frame"
+    )
     return {
         "schema_version": 1,
-        "boundary": "first-snes-end-frame",
+        "boundary": boundary,
         "capture": {
             "event_count": coverage["capture"]["event_count"],
             "scpu_events": coverage["processors"]["scpu"]["events"],

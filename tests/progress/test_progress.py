@@ -37,18 +37,24 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(machine["schema_version"], 1)
             self.assertEqual(len(machine["block_map"]["processors"]["scpu"]["blocks"]), 214)
             self.assertEqual(len(machine["block_map"]["processors"]["sa1"]["blocks"]), 40)
+            self.assertEqual(machine["block_map"]["execution_count"], 254)
+            self.assertEqual(machine["block_map"]["observed_count"], 254)
             self.assertEqual(len(machine["workstreams"]), 7)
             self.assertEqual(machine["boundary_sync"]["target_master"], 306900)
             summary = (out / "summary.svg").read_text(encoding="utf-8")
             ET.fromstring(summary)
             self.assertEqual(summary.count('class="identity"'), 2273)
             self.assertEqual(summary.count('class="checkpoint"'), 42)
+            self.assertIn("Runtime execution</text>", summary)
+            self.assertIn("254 / 2273", summary)
             self.assertNotIn("<script", summary)
             self.assertNotIn("<image", summary)
 
     def test_block_map_is_derived_from_sanitized_first_frame_artifacts(self):
         block_map = progress_build.load_block_map(ROOT)
         self.assertEqual(block_map["boundary"], "first-snes-end-frame")
+        self.assertEqual(block_map["execution_count"], 254)
+        self.assertEqual(block_map["observed_count"], 254)
         scpu = block_map["processors"]["scpu"]
         sa1 = block_map["processors"]["sa1"]
         self.assertEqual(scpu["counts"], {
@@ -81,12 +87,12 @@ class ProgressTests(unittest.TestCase):
         self.assertFalse(sync["full_parity_proven"])
         self.assertEqual(
             [(item["id"], item["value"], item["target"]) for item in sync["domains"]],
-            [("scpu", 306900, 306900), ("sa1", 225694, 306900),
+            [("scpu", 306900, 306900), ("sa1", 306894, 306900),
              ("spc", 306900, 306900)],
         )
         self.assertEqual(
             [(item["id"], item["value"], item["target"]) for item in sync["chains"]],
-            [("cpu-writes", 26908, 26906), ("spc-ports", 465, 462),
+            [("cpu-writes", 26906, 26906), ("spc-ports", 463, 462),
              ("ppu-events", 54, 54), ("dma-events", 23, 23)],
         )
         self.assertEqual(

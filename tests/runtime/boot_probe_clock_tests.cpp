@@ -61,10 +61,26 @@ void test_default_probe_uses_local_complete_scpu_stream() {
     assert(result.scpu.address() == 0x00d68eU && result.sa1.address() == 0x008c58U);
     assert(result.sa1_poll_value == 0x00U && result.apu_port0_output == 0xaaU);
     assert(result.scpu_master_ready > 0U && result.scpu_accesses_recorded > 0U);
+    assert(result.sa1_frame_observation_start == 225694U);
+    assert(result.sa1_frame_observation.status
+        == kss::Sa1PollAdvanceStatus::target_inside_instruction);
+    assert(result.sa1_frame_observation.completed_blocks == 10150U);
+    assert(result.sa1_frame_observation.completed_cycles == 40600U);
+    assert(result.sa1_frame_observation.last_completed == kss::BlockKey::make(
+        kss::ProcessorId::sa1, 0x008c5bU, false, false, false));
+    assert(result.sa1_frame_observation.ready_at == 306894U);
+    assert(result.sa1_frame_observation.target == kss::kSnesFirstFrameMasterClock);
+    assert(result.sa1_frame_observation.shortfall == 6U);
+    assert(result.sa1_frame_sync_points == 1U);
+    assert(result.sa1_last_sync_target == kss::kSnesFirstFrameMasterClock);
     assert(result.sa1_master_ready == result.sa1.cycles * 2U);
+    assert(result.sa1_master_ready == result.sa1_frame_observation.ready_at);
+    assert(result.sa1.cycles == 153447U);
     assert(result.first_frame_event_seen && result.master_now == 306900U);
     assert(result.spc_steps_completed == 0U && !result.spc_registers);
     assert(result.cpu_signals_processed == 0U && !result.last_cpu_signal);
+    // Private builds must fall back to the public inventory for any ROM whose
+    // digest does not match the authorized KSS revision.
     assert(result.inventory_block_identities.size() == 254U);
     assert(result.executed_block_identities.size() == 236U);
     assert(result.missing_block_identities.size() == 18U);
@@ -182,8 +198,15 @@ void test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary() {
         == kss::SpcExactAdvanceStatus::target_inside_instruction
         || result.spc_first_frame_boundary->status
             == kss::SpcExactAdvanceStatus::target_reached);
+    assert(result.sa1_frame_observation.status
+        == kss::Sa1PollAdvanceStatus::target_inside_instruction);
+    assert(result.sa1_frame_observation.ready_at == 306894U);
+    assert(result.sa1_frame_observation.shortfall == 6U);
+    assert(result.sa1_frame_sync_points > 100U);
+    assert(result.sa1_last_sync_target == kss::kSnesFirstFrameMasterClock);
     assert(result.first_frame_event_seen
         && result.master_now == kss::kSnesFirstFrameMasterClock);
+    assert(result.inventory_block_identities.size() == 254U);
     assert(result.executed_block_identities.size() == 254U);
     assert(result.missing_block_identities.empty());
 }

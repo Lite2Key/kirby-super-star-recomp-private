@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-07-15T02:53:15Z",
+    "generated_at": "2026-08-01T22:19:44Z",
     "commit": "d697d0b04ba12f9369c51593c83e052a1ef3b347",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
@@ -60,7 +60,7 @@
         },
         {
           "id": "m3.local-verification",
-          "label": "212 Python and 25 native tests",
+          "label": "221 Python and 25 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
         },
         {
@@ -155,7 +155,7 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "All 254 identities execute; S-CPU/SA-1 reset and both MVNs now run cooperatively, the PPU event chain matches, and a repeat-stable first-visible reference is captured. Post-reset SA-1 polling and remaining event/state parity stay open.",
+      "summary": "The first-frame runtime still executes 254 identities, while the private route generator now covers 2258 of the 2273-identity reset-to-visible corpus. Reset, both MVNs, and post-reset SA-1 polling run cooperatively through the frame; PPU parity and CPU/S-CPU/SA-1/DMA counts are exact, with SPC microphase and full route execution still open.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
@@ -272,11 +272,11 @@
           "status": "passed"
         },
         {
-          "name": "Lift 254",
+          "name": "Lift 2258",
           "status": "passed"
         },
         {
-          "name": "Generate 254",
+          "name": "Generate 2258",
           "status": "passed"
         },
         {
@@ -489,7 +489,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-visible route exposes 1032 S-CPU identities; the original 214 first-frame identities lift, generate, execute, and have architectural-state oracle coverage.",
+      "summary": "The first-visible route exposes 1032 S-CPU identities; 1017 now lift and generate safely, while the runtime still executes the original 254-identity first-frame slice.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -507,10 +507,10 @@
         },
         {
           "label": "semantics-supported identities",
-          "value": 214,
+          "value": 1017,
           "total": 1032,
           "denominator": "evolving",
-          "note": "The 214-identity first-frame seed is executable; the 818 newly observed S-CPU identities now enter decode/lift/generate triage."
+          "note": "2258 private blocks are generated overall; the 15 remaining unresolved identities are executable S-CPU WRAM code, so generated coverage is 1017/1032 for this processor."
         }
       ],
       "evidence": [
@@ -536,7 +536,7 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-visible route exposes 1241 SA-1 identities; all 40 first-frame identities execute, 34 with architectural-state/write oracle coverage.",
+      "summary": "The first-visible route exposes 1241 SA-1 identities; all 1241 now lift and generate safely, while the runtime poll domain reaches the first-frame boundary with a six-master-clock residual.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -554,10 +554,10 @@
         },
         {
           "label": "semantics-supported identities",
-          "value": 40,
+          "value": 1241,
           "total": 1241,
           "denominator": "evolving",
-          "note": "The 40-identity first-frame seed is executable; the 1201 newly observed SA-1 identities now enter decode/lift/generate triage."
+          "note": "All observed SA-1 identities are ROM-mapped and generated; route execution beyond the current 254-identity runtime frontier remains separate."
         }
       ],
       "evidence": [
@@ -601,10 +601,10 @@
         },
         {
           "label": "private generated block functions",
-          "value": 254,
+          "value": 2258,
           "total": 2273,
           "denominator": "evolving",
-          "note": "Deterministically regenerated from the authorized ROM and current sanitized route corpus; this denominator grows with route discovery."
+          "note": "Deterministically regenerated from the authorized ROM and current sanitized route corpus: 2258/2273 generated, with 15 executable-WRAM identities still requiring private witnesses."
         }
       ]
     },
@@ -617,10 +617,10 @@
       "metrics": [
         {
           "label": "synchronization classes",
-          "value": 5,
+          "value": 6,
           "total": 8,
           "denominator": "fixed",
-          "note": "Frames, value-free S-CPU bus timing, cooperative reset/MVN scheduling, APU-port ordering, and timestamped CPU signals are validated. Post-reset SA-1 polling, device timers, and full micro-access arbitration remain."
+          "note": "Frames, value-free S-CPU bus timing, cooperative reset/MVN scheduling, post-reset SA-1 polling through the frame, APU-port ordering, and timestamped CPU signals are validated. Six master clocks remain inside the next whole SA-1 instruction; full micro-access arbitration remains."
         }
       ]
     },
@@ -682,7 +682,7 @@
       "name": "Differential validator",
       "group": "validation",
       "status": "in_progress",
-      "summary": "Reset and two post-reset CPU slices pass, the forced-blank and first-visible oracles are repeat-stable, and the live PPU event chain now matches exactly; CPU/DMA/SPC state and ordered timing remain active.",
+      "summary": "Reset and post-reset slices pass; the first-visible oracle is repeat-stable; PPU parity and CPU/S-CPU/SA-1/DMA counts are exact. SPC has an exact 462-event prefix plus one trailing acknowledgement, while ordered digests and full route execution remain active.",
       "metrics": [
         {
           "label": "passing required scenarios",
@@ -829,23 +829,23 @@
     {
       "id": "post-first-frame-route-expansion",
       "severity": "technical",
-      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges. The remaining route blocker is decoding, lifting, privately generating, and executing the 2019 identities beyond the original 254-block seed.",
+      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges. Static generation now covers 2258; the remaining 15 are executable S-CPU WRAM identities that need private byte witnesses, and runtime execution still stops at the original 254-identity first-frame slice.",
       "owner": "analysis/recompiler"
     },
     {
       "id": "shared-first-endframe-parity",
       "severity": "technical",
-      "summary": "Cooperative reset/MVN scheduling is live, reset-DMA side effects are fully observed, and the PPU chain matches exactly. CPU/S-CPU counts are now only +2, while post-reset SA-1 polling and CPU/DMA/SPC digests remain open.",
+      "summary": "Cooperative reset/MVN and post-reset SA-1 scheduling reach the first frame; reset-DMA side effects and PPU parity are exact, CPU/S-CPU/SA-1/DMA counts match, and only ordered digests plus SPC microphase remain open.",
       "owner": "runtime/validation"
     }
   ],
   "next_proof": {
-    "title": "Close post-reset polling and import the visible route",
+    "title": "Import executable WRAM and advance the visible route",
     "acceptance": [
-      "Continue SA-1 polling concurrently from $8C58 through the first endFrame instead of stopping that domain at its first checkpoint",
-      "Resolve the remaining two extra CPU-to-SPC and one extra SPC-to-CPU events at exact microphase boundaries",
-      "Preserve exact PPU parity while matching processor state plus CPU, SA-1, DMA, and SPC ordered digests",
-      "Decode, lift, privately generate, and execute the 2019 newly discovered first-visible-route identities"
+      "Capture private byte witnesses and fail-closed generated functions for the 15 executable S-CPU WRAM identities",
+      "Execute the 2258 generated route identities beyond the current 254-identity runtime frontier through the first visible frame",
+      "Resolve the one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle",
+      "Close ordered CPU, SA-1, DMA, PPU, and SPC digest parity without patching architectural state"
     ],
     "owner": "runtime/validation"
   },
@@ -1041,6 +1041,33 @@
       "standard_native_tests": 25,
       "private_native_tests": 25,
       "python_tests": 212
+    },
+    {
+      "at": "2026-08-01T22:19:44Z",
+      "verified_blocks": 248,
+      "executed_blocks": 254,
+      "observed_blocks": 2273,
+      "generated_blocks": 2258,
+      "new_route_blocks_remaining": 15,
+      "passing_scenarios": 0,
+      "open_divergences": 2,
+      "first_visible_route_capture": 1,
+      "first_visible_route_events": 4571378,
+      "first_visible_route_edges": 2440,
+      "async_nmi_edges": 21,
+      "cooperative_reset_scheduler": 1,
+      "sa1_frame_ready_master": 306894,
+      "sa1_frame_residual_master": 6,
+      "ppu_event_chain_parity": 1,
+      "cpu_write_count_delta": 0,
+      "scpu_write_count_delta": 0,
+      "sa1_write_count_delta": 0,
+      "dma_write_count_delta": 0,
+      "spc_event_count": 463,
+      "spc_reference_prefix": 462,
+      "standard_native_tests": 25,
+      "private_native_tests": 25,
+      "python_tests": 221
     }
   ]
 }

@@ -27,7 +27,17 @@
       "interleaved_reset_scpu_blocks": 8538,
       "reset_domain_switches": 11410,
       "interleaved_through_reset_and_mvn": true,
-      "interleaved_through_frame": false
+      "interleaved_through_frame": true,
+      "frame_observation": {
+        "start_master_clock": 225694,
+        "ready_master_clock": 306894,
+        "target_master_clock": 306900,
+        "status": "target_inside_instruction",
+        "completed_blocks": 10150,
+        "completed_sa1_cycles": 40600,
+        "residual_master_clocks": 6,
+        "residual_sa1_cycles": 3
+      }
     },
     "scpu": {
       "ready_master_clock": 306934,
@@ -65,11 +75,11 @@
     "exact_spc_state_parity_proven": false,
     "full_first_frame_parity_proven": false,
     "cooperative_reset_schedule_proven": true,
-    "hard_boundary": "post_reset_sa1_polling_sub_instruction_state_parity_and_cross_domain_event_order"
+    "hard_boundary": "post_reset_sa1_polling_whole_instruction_residual_and_cross_domain_event_order"
   },
   "residual": {
-    "reason": "reset and both MVNs now run cooperatively, but SA-1 polling is not scheduled through the frame and exact S-CPU/SPC architectural state plus most cross-domain event digests do not yet match the reference",
-    "required_proof": "schedule the post-reset SA-1 poll through the frame, correct reset-DMA side-effect observation, and close reference-ordered S-CPU/SPC event parity"
+    "reason": "reset, both MVNs, and the post-reset SA-1 poll now run cooperatively through the first-frame boundary; the remaining hard gaps are a six-master-clock whole-instruction SA-1 residual, exact S-CPU/SPC architectural parity, and cross-domain event digests",
+    "required_proof": "resolve the SA-1 residual without fabricating a partial instruction, close reference-ordered S-CPU/SPC event parity, and extend execution beyond the 254-identity first-frame runtime frontier"
   },
   "sources": [
     "analysis/differential/first-frame-reference.json",

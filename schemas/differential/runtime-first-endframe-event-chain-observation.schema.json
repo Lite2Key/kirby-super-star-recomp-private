@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "boundary", "master_clock", "probe_status", "capture_fidelity", "data_boundary", "full_first_frame_parity_proven", "chains", "spc_directions", "hard_gaps"],
+  "required": ["schema_version", "boundary", "master_clock", "probe_status", "capture_fidelity", "data_boundary", "full_first_frame_parity_proven", "chains", "cross_domain_order_records", "spc_directions", "hard_gaps"],
   "properties": {
     "schema_version": {"const": 1},
     "boundary": {"const": "live_scpu_spc_then_scheduled_first_frame"},
@@ -12,6 +12,7 @@
     "data_boundary": {"const": "sanitized-digests-and-counts-only"},
     "full_first_frame_parity_proven": {"const": false},
     "chains": {"type": "object", "minProperties": 6, "maxProperties": 6, "additionalProperties": {"$ref": "#/$defs/chain"}},
+    "cross_domain_order_records": {"type": "integer", "minimum": 0},
     "spc_directions": {"type": "object", "required": ["cpu_to_spc", "spc_to_cpu"], "additionalProperties": {"$ref": "#/$defs/counts"}},
     "hard_gaps": {"type": "array", "minItems": 3, "items": {"type": "string"}}
   },

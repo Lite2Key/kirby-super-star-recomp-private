@@ -47,7 +47,22 @@
             "interleaved_reset_scpu_blocks": {"type": "integer", "minimum": 1},
             "reset_domain_switches": {"type": "integer", "minimum": 2},
             "interleaved_through_reset_and_mvn": {"const": true},
-            "interleaved_through_frame": {"const": false}
+            "interleaved_through_frame": {"const": true},
+            "frame_observation": {
+              "type": "object",
+              "required": ["start_master_clock", "ready_master_clock", "target_master_clock", "status", "completed_blocks", "completed_sa1_cycles", "residual_master_clocks", "residual_sa1_cycles"],
+              "properties": {
+                "start_master_clock": {"type": "integer", "minimum": 0},
+                "ready_master_clock": {"type": "integer", "minimum": 0},
+                "target_master_clock": {"const": 306900},
+                "status": {"const": "target_inside_instruction"},
+                "completed_blocks": {"type": "integer", "minimum": 1},
+                "completed_sa1_cycles": {"type": "integer", "minimum": 1},
+                "residual_master_clocks": {"type": "integer", "minimum": 1},
+                "residual_sa1_cycles": {"type": "integer", "minimum": 1}
+              },
+              "additionalProperties": false
+            }
           },
           "additionalProperties": false
         },
@@ -112,7 +127,7 @@
         "exact_spc_state_parity_proven": {"const": false},
         "full_first_frame_parity_proven": {"const": false},
         "cooperative_reset_schedule_proven": {"const": true},
-        "hard_boundary": {"const": "post_reset_sa1_polling_sub_instruction_state_parity_and_cross_domain_event_order"}
+        "hard_boundary": {"const": "post_reset_sa1_polling_whole_instruction_residual_and_cross_domain_event_order"}
       },
       "additionalProperties": false
     },

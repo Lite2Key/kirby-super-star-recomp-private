@@ -59,6 +59,9 @@ def test_private_build_is_deterministic_and_registers_both_processors():
     assert manifest["registered_blocks"] == 2
     assert manifest["processors"] == {"sa1": 1, "scpu": 1}
     assert "0xEA" in first["src/private_first_frame_blocks.cpp"]
+    frontier = json.loads(first["frontier.json"])
+    assert frontier["generated_nodes"] == 2
+    assert frontier["processors"]["scpu"]["new_nodes"] == 1
 
 
 def test_private_build_rejects_wrong_revision_before_lifting():

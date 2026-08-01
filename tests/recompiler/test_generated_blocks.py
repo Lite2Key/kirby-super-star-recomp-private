@@ -63,3 +63,27 @@ def test_manifest_counts_registered_identity_route_provenance() -> None:
     }
     schema = json.loads((ROOT / "schemas/recompiler/generated-block-manifest.schema.json").read_text())
     jsonschema.validate(manifest, schema)
+
+
+def test_all_observed_selection_registers_decoded_nodes_beyond_a_frontier() -> None:
+    document = _document()
+    document["source"]["selection_policy"] = "all-observed-decoded"
+    document["edges"] = []
+    manifest = render(document, max_blocks_per_processor=4096)[2]
+    expected = sum(
+        block["status"] == "decoded" and block["instruction"] is not None
+        for block in document["blocks"]
+    )
+    assert manifest["registered_blocks"] == expected
+
+
+def test_all_observed_leaf_blocks_stop_before_disconnected_registered_nodes() -> None:
+    document = _document()
+    document["source"]["selection_policy"] = "all-observed-decoded"
+    document["edges"] = []
+    source = render(document, max_blocks_per_processor=4096)[1]
+    expected = sum(
+        block["status"] == "decoded" and block["instruction"] is not None
+        for block in document["blocks"]
+    )
+    assert source.count("    cpu.stopped = true;\n}") == expected

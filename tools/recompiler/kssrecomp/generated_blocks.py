@@ -62,6 +62,23 @@ def select_blocks(document: Mapping[str, Any], max_blocks_per_processor: int) ->
         outgoing[source].append(target)
 
     selected: list[Mapping[str, Any]] = []
+    selection_policy = document.get("source", {}).get(
+        "selection_policy", "entry-reachable-decoded"
+    )
+    if selection_policy == "all-observed-decoded":
+        for processor in ("scpu", "sa1"):
+            candidates = sorted(
+                (block for block in blocks
+                 if block["identity"]["processor"] == processor
+                 and block.get("status") == "decoded"
+                 and block.get("instruction") is not None),
+                key=lambda block: _identity_key(block["identity"]),
+            )
+            selected.extend(candidates[:max_blocks_per_processor])
+        selected.sort(key=lambda block: _identity_key(block["identity"]))
+        return selected
+    if selection_policy != "entry-reachable-decoded":
+        raise GeneratedBlocksError(f"unsupported selection policy: {selection_policy}")
     for processor in ("scpu", "sa1"):
         try:
             entry = _identity_key(regions[processor]["entry"])
@@ -95,6 +112,9 @@ def render(
     if not registration_name.replace("_", "").isalnum() or not registration_name[0].isalpha():
         raise GeneratedBlocksError("registration_name must be a C++ identifier fragment")
     blocks = select_blocks(document, max_blocks_per_processor)
+    selection_policy = document.get("source", {}).get(
+        "selection_policy", "entry-reachable-decoded"
+    )
     outgoing: dict[tuple[str, int, bool, bool, bool], list[Mapping[str, Any]]] = {}
     for edge in document["edges"]:
         outgoing.setdefault(_identity_key(edge["source"]), []).append(edge["target"])
@@ -159,6 +179,11 @@ namespace kss::generated {
         if successors:
             condition = " && ".join(f"cpu.block_key() != {_cpp_key(target)}" for target in successors)
             source.append(f"    if ({condition}) {{ cpu.stopped = true; }}")
+        elif selection_policy == "all-observed-decoded":
+            # All observed nodes are registered independently, so merely
+            # relying on the next dispatch to miss is unsafe: a leaf could
+            # compute an unobserved transition into another registered node.
+            source.append("    cpu.stopped = true;")
         source.extend(["}", ""])
     source.extend(["} // namespace", "", f"bool register_{registration_name}_blocks(CheckedDispatcher& dispatcher) {{"])
     if blocks:

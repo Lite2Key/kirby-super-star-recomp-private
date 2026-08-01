@@ -117,4 +117,14 @@ ScpuAccessBoundary observe_scpu_access_boundary(
     return result;
 }
 
+bool scpu_write_access_completed_at_boundary(
+    const ScpuAccessBoundary& boundary,
+    std::size_t block_access_start,
+    std::size_t captured_access_count) noexcept {
+    if (captured_access_count <= block_access_start) return false;
+    const auto local_access_index =
+        captured_access_count - block_access_start - 1U;
+    return local_access_index < boundary.completed_accesses;
+}
+
 } // namespace kss

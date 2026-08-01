@@ -4,6 +4,8 @@
 #include "kss/dispatcher.hpp"
 #include "kss/dual_bus.hpp"
 #include "kss/generated_first_frame_blocks.hpp"
+#include "kss/rom_validation.hpp"
+#include "kss/sa1_frame_domain.hpp"
 #include "kss/sa1_timing.hpp"
 #include "kss/scpu_micro_access_recorder.hpp"
 #ifdef KSS_USE_PRIVATE_GENERATED
@@ -16,16 +18,42 @@
 namespace kss {
 namespace {
 
+#ifdef KSS_USE_PRIVATE_GENERATED
+inline constexpr Sha256Digest kPrivateGeneratedRomDigest{
+    0x4e, 0x09, 0x5f, 0xbb, 0xde, 0xc4, 0xa1, 0x6b,
+    0x07, 0x5d, 0x71, 0x40, 0x38, 0x5f, 0xf6, 0x8b,
+    0x25, 0x98, 0x70, 0xca, 0x9e, 0x33, 0x57, 0xf0,
+    0x76, 0xdf, 0xff, 0x7f, 0x3d, 0x1c, 0x4a, 0x62,
+};
+
+[[nodiscard]] bool may_use_private_generated_blocks(
+    std::span<const std::uint8_t> rom) noexcept {
+    return rom.size() == kExpectedRomSize
+        && sha256(rom) == kPrivateGeneratedRomDigest;
+}
+#endif
+
 struct PendingCpuWrite {
     ProcessorId processor{};
     std::uint32_t address{};
     std::uint8_t value{};
+    // One past the global S-CPU access index observed before the inner bus
+    // callback. Zero for non-S-CPU writes.
+    std::size_t scpu_access_count{};
+};
+
+struct PendingCpuWriteCapture {
+    std::vector<PendingCpuWrite>* writes{};
+    const ScpuMicroAccessRecorder* scpu_accesses{};
 };
 
 void capture_cpu_write(void* context, ProcessorId processor,
     std::uint32_t address, std::uint8_t value) noexcept {
-    auto* pending = static_cast<std::vector<PendingCpuWrite>*>(context);
-    pending->push_back({processor, address, value});
+    auto* capture = static_cast<PendingCpuWriteCapture*>(context);
+    const auto access_count = processor == ProcessorId::snes_cpu
+        && capture->scpu_accesses
+        ? capture->scpu_accesses->accesses().size() : 0U;
+    capture->writes->push_back({processor, address, value, access_count});
 }
 
 struct PendingSpcPortWrite {
@@ -76,7 +104,10 @@ BootProbeResult run_boot_probe(
     DeterministicScheduler scheduler;
     CheckedDispatcher dispatcher;
 #ifdef KSS_USE_PRIVATE_GENERATED
-    if (!generated::register_private_first_frame_blocks(dispatcher)) {
+    const auto registered = may_use_private_generated_blocks(rom)
+        ? generated::register_private_first_frame_blocks(dispatcher)
+        : generated::register_first_frame_blocks(dispatcher);
+    if (!registered) {
 #else
     if (!generated::register_first_frame_blocks(dispatcher)) {
 #endif
@@ -94,9 +125,11 @@ BootProbeResult run_boot_probe(
     pending_spc_writes.reserve(512U);
     std::vector<PendingCpuWrite> pending_cpu_writes;
     pending_cpu_writes.reserve(32'768U);
+    PendingCpuWriteCapture pending_cpu_capture{
+        &pending_cpu_writes, &timed_bus};
     if (timing.event_chain) {
         hardware_bus.set_cpu_write_sink(
-            &pending_cpu_writes, &capture_cpu_write);
+            &pending_cpu_capture, &capture_cpu_write);
     }
     if (timing.event_chain && hardware_bus.spc_core()) {
         hardware_bus.spc_core()->set_port_write_sink(
@@ -338,6 +371,11 @@ BootProbeResult run_boot_probe(
         return result;
     }
     result.sa1_master_ready = sa1_poll_timing.ready_at;
+    result.sa1_frame_observation_start = result.sa1_master_ready;
+    result.sa1_frame_observation.ready_at = result.sa1_master_ready;
+    result.sa1_frame_observation.target = kSnesFirstFrameMasterClock;
+    result.sa1_frame_observation.shortfall =
+        kSnesFirstFrameMasterClock - result.sa1_master_ready;
     flush_cpu_writes(sa1_poll_timing.ready_at);
     result.sa1_poll_value = hardware_bus.sa1_iram()[0x0aU];
     if (result.sa1_poll_observation.status != GeneratedRunStatus::checkpoint_reached) {
@@ -345,8 +383,53 @@ BootProbeResult run_boot_probe(
         return result;
     }
 
+    bool live_sa1_ok = true;
+    const auto advance_sa1_to = [&](MasterClock requested_target) noexcept {
+        const auto target = std::min(requested_target, kSnesFirstFrameMasterClock);
+        const auto current = clocks.ready_at(ClockDomain::sa1);
+        if (current >= target) return true;
+
+        constexpr std::size_t poll_block_limit = 65'536U;
+        const auto advance = advance_sa1_poll_to(
+            result.sa1, bus, scheduler, dispatcher,
+            current, target, poll_block_limit);
+        result.sa1_frame_observation.completed_blocks += advance.completed_blocks;
+        result.sa1_frame_observation.completed_cycles += advance.completed_cycles;
+        result.sa1_frame_observation.ready_at = advance.ready_at;
+        result.sa1_frame_observation.target = kSnesFirstFrameMasterClock;
+        result.sa1_frame_observation.shortfall =
+            kSnesFirstFrameMasterClock - advance.ready_at;
+        result.sa1_frame_observation.status = advance.status;
+        if (advance.completed_blocks > 0U) {
+            result.sa1_frame_observation.last_completed = advance.last_completed;
+            ++result.sa1_frame_sync_points;
+            result.sa1_last_sync_target = target;
+        }
+
+        const auto accounted = clocks.account_sa1_cycles(advance.completed_cycles);
+        if (accounted.status != CoordinatorStatus::accepted
+            || accounted.ready_at != advance.ready_at) {
+            live_sa1_ok = false;
+            return false;
+        }
+        result.sa1_master_ready = accounted.ready_at;
+        flush_cpu_writes(accounted.ready_at);
+
+        const bool accepted_boundary =
+            advance.status == Sa1PollAdvanceStatus::target_reached
+            || advance.status == Sa1PollAdvanceStatus::target_inside_instruction;
+        if (!accepted_boundary) live_sa1_ok = false;
+        return accepted_boundary;
+    };
+
     bool live_spc_ok = true;
-    const auto advance_spc_to = [&](MasterClock target) noexcept {
+    const auto advance_spc_to = [&](MasterClock requested_target) noexcept {
+        // This probe's contract ends at the first SNES endFrame boundary.
+        // Whole S-CPU instructions may retire beyond it, but they must not
+        // drag the functional SPC core through later acknowledgements or add
+        // post-boundary writes to the first-frame event chain.
+        const auto target = std::min(
+            requested_target, kSnesFirstFrameMasterClock);
         // One first-frame synchronization never needs remotely this many SPC
         // instructions (the reset-to-frame reference is under four thousand).
         // Keep a strict fail-closed guard against a zero-cycle or stuck core.
@@ -400,6 +483,10 @@ BootProbeResult run_boot_probe(
             return run;
         }
         for (std::size_t step = 0; step < max_blocks; ++step) {
+            if (!advance_sa1_to(clocks.ready_at(ClockDomain::scpu))) {
+                run.status = GeneratedRunStatus::generated_block_failed_closed;
+                return run;
+            }
             if (result.scpu.stopped) {
                 run.status = GeneratedRunStatus::cpu_stopped;
                 return run;
@@ -438,7 +525,27 @@ BootProbeResult run_boot_probe(
                         block_master_start, kSnesFirstFrameMasterClock);
                 }
             }
+            if (timing.event_chain && result.scpu_first_frame_boundary
+                && result.scpu_first_frame_boundary->block == before
+                && !result.scpu_first_frame_boundary->architectural_state_committed) {
+                // Functional execution remains whole-instruction, but the
+                // first-endFrame event chain is an exact boundary view. Drop
+                // only S-CPU writes whose bus accesses had not completed at
+                // that boundary; SA-1 records are unaffected.
+                const auto& boundary = *result.scpu_first_frame_boundary;
+                std::erase_if(pending_cpu_writes,
+                    [&](const PendingCpuWrite& write) noexcept {
+                        return write.processor == ProcessorId::snes_cpu
+                            && !scpu_write_access_completed_at_boundary(
+                                boundary, block_access_start,
+                                write.scpu_access_count);
+                    });
+            }
             flush_cpu_writes(clocks.ready_at(ClockDomain::scpu));
+            if (!advance_sa1_to(clocks.ready_at(ClockDomain::scpu))) {
+                run.status = GeneratedRunStatus::generated_block_failed_closed;
+                return run;
+            }
             if (!advance_spc_to(clocks.ready_at(ClockDomain::scpu))) {
                 run.status = GeneratedRunStatus::generated_block_failed_closed;
                 return run;
@@ -572,6 +679,15 @@ BootProbeResult run_boot_probe(
             result.spc_registers = hardware_bus.spc_core()->registers();
             return result;
         }
+    }
+
+    // Preserve the last complete SA-1 poll instruction at or before the PPU
+    // boundary. If endFrame falls inside the next instruction, the residual
+    // remains explicit in sa1_frame_observation; no state is executed and
+    // rewound merely to make the domain cursor equal 306900.
+    if (!advance_sa1_to(kSnesFirstFrameMasterClock) || !live_sa1_ok) {
+        result.status = BootProbeStatus::timing_debt;
+        return result;
     }
 
     result.frame = SnesFrameRenderer::render(hardware_bus.ppu_state());
