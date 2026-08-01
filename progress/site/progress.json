@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-01T22:58:46Z",
-    "commit": "bfbc6258b75e264b934c05c1714fa9e80367c254",
+    "generated_at": "2026-08-01T23:07:56Z",
+    "commit": "f98cf6cd0c3c728e183f13ca8b3d984a663954f3",
     "dirty": false,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -59,14 +59,14 @@
           "path": "analysis/coverage/first-visible-route-coverage.json"
         },
         {
-          "id": "m3.wram-postframe-route",
-          "label": "Private WRAM witness closure and bounded post-frame route probe",
-          "path": "progress/evidence/m3-wram-postframe-route.md"
-        },
-        {
           "id": "m3.local-verification",
           "label": "226 Python and 25 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
+        },
+        {
+          "id": "m3.wram-postframe-route",
+          "label": "Private WRAM witness closure and bounded post-frame route probe",
+          "path": "progress/evidence/m3-wram-postframe-route.md"
         },
         {
           "id": "recompiler.opcode-matrix",

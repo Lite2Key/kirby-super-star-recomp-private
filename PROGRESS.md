@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-08-01T22:58:46Z` | commit `bfbc6258b75e264b934c05c1714fa9e80367c254` | tree `clean`
+Snapshot: `2026-08-01T23:07:56Z` | commit `f98cf6cd0c3c728e183f13ca8b3d984a663954f3` | tree `clean`
 
 ## Milestone map
 
@@ -60,8 +60,8 @@ Snapshot: `2026-08-01T22:58:46Z` | commit `bfbc6258b75e264b934c05c1714fa9e80367c
 - `m3.cpu-hardware-runtime` [CPU semantic closure, hardware boundary, SPC core, and executable boot probe](progress/evidence/m3-cpu-hardware-runtime.md)
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
 - `m3.first-visible-route` [Compact first-visible route and repeat-stable visual oracle](analysis/coverage/first-visible-route-coverage.json)
-- `m3.wram-postframe-route` [Private WRAM witness closure and bounded post-frame route probe](progress/evidence/m3-wram-postframe-route.md)
 - `m3.local-verification` [226 Python and 25 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.wram-postframe-route` [Private WRAM witness closure and bounded post-frame route probe](progress/evidence/m3-wram-postframe-route.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
 
