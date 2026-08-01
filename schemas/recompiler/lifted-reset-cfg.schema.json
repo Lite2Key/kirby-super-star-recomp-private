@@ -14,6 +14,7 @@
         "payload_size": { "type": "integer", "minimum": 32768 },
         "max_blocks_per_processor": { "type": "integer", "minimum": 1, "maximum": 4096 },
         "byte_policy": { "const": "instruction-bytes-only-max-4-per-node" },
+        "wram_witness_policy": { "const": "private-sparse-bytes-v1" },
         "dynamic_control_flow_policy": {
           "enum": ["unresolved", "observed-successors-fail-closed"]
         },
@@ -74,6 +75,7 @@
       "properties": {
         "identity": { "$ref": "#/$defs/identity" },
         "rom_offset": { "type": ["integer", "null"], "minimum": 0 },
+        "memory_region": { "enum": ["wram"] },
         "status": { "enum": ["decoded", "unresolved"] },
         "instruction": { "oneOf": [{ "$ref": "#/$defs/instruction" }, { "type": "null" }] },
         "unresolved_reason": { "type": ["string", "null"] },

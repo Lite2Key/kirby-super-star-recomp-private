@@ -19,6 +19,7 @@ from .frontier import build_frontier
 from .reset_lift import lift_reset_paths
 from .rom import identify
 from .trace_cfg import build_trace_seeded_cfg
+from .wram_witness import load_witness, WramWitnessError
 
 
 EXPECTED_KSS_SHA256 = "4E095FBBDEC4A16B075D7140385FF68B259870CA9E3357F076DFFF7F3D1C4A62"
@@ -44,6 +45,7 @@ def build_outputs(
     expected_sha256: str = EXPECTED_KSS_SHA256,
     max_blocks_per_processor: int = 4096,
     baseline: Mapping[str, Any] | None = None,
+    wram_witness: Mapping[str, Any] | None = None,
 ) -> dict[str, str]:
     identity = identify(rom)
     if identity.sha256.upper() != expected_sha256.upper():
@@ -55,6 +57,7 @@ def build_outputs(
         max_blocks_per_processor=max_blocks_per_processor,
         allow_observed_dynamic_control_flow=True,
         analyze_all_observed_identities=True,
+        wram_witness=wram_witness,
     )
     header, source, generated_manifest = render_generated_blocks(
         lifted,
@@ -81,7 +84,7 @@ def build_outputs(
         "identity_policy": generated_manifest["identity_policy"],
         "output_policy": "rom-derived-files-under-.private-only",
     }
-    return {
+    outputs = {
         "trace-cfg.json": _json(trace_cfg),
         "lifted.json": _json(lifted),
         "frontier.json": _json(frontier),
@@ -90,6 +93,11 @@ def build_outputs(
         "manifest.json": _json(generated_manifest),
         "summary.json": _json(summary),
     }
+    if wram_witness is not None:
+        # This file remains under .private with the generated instruction
+        # bytes; it is useful evidence when regenerating the exact route.
+        outputs["wram-witness.json"] = _json(wram_witness)
+    return outputs
 
 
 def write_outputs(root: Path, outputs: Mapping[str, str], *, check: bool = False) -> None:
@@ -116,6 +124,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=Path(".private/generated/first-frame"))
     parser.add_argument("--max-blocks", type=int, default=4096)
     parser.add_argument(
+        "--wram-witness-log", type=Path,
+        default=Path(".private/traces/wram-witness-bytes.log"),
+        help="private Mesen log containing KSS_WRAM_BYTES_V1 markers",
+    )
+    parser.add_argument(
         "--baseline", type=Path,
         default=Path("analysis/cfg/first-frame-dual.lifted.json"),
     )
@@ -131,15 +144,19 @@ def main(argv: list[str] | None = None) -> int:
         ]
         coverage = (route_documents[0][1] if len(route_documents) == 1
                     else merge_coverages(route_documents))
+        wram_witness = None
+        if args.wram_witness_log.exists():
+            wram_witness = load_witness(args.wram_witness_log)
         outputs = build_outputs(
             args.rom.read_bytes(),
             json.loads(args.vectors.read_text(encoding="utf-8")),
             coverage,
             max_blocks_per_processor=args.max_blocks,
             baseline=json.loads(args.baseline.read_text(encoding="utf-8")),
+            wram_witness=wram_witness,
         )
         write_outputs(args.out, outputs, check=args.check)
-    except (OSError, json.JSONDecodeError, ValueError) as error:
+    except (OSError, json.JSONDecodeError, ValueError, WramWitnessError) as error:
         parser.error(str(error))
     return 0
 

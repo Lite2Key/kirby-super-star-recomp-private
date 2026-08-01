@@ -50,6 +50,12 @@ struct BootProbeTimingEvidence {
     // Optional memory-only event sink. Captured values remain owned by the
     // caller; BootProbeResult exposes only a count/digest summary.
     RuntimeEventChainRecorder* event_chain{};
+    // Development-only route continuation. When enabled without an event
+    // recorder, the live SPC model may advance past the first endFrame while
+    // the bounded generated route continues. Event-chain probes keep the
+    // first-frame clamp regardless of this flag so post-boundary records
+    // cannot be mistaken for first-frame evidence.
+    bool continue_route_after_first_frame{};
 };
 
 enum class BootProbeEventChainStatus : std::uint8_t {

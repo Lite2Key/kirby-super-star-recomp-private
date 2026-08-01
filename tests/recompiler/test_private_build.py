@@ -10,6 +10,7 @@ from recompiler.kssrecomp.private_build import (
     build_outputs,
     write_outputs,
 )
+from recompiler.kssrecomp.wram_witness import parse_witness_lines
 
 
 def _fixture():
@@ -68,6 +69,18 @@ def test_private_build_rejects_wrong_revision_before_lifting():
     rom, vectors, coverage = _fixture()
     with pytest.raises(PrivateBuildError, match="SHA-256"):
         build_outputs(rom, vectors, coverage, expected_sha256="00" * 32)
+
+
+def test_private_build_accepts_optional_wram_witness_and_omits_it_without_one():
+    rom, vectors, coverage = _fixture()
+    digest = hashlib.sha256(rom).hexdigest()
+    without = build_outputs(rom, vectors, coverage, expected_sha256=digest)
+    assert "wram-witness.json" not in without
+    witness = parse_witness_lines(["KSS_WRAM_BYTES_V1|00000E|EA000000"])
+    with_witness = build_outputs(
+        rom, vectors, coverage, expected_sha256=digest, wram_witness=witness,
+    )
+    assert json.loads(with_witness["wram-witness.json"]) == witness
 
 
 def test_private_writer_requires_private_root_and_supports_check():

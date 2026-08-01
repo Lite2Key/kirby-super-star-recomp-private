@@ -211,6 +211,35 @@ void test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary() {
     assert(result.missing_block_identities.empty());
 }
 
+void test_post_frame_route_opt_in_keeps_event_chain_first_frame_bounded() {
+    const auto ipl = ipl_with({
+        0xe8, 0xaa, 0xc4, 0xf4,
+        0xe8, 0xbb, 0xc4, 0xf5,
+        0xe4, 0xf4, 0x68, 0xcc, 0xd0, 0xfa,
+        0xc4, 0xf4,
+        0xe4, 0xf4, 0xc4, 0xf4, 0x2f, 0xfa,
+    });
+    kss::RuntimeEventChainRecorder recorder;
+    kss::BootProbeTimingEvidence evidence{ipl, {}, {}, &recorder};
+    evidence.continue_route_after_first_frame = true;
+    const auto result = kss::run_boot_probe(synthetic_upload_rom(), evidence);
+    assert(result.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(result.event_chain_status
+        == kss::BootProbeEventChainStatus::instruction_retirement_stream);
+    // The clamp governs requested SPC work and event recording; a whole SPC
+    // instruction may retire a few clocks past the exact boundary.
+    assert(result.spc_master_ready >= kss::kSnesFirstFrameMasterClock);
+    assert(std::all_of(recorder.spc_ports().begin(), recorder.spc_ports().end(),
+        [](const auto& event) {
+            return event.master_clock <= kss::kSnesFirstFrameMasterClock;
+        }));
+    assert(std::all_of(recorder.cpu_writes().begin(), recorder.cpu_writes().end(),
+        [](const auto& event) {
+            return event.master_clock <= kss::kSnesFirstFrameMasterClock;
+        }));
+    assert(result.event_chain_summary);
+}
+
 void test_runtime_event_chain_observes_live_causal_path() {
     const auto ipl = ipl_with({
         0xe8, 0xaa, 0xc4, 0xf4,
@@ -313,6 +342,7 @@ int main() {
     test_explicit_access_evidence_and_spc_phase_drive_only_requested_step();
     test_runtime_ipl_clocks_real_port_ack_and_reaches_generated_upload();
     test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary();
+    test_post_frame_route_opt_in_keeps_event_chain_first_frame_bounded();
     test_runtime_event_chain_observes_live_causal_path();
     test_spc_requires_runtime_ipl_and_fails_closed();
     test_post_frame_spc_phase_is_timing_debt_without_execution();

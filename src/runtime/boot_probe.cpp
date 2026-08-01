@@ -428,8 +428,15 @@ BootProbeResult run_boot_probe(
         // Whole S-CPU instructions may retire beyond it, but they must not
         // drag the functional SPC core through later acknowledgements or add
         // post-boundary writes to the first-frame event chain.
-        const auto target = std::min(
-            requested_target, kSnesFirstFrameMasterClock);
+        // First-frame event-chain probes must never absorb acknowledgements
+        // from later frames. A route-only development probe may opt in to
+        // continuing the live SPC handshake beyond that boundary, but only
+        // when no event recorder is attached (the public evidence contract
+        // remains first-frame bounded).
+        const auto target = timing.continue_route_after_first_frame
+                && timing.event_chain == nullptr
+            ? requested_target
+            : std::min(requested_target, kSnesFirstFrameMasterClock);
         // One first-frame synchronization never needs remotely this many SPC
         // instructions (the reset-to-frame reference is under four thousand).
         // Keep a strict fail-closed guard against a zero-cycle or stuck core.
@@ -611,8 +618,13 @@ BootProbeResult run_boot_probe(
         // Reach the second upload iteration as needed: the first iteration's
         // entry path skips four identities, while the genuine token/data
         // acknowledgement loop reaches them on the next pass.
+        // Both modes are bounded. The opt-in path permits the live SPC
+        // handshake to continue beyond the first endFrame, but still stops
+        // after this finite inventory walk; it is not a claim that the full
+        // later-game route has completed.
+        constexpr std::size_t upload_block_limit = 4096U;
         for (std::size_t step = 0;
-             step < 4096U
+             step < upload_block_limit
                 && result.executed_block_identities.size()
                     < result.inventory_block_identities.size();
              ++step) {
