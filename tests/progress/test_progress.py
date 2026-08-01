@@ -46,7 +46,7 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(summary.count('class="identity"'), 2273)
             self.assertEqual(summary.count('class="checkpoint"'), 42)
             self.assertIn("Runtime execution</text>", summary)
-            self.assertIn("279 / 2273", summary)
+            self.assertIn("388 / 2273", summary)
             self.assertNotIn("<script", summary)
             self.assertNotIn("<image", summary)
 

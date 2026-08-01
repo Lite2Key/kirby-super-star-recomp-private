@@ -24,20 +24,27 @@ instructions after that boundary.
 The authorized private probe currently reports:
 
 - status `expected_frontier_reached`;
-- inventory `2,273`, executed `254`, missing `2,019` identities;
-- `4,096` pre-frame upload blocks and a bounded `131,072` post-frame route
+- inventory `2,273`, executed `388`, missing `1,885` identities;
+- `4,096` pre-frame upload blocks and a bounded `4,194,304` post-frame route
   budget, ending at the explicit step limit;
-- the route executes `279` unique identities, reducing the missing set to
-  `1,994` without changing the static inventory;
-- S-CPU `$D5E9` and SA-1 `$8C5B` are the active generated identities after the
-  upload wait;
-- the SPC reaches uploaded RAM at `$0760` after `155,855` cycles, and the
-  final SPC output latch is `0x00` while the S-CPU remains at the transfer
-  boundary, exposing the next handshake phase without fabricated state.
+- the route executes `388` unique identities, reducing the missing set from
+  `1,919` at the prior checkpoint to `1,885` without changing the static
+  inventory;
+- post-frame SA-1 handoff now follows the generated `$8C5D/$8C60` tail after
+  the strict first-frame `$8C58/$8C5B` poll; the bounded route reaches S-CPU
+  `$0014` and SA-1 `$8A01`;
+- the SPC reaches uploaded RAM and continues through the authentic IPL-driven
+  protocol (`5,198,846` SPC cycles at the latest bounded endpoint; final
+  F4=`0x72`), with no architectural state patched or rewound.
+- a clean private generator/build rerun with the authorized ROM and IPL
+  reproduces the same status, counts, endpoint registers, and SPC cycle total;
+  the generated route output remains ignored and unpublished.
 
 This is a measured continuation frontier, not a gameplay-completion claim.
-The next proof is to model the counter/latch ordering and then extend the
-route through the first newly observed post-upload identity.
+The upload counter/latch ordering is now evidenced by the private Mesen trace;
+the next proof is to carry the same causal route beyond the SA-1 `$8A01` /
+S-CPU `$0014` dynamic-return boundary instead of treating the bounded frontier
+as completion.
 
 ## Verification gates
 

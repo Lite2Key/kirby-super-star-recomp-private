@@ -19,8 +19,10 @@ decoded from an ignored private witness map; their ROM-derived bytes never enter
 the public repository. The current first-frame runtime executes its original
 254-identity slice. A route-only development probe can continue whole
 CPU/SA-1/SPC instructions without contaminating first-frame evidence: with a
-finite 131,072-block budget it reaches 279 identities and the next upload phase
-at S-CPU `$D5E9`, leaving 1,994 route identities unexecuted. All 256 opcodes have
+finite 4,194,304-block budget it reaches 388 identities after crossing the
+upload loops and following the generated post-frame SA-1 handoff to `$8A01`
+while the S-CPU reaches `$0014`, leaving 1,885 route identities unexecuted. All
+256 opcodes have
 architecture-tested execution semantics. With a runtime-only authentic IPL,
 the 254 runtime identities execute through the real SPC `$CC` acknowledgement
 with no patched state. Reset DMA, shared SA-1 I-RAM/control,

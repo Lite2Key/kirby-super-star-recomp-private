@@ -392,6 +392,34 @@ BootProbeResult run_boot_probe(
     // the S-CPU finishes a boundary-crossing block, but the SA-1 evidence must
     // still retain its exact 306900-master-clock contract.
     bool route_post_frame_active = false;
+    // The first-frame SA-1 helper is deliberately limited to the proven
+    // $8C58/$8C5B poll. Once the live route writes a negative shared value,
+    // real hardware takes the BPL fall-through at $8C5B and continues through
+    // $8C5D/$8C60 into the normal SA-1 code. Route-only probes may follow that
+    // edge with the generated whole-block dispatcher; first-frame probes never
+    // enable this handoff.
+    bool route_sa1_generic_active = false;
+    const auto advance_sa1_generic_to = [&](MasterClock requested_target) noexcept {
+        if (!route_only || !route_post_frame_active) return false;
+        const auto current = clocks.ready_at(ClockDomain::sa1);
+        if (current >= requested_target) return true;
+        constexpr std::size_t generic_block_limit = 65'536U;
+        for (std::size_t step = 0; step < generic_block_limit; ++step) {
+            if (result.sa1.stopped) return false;
+            const auto cycles_before = result.sa1.cycles;
+            const auto dispatch = dispatcher.dispatch(result.sa1, bus, scheduler);
+            if (dispatch != DispatchStatus::executed || result.sa1.stopped) return false;
+            if (result.sa1.cycles < cycles_before) return false;
+            const auto elapsed = result.sa1.cycles - cycles_before;
+            if (elapsed == 0U) return false;
+            const auto advance = clocks.account_sa1_cycles(elapsed);
+            if (advance.status != CoordinatorStatus::accepted) return false;
+            result.sa1_master_ready = advance.ready_at;
+            flush_cpu_writes(advance.ready_at);
+            if (advance.ready_at >= requested_target) return true;
+        }
+        return false;
+    };
     const auto advance_sa1_to = [&](MasterClock requested_target) noexcept {
         const auto target = route_only && route_post_frame_active
             ? requested_target
@@ -399,6 +427,10 @@ BootProbeResult run_boot_probe(
         const bool first_frame_target = target <= kSnesFirstFrameMasterClock;
         const auto current = clocks.ready_at(ClockDomain::sa1);
         if (current >= target) return true;
+
+        if (route_sa1_generic_active) {
+            return advance_sa1_generic_to(target);
+        }
 
         constexpr std::size_t poll_block_limit = 65'536U;
         const auto advance = advance_sa1_poll_to(
@@ -434,6 +466,11 @@ BootProbeResult run_boot_probe(
         const bool accepted_boundary =
             advance.status == Sa1PollAdvanceStatus::target_reached
             || advance.status == Sa1PollAdvanceStatus::target_inside_instruction;
+        if (route_only && route_post_frame_active
+            && advance.status == Sa1PollAdvanceStatus::poll_released) {
+            route_sa1_generic_active = true;
+            return advance_sa1_generic_to(target);
+        }
         if (!accepted_boundary) live_sa1_ok = false;
         return accepted_boundary;
     };
@@ -725,8 +762,12 @@ BootProbeResult run_boot_probe(
         // stop at a finite boundary when the upload handshake has no next
         // causal edge. This keeps a stalled $D655 wait observable rather than
         // turning a diagnostic mode into an unbounded emulator loop.
+        // Keep the route-only continuation finite even when a private probe
+        // requests a larger measured window. Four million whole blocks is
+        // long enough to cross the observed SPC timer/main-loop handoffs
+        // while still failing closed instead of becoming an emulator loop.
         const auto post_frame_block_limit = std::min<std::size_t>(
-            timing.post_frame_route_block_budget, 1'048'576U);
+            timing.post_frame_route_block_budget, 4'194'304U);
         const auto impossible_checkpoint = BlockKey::make(
             ProcessorId::snes_cpu, 0x00ffffU, false, true, false);
         for (std::size_t step = 0; step < post_frame_block_limit; ++step) {
