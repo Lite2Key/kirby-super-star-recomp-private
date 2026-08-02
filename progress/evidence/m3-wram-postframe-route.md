@@ -93,3 +93,8 @@ can close.
 - Python suite: `227 passed`.
 - Public Windows native suite: `25 / 25 passed`.
 - Private generated Windows native suite: `25 / 25 passed`.
+- The value-free S-CPU recorder now has a focused native wait-loop oracle for
+  `$0014` BIT `$2300` → `$0017` BEQ `$0014`: seven ordered accesses, eight
+  architectural cycles, and the current 52-master-clock bus-only charge. This
+  is a regression rail for the future scoped internal-cycle model; it does not
+  claim that 52 matches the Mesen cadence yet.
