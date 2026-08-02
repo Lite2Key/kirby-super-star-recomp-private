@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-02T02:47:19Z",
-    "commit": "dad565a58c2f10fc69e7b0b80912c5043eedaf68",
-    "dirty": true,
+    "generated_at": "2026-08-02T03:02:39Z",
+    "commit": "d2c779f8a74768d42418706c44a7e04721bd36cd",
+    "dirty": false,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
     "evidence": {
@@ -1379,6 +1379,10 @@
       "route_probe_message_write_alignment_through_nmi": 20,
       "route_probe_static_post_nmi_extra_writes": 19,
       "route_probe_static_post_nmi_extra_reads": 684,
+      "route_probe_message_poll_oracle_accesses": 7,
+      "route_probe_message_poll_oracle_architectural_cycles": 8,
+      "route_probe_message_poll_oracle_master_clocks": 52,
+      "route_probe_message_poll_oracle_timing_model": "bus_only_baseline",
       "route_probe_clean_bwram_fixture": 1,
       "route_probe_post_budget_cap": 4194304,
       "route_probe_postfrontier_executed": 2019,
