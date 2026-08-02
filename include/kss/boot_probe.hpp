@@ -152,6 +152,9 @@ struct BootProbeResult {
     // polls after the first-frame boundary. These retain only master-clock
     // positions, making entry drift and steady-state poll cadence separately
     // measurable without exposing the private event stream.
+    // The SA-1 release anchor below is a scheduler edge, not a bus callback;
+    // it deliberately avoids implying false `$3010` write precision.
+    std::optional<MasterClock> route_sa1_poll_release_master{};
     std::optional<MasterClock> route_first_message_poll_master{};
     std::optional<MasterClock> route_second_message_poll_master{};
     MasterClock route_message_poll_cadence_master{};

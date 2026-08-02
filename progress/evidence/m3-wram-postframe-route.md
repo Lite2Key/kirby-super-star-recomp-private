@@ -90,6 +90,17 @@ deficit from the steady-state poll cadence and is why the rejected `+6`
 taken-branch A/B cannot be treated as a complete fix. These are bus-derived
 access-completion anchors, not NMI service timestamps or raw event exports.
 
+The same run records the earlier SA-1 poll-release scheduler edge at master
+`27,742,664`. The corresponding Mesen witness has its first `$3010=0` write at
+`27,710,962`, after the first S-CPU `$0014` poll begins at `27,710,906` and its
+`$2300` read completes at `27,710,936`. The cross-witness offset is `31,702`
+masters, while the static release edge is only `146` masters before its first
+poll completion. Because the static value is a poll-release scheduler edge and
+the Mesen value is a bus-write witness, this is an ordering diagnostic rather
+than a claim that the two timestamps are identical hardware phases. It places
+the large deficit at the upstream SA-1/S-CPU handoff, before the steady-state
+branch cadence.
+
 This is a measured compact-route closure, not a gameplay-completion claim.
 The optional public latch snapshot is an endpoint observation only; it does not
 replace a transient event proof. The next proof is causal parity at the new

@@ -392,6 +392,7 @@ BootProbeResult run_boot_probe(
     // the S-CPU finishes a boundary-crossing block, but the SA-1 evidence must
     // still retain its exact 306900-master-clock contract.
     bool route_post_frame_active = false;
+    std::optional<MasterClock> route_sa1_poll_release_master;
     std::optional<MasterClock> route_first_message_poll_master;
     std::optional<MasterClock> route_second_message_poll_master;
     MasterClock route_message_poll_cadence_master = 0;
@@ -471,6 +472,9 @@ BootProbeResult run_boot_probe(
             || advance.status == Sa1PollAdvanceStatus::target_inside_instruction;
         if (route_only && route_post_frame_active
             && advance.status == Sa1PollAdvanceStatus::poll_released) {
+            if (!route_sa1_poll_release_master) {
+                route_sa1_poll_release_master = advance.ready_at;
+            }
             route_sa1_generic_active = true;
             return advance_sa1_generic_to(target);
         }
@@ -863,6 +867,7 @@ BootProbeResult run_boot_probe(
     // the bounded route endpoint is still a useful causal observation.
     result.sa1_snes_message_latch = hardware_bus.sa1_control_state().snes_message;
     result.sa1_message_latch_summary = hardware_bus.sa1_message_latch_summary();
+    result.route_sa1_poll_release_master = route_sa1_poll_release_master;
     result.route_first_message_poll_master = route_first_message_poll_master;
     result.route_second_message_poll_master = route_second_message_poll_master;
     result.route_message_poll_cadence_master = route_message_poll_cadence_master;
