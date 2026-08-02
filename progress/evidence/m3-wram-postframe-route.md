@@ -54,6 +54,6 @@ instead of treating the bounded continuation as completion.
 
 ## Verification gates
 
-- Python suite: `226 passed`.
+- Python suite: `227 passed`.
 - Public Windows native suite: `25 / 25 passed`.
 - Private generated Windows native suite: `25 / 25 passed`.

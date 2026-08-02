@@ -66,9 +66,9 @@ def _edge_is_supported(
     if allow_observed_dynamic_control_flow and flow in (
         Flow.RETURN, Flow.INTERRUPT, Flow.INTERRUPT_RETURN,
     ):
-        # The sanitized route supplies only the resulting identity.  Generated
-        # execution still computes the target from runtime stack/vector state
-        # and fails closed unless it matches one of these observed successors.
+        # The sanitized route supplies only the resulting identity. Generated
+        # execution computes the target from runtime stack/vector state; the
+        # dispatcher remains fail-closed when that identity is not registered.
         return True
     if flow == Flow.STOP:
         return False
@@ -295,8 +295,8 @@ def lift_reset_paths(
                 # successor modes.  Decode using a deterministic representative
                 # mode, but retain the complete observed set on the block and
                 # validate every edge against it below.  Generated execution
-                # still checks the complete successor identity, so an
-                # unobserved stack restore fails closed at dispatch.
+                # still registers the observed identities, so an unregistered
+                # stack-restored target fails closed at dispatch.
                 restored_modes = sorted({target.mode for target in targets}, key=lambda mode: mode.key)
                 # The emulation flag is not part of the stacked status byte;
                 # accepting an observed target that changes it would turn a

@@ -118,7 +118,7 @@ def test_route_lift_represents_polymorphic_rti_modes_and_keeps_successors_bounde
     rti_edges = [edge for edge in result["edges"] if edge["source"] == source]
     assert {edge["target"]["pc"] for edge in rti_edges} == {0x8200, 0x8201, 0x8202}
 
-    # The generated dispatcher accepts exactly these observed identities; a
+    # The generated dispatcher registers these observed identities; a
     # different stack-restored PC or mode reaches the normal unknown-block
     # stop path instead of inheriting one arbitrary restored mode.
     source_text = render_generated_blocks(
