@@ -34,6 +34,28 @@ void test_exact_domain_progress_and_timing_debt() {
     assert(exact.status == CoordinatorStatus::accepted);
     assert(exact.master_clocks == 32 && exact.ready_at == 32);
 
+    constexpr std::array message_poll_accesses{
+        kss::SnesBusAccessTiming{0x0014, false},
+        kss::SnesBusAccessTiming{0x0015, false},
+        kss::SnesBusAccessTiming{0x0016, false},
+        kss::SnesBusAccessTiming{0x002300, false},
+        kss::SnesBusAccessTiming{0x002301, false},
+        kss::SnesBusAccessTiming{0x0017, false},
+        kss::SnesBusAccessTiming{0x0018, false},
+    };
+    MultiClockCoordinator measured_internal;
+    const auto baseline = measured_internal.account_scpu_accesses(message_poll_accesses);
+    assert(baseline.status == CoordinatorStatus::accepted);
+    assert(baseline.master_clocks == 52 && baseline.ready_at == 52);
+    MultiClockCoordinator with_internal;
+    const auto internal = with_internal.account_scpu_accesses(message_poll_accesses, 6);
+    assert(internal.status == CoordinatorStatus::accepted);
+    assert(internal.master_clocks == 58 && internal.ready_at == 58);
+
+    const auto empty_internal = with_internal.account_scpu_accesses({}, 6);
+    assert(empty_internal.status == CoordinatorStatus::timing_debt);
+    assert(empty_internal.master_clocks == 0 && empty_internal.ready_at == 58);
+
     const auto overflow = coordinator.account_sa1_cycles(
         std::numeric_limits<std::uint64_t>::max());
     assert(overflow.status == CoordinatorStatus::overflow);

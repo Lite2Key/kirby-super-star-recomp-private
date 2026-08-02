@@ -98,3 +98,12 @@ can close.
   architectural cycles, and the current 52-master-clock bus-only charge. This
   is a regression rail for the future scoped internal-cycle model; it does not
   claim that 52 matches the Mesen cadence yet.
+- The coordinator now accepts an explicit, transactional internal-duration
+  argument without changing existing callers; the same oracle proves the
+  measured `+6` candidate would charge 58 master clocks while preserving its
+  seven accesses and eight architectural cycles. A private prefix-24 A/B using
+  that candidate was deliberately removed: it kept the `2,273 / 2,273` route
+  endpoint but moved the static signature to `95 / 8,437`
+  (`e29be5c6e5ac04ab`), overshooting the Mesen `76 / 8,720` witness. This
+  rejects a blanket taken-branch correction as the fix and leaves route-entry
+  drift and poll cadence as separate proof obligations.

@@ -132,6 +132,11 @@ void test_native_message_poll_microphase_oracle() {
     const auto advance = clocks.account_scpu_accesses(recorder.timing_accesses());
     assert(advance.status == kss::CoordinatorStatus::accepted);
     assert(advance.master_clocks == 52U && advance.ready_at == 52U);
+    kss::MultiClockCoordinator measured_internal;
+    const auto internal = measured_internal.account_scpu_accesses(
+        recorder.timing_accesses(), 6U);
+    assert(internal.status == kss::CoordinatorStatus::accepted);
+    assert(internal.master_clocks == 58U && internal.ready_at == 58U);
 }
 
 } // namespace

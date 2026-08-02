@@ -39,7 +39,8 @@ DomainAdvanceResult MultiClockCoordinator::account_sa1_cycles(std::uint64_t cycl
 }
 
 DomainAdvanceResult MultiClockCoordinator::account_scpu_accesses(
-    std::span<const SnesBusAccessTiming> accesses) noexcept {
+    std::span<const SnesBusAccessTiming> accesses,
+    MasterClock internal_master_clocks) noexcept {
     auto& cursor = ready_at_[domain_index(ClockDomain::scpu)];
     if (accesses.empty()) return {CoordinatorStatus::timing_debt, 0, cursor};
     MasterClock delta = 0;
@@ -51,6 +52,10 @@ DomainAdvanceResult MultiClockCoordinator::account_scpu_accesses(
         }
         delta += duration;
     }
+    if (add_overflows(delta, internal_master_clocks)) {
+        return {CoordinatorStatus::overflow, 0, cursor};
+    }
+    delta += internal_master_clocks;
     if (add_overflows(cursor, delta)) {
         return {CoordinatorStatus::overflow, 0, cursor};
     }

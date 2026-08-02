@@ -97,9 +97,13 @@ public:
 
     // Every S-CPU micro-access must be supplied. An empty sequence is timing
     // debt and does not mutate the cursor; instruction-cycle approximations
-    // are deliberately not accepted by this API.
+    // are deliberately not accepted by this API. A measured internal duration
+    // may be supplied separately when an instruction phase has no bus access;
+    // it is charged transactionally with the observable accesses and defaults
+    // to zero.
     [[nodiscard]] DomainAdvanceResult account_scpu_accesses(
-        std::span<const SnesBusAccessTiming> accesses) noexcept;
+        std::span<const SnesBusAccessTiming> accesses,
+        MasterClock internal_master_clocks = 0) noexcept;
 
     // The SPC700 architectural cycle clock is 1.024 MHz. Convert it to the
     // SNES master domain with a retained rational remainder so repeated small
