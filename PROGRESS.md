@@ -74,15 +74,15 @@ Snapshot: `2026-08-02T01:31:14Z` | commit `f325dd839d7bb12c53dce561ef6db74049f40
 
 ## Next executable proof
 
-**Close the post-frame polling frontier** - owner: `runtime/validation`
+**Close post-frame causal parity** - owner: `runtime/validation`
 
-- [ ] Advance the opt-in CPU/SA-1 route beyond the S-CPU $008A56 / SA-1 $008CC0 frontier and reduce the 314 untouched inventory identities using a new causal route scenario
-- [ ] Resolve the one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle
+- [ ] Re-run the $00002C / $00A6E7 handoff with ordered CPU/SA-1 micro-access and signal-cursor evidence beyond the 24-edge compact-route prefix
+- [ ] Resolve the six-master-clock SA-1 residual and one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle
 - [ ] Close ordered CPU, SA-1, DMA, PPU, and SPC digest parity without patching architectural state
 
 ## Active blockers
 
-- **technical** `post-first-frame-route-expansion`: The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation covers all 2273. A clean-BWRAM private route probe dispatches 1959 unique identities after a bounded 4194304-block continuation, reaches SA-1 $008CC0 and S-CPU $008A56 after 12 NMI services, and leaves 314 inventory identities untouched; the next polling frontier remains open. (owner: analysis/recompiler)
+- **technical** `post-first-frame-route-expansion`: The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation covers all 2273. A clean-BWRAM private route sweep reaches its inventory checkpoint after 1433720 whole blocks with 2273/2273 identities dispatched and live S-CPU $00002C / SA-1 $00A6E7 endpoints. The full 102-edge schedule processes a decisive 24 signals and then fails closed with timing_debt while 78 later signals remain unscheduled; exact post-route causal parity is the active blocker, not static coverage. (owner: analysis/recompiler)
 - **technical** `shared-first-endframe-parity`: Cooperative reset/MVN and post-reset SA-1 scheduling reach the first frame; reset-DMA side effects and PPU parity are exact, and CPU/S-CPU/SA-1/DMA counts match. The remaining work is the post-frame CPU/SA-1 upload handshake, one trailing SPC acknowledgement, and ordered digest parity. (owner: runtime/validation)
 
 Regenerate the interactive dashboard with:

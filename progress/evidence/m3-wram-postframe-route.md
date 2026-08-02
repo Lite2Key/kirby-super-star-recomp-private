@@ -21,36 +21,39 @@ The ordinary first-frame recorder therefore remains clamped to master clock
 `306900`, while the route-only probe may retire whole CPU, SA-1, and SPC
 instructions after that boundary.
 
-The authorized private probe currently reports (with the clean Mesen BWRAM
-fixture supplied only at runtime):
+The newest authorized private witness uses the clean Mesen BWRAM fixture and a
+102-edge timestamped NMI schedule (the schedule and fixture remain ignored).
+A prefix sweep found that the first `24` edges are sufficient and necessary for
+the current bounded route: prefix `23` stops at an SA-1 unknown-block boundary
+with `2,270 / 2,273` identities, while prefix `24` reaches the inventory
+checkpoint with no missing identity.
 
-- status `expected_frontier_reached` after the finite route budget;
-- inventory `2,273`, with `1,959` unique identities dispatched and `314`
-  inventory identities still untouched by this bounded continuation (all
-  `2,273` generated functions remain registered; this is not a static
-  generation gap);
-- `4,096` pre-frame upload blocks and a bounded `4,194,304` post-frame route
-  budget, ending at the explicit step limit with both modeled CPUs running;
-- all twelve supplied timestamped NMI edges are consumed at whole S-CPU
-  boundaries, and the route reaches S-CPU `$008A56` while the SA-1 remains in
-  the generated `$008CC0` poll loop;
+- the generated route continuation reaches its explicit inventory checkpoint
+  (`post_status=checkpoint_reached`) after `1,433,720` whole blocks;
+- inventory `2,273` has `2,273` unique identities dispatched and `0` missing;
+  this closes the current compact reset-to-visible corpus, not the whole game;
+- `4,096` pre-frame upload blocks are retained, both modeled CPUs remain live,
+  and the final route endpoints are S-CPU `$00002C` and SA-1 `$00A6E7`;
+- the minimum-prefix run returns `expected_frontier_reached` after processing
+  `24` NMI edges. Supplying the complete `102`-edge schedule reaches the same
+  inventory checkpoint and endpoint, then returns outer status `timing_debt`
+  because `78` later timestamped edges remain outside the finite continuation;
+  this is not an unknown-block or static-generation failure;
+- the final APU port-0 latch is `0xC3` (`195`) with the authentic `0xCC`
+  acknowledgement observed, and the route retires `5,515,447` S-CPU cycles
+  and `18,024,378` SA-1 cycles before the checkpoint;
 - a clean Mesen BWRAM capture and the private 8 KiB SRAM snapshot are
-  byte-identical. Direct Mesen seeding reaches the same SA-1 `$008CC0`
-  frontier. The generator now treats the `$0084A1` RTI as a runtime-derived
-  return instead of freezing it to the bootstrap trace's return set, allowing
-  the measured `$00CCB7` NMI return and subsequent route dispatch;
-- the SPC reaches uploaded RAM and continues through the authentic IPL-driven
-  protocol with no architectural state patched or rewound. The fixture and
-  all raw route traces remain ignored/private.
-- a clean private generator/build rerun with the authorized ROM and IPL
-  reproduces the same status, counts, endpoint registers, and SPC cycle total;
-  the generated route output remains ignored and unpublished.
+  byte-identical. The generator treats the `$0084A1` RTI as a runtime-derived
+  return, allowing measured NMI returns and the later dynamic-vector route;
+- the SPC reaches uploaded RAM through the authentic IPL-driven protocol with
+  no architectural state patched or rewound. Raw ROM, IPL, schedule, fixture,
+  and route traces remain ignored/private.
 
-This is a measured continuation frontier, not a gameplay-completion claim.
-The upload counter/latch ordering, post-frame NMI timing, and runtime-return
-dispatch are now evidenced by the private Mesen trace; the next proof is to
-extend the route beyond the remaining `$008A56`/`$008CC0` polling frontier
-instead of treating the bounded continuation as completion.
+This is a measured compact-route closure, not a gameplay-completion claim.
+The next proof is causal parity at the new `$00002C`/`$00A6E7` handoff:
+ordered CPU/SA-1 micro-accesses, the remaining timestamped signal schedule,
+SPC acknowledgement timing, dynamic returns, and event-chain digests must
+still match before M3 can close.
 
 ## Verification gates
 

@@ -18,11 +18,17 @@ S-CPU and 1,241 SA-1 identities. The 15 executable S-CPU WRAM identities are
 decoded from an ignored private witness map; their ROM-derived bytes never enter
 the public repository. The current first-frame runtime executes its original
 254-identity slice. A route-only development probe can continue whole
-CPU/SA-1/SPC instructions without contaminating first-frame evidence: with a
-finite 4,194,304-block budget it reaches 388 identities after crossing the
-upload loops and following the generated post-frame SA-1 handoff to `$8A01`
-while the S-CPU reaches `$0014`, leaving 1,885 route identities unexecuted. All
-256 opcodes have
+CPU/SA-1/SPC instructions without contaminating first-frame evidence: using a
+private 102-edge NMI schedule, the bounded continuation reaches its inventory
+checkpoint after 1,433,720 whole blocks with all 2,273 compact-corpus
+identities dispatched and no missing route identity. A prefix sweep shows that
+24 of the supplied edges are sufficient; the full schedule reaches the same
+checkpoint before 78 later edges are intentionally left for the next timing
+proof. Its final live endpoints are S-CPU `$00002C` and SA-1 `$00A6E7`; the
+outer full-schedule probe reports explicit timing debt at that finite boundary.
+This closes the current reset-to-visible route corpus, not the whole game or
+its behavioral parity.
+All 256 opcodes have
 architecture-tested execution semantics. With a runtime-only authentic IPL,
 the 254 runtime identities execute through the real SPC `$CC` acknowledgement
 with no patched state. Reset DMA, shared SA-1 I-RAM/control,
