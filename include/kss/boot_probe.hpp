@@ -148,6 +148,13 @@ struct BootProbeResult {
     // The event stream remains private; only counts and an order digest leave
     // the runtime boundary.
     std::optional<Sa1MessageLatchSummary> sa1_message_latch_summary{};
+    // Route-only timing anchors for completion of the first two S-CPU $2300
+    // polls after the first-frame boundary. These retain only master-clock
+    // positions, making entry drift and steady-state poll cadence separately
+    // measurable without exposing the private event stream.
+    std::optional<MasterClock> route_first_message_poll_master{};
+    std::optional<MasterClock> route_second_message_poll_master{};
+    MasterClock route_message_poll_cadence_master{};
     std::uint8_t apu_port0_output{};
     bool apu_cc_acknowledged{};
     BootProbeEventChainStatus event_chain_status{

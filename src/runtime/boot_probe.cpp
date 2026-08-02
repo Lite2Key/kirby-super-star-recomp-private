@@ -392,6 +392,9 @@ BootProbeResult run_boot_probe(
     // the S-CPU finishes a boundary-crossing block, but the SA-1 evidence must
     // still retain its exact 306900-master-clock contract.
     bool route_post_frame_active = false;
+    std::optional<MasterClock> route_first_message_poll_master;
+    std::optional<MasterClock> route_second_message_poll_master;
+    MasterClock route_message_poll_cadence_master = 0;
     // The first-frame SA-1 helper is deliberately limited to the proven
     // $8C58/$8C5B poll. Once the live route writes a negative shared value,
     // real hardware takes the BPL fall-through at $8C5B and continues through
@@ -570,6 +573,29 @@ BootProbeResult run_boot_probe(
         }
         return true;
     };
+    const auto record_route_message_polls = [&](
+        std::size_t access_start, MasterClock block_master_start) noexcept {
+        if (!route_only || !route_post_frame_active) return;
+        const auto accesses = timed_bus.timing_accesses();
+        if (access_start > accesses.size()) return;
+        auto cursor = block_master_start;
+        for (std::size_t index = access_start; index < accesses.size(); ++index) {
+            const auto& access = accesses[index];
+            const auto duration = snes_bus_cycle_master_clocks(
+                access.address, access.fast_rom_enabled);
+            if ((access.address & 0x00ff'ffffU) == 0x0000'2300U) {
+                if (!route_first_message_poll_master) {
+                    route_first_message_poll_master = cursor + duration;
+                } else if (!route_second_message_poll_master) {
+                    route_second_message_poll_master = cursor + duration;
+                    route_message_poll_cadence_master =
+                        *route_second_message_poll_master
+                        - *route_first_message_poll_master;
+                }
+            }
+            cursor += duration;
+        }
+    };
     const auto run_interleaved_until = [&](BlockKey checkpoint,
         std::size_t max_blocks, std::size_t minimum_blocks = 0U) noexcept {
         GeneratedRunResult run{};
@@ -612,6 +638,7 @@ BootProbeResult run_boot_probe(
                 run.status = GeneratedRunStatus::generated_block_failed_closed;
                 return run;
             }
+            record_route_message_polls(block_access_start, block_master_start);
             const auto block_master_end = clocks.ready_at(ClockDomain::scpu);
             if (!result.scpu_first_frame_boundary
                 && block_master_start <= kSnesFirstFrameMasterClock
@@ -836,6 +863,9 @@ BootProbeResult run_boot_probe(
     // the bounded route endpoint is still a useful causal observation.
     result.sa1_snes_message_latch = hardware_bus.sa1_control_state().snes_message;
     result.sa1_message_latch_summary = hardware_bus.sa1_message_latch_summary();
+    result.route_first_message_poll_master = route_first_message_poll_master;
+    result.route_second_message_poll_master = route_second_message_poll_master;
+    result.route_message_poll_cadence_master = route_message_poll_cadence_master;
 
     // The CC acknowledgement field above records the upload-start edge. The
     // port value exposed in the result is the final live latch, so route-only

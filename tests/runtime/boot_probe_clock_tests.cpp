@@ -62,6 +62,9 @@ void test_default_probe_uses_local_complete_scpu_stream() {
     assert(result.sa1_poll_value == 0x00U && result.apu_port0_output == 0xaaU);
     assert(result.sa1_snes_message_latch && *result.sa1_snes_message_latch == 0x00U);
     assert(result.sa1_message_latch_summary);
+    assert(!result.route_first_message_poll_master);
+    assert(!result.route_second_message_poll_master);
+    assert(result.route_message_poll_cadence_master == 0U);
     assert(result.scpu_master_ready > 0U && result.scpu_accesses_recorded > 0U);
     assert(result.sa1_frame_observation_start == 225694U);
     assert(result.sa1_frame_observation.status

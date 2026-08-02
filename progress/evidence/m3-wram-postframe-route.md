@@ -80,6 +80,16 @@ the prefix-24 endpoint while the Mesen witness remains at `76 / 8,721`.
 This points to pre-NMI polling and later route timing/control-flow drift, not a
 masking error in the `$2209` latch itself.
 
+The route now also exports two value-free `$2300` access-completion anchors.
+The static prefix-24 run completes its first two polls at master `27,742,810`
+and `27,742,862` (`+52` cadence); the corresponding Mesen witness completes
+them at `27,710,936` and `27,710,994` (`+58` cadence). The first-entry gap is
+therefore `31,874` master clocks and the second is `31,868`, shrinking by the
+six-master cadence difference. This separates a large pre-poll route-entry
+deficit from the steady-state poll cadence and is why the rejected `+6`
+taken-branch A/B cannot be treated as a complete fix. These are bus-derived
+access-completion anchors, not NMI service timestamps or raw event exports.
+
 This is a measured compact-route closure, not a gameplay-completion claim.
 The optional public latch snapshot is an endpoint observation only; it does not
 replace a transient event proof. The next proof is causal parity at the new
