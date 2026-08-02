@@ -830,6 +830,12 @@ BootProbeResult run_boot_probe(
         }
     }
 
+    // Capture the message-latch endpoint before the final post-route event
+    // scheduling pass. A full private NMI schedule may deliberately fail
+    // closed later with timing_debt when future signals remain; the latch at
+    // the bounded route endpoint is still a useful causal observation.
+    result.sa1_snes_message_latch = hardware_bus.sa1_control_state().snes_message;
+
     // The CC acknowledgement field above records the upload-start edge. The
     // port value exposed in the result is the final live latch, so route-only
     // diagnostics do not mistake that initial acknowledgement for the later

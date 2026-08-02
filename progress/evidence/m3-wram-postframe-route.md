@@ -34,6 +34,9 @@ checkpoint with no missing identity.
   this closes the current compact reset-to-visible corpus, not the whole game;
 - `4,096` pre-frame upload blocks are retained, both modeled CPUs remain live,
   and the final route endpoints are S-CPU `$00002C` and SA-1 `$00A6E7`;
+- the clean 24-edge prefix run records final SA-1 `$2209` message-latch state
+  `0`, so the S-CPU `$2300` poll at `$00002C` is waiting for a later causal
+  message edge rather than crashing or fabricating a ready value;
 - the minimum-prefix run returns `expected_frontier_reached` after processing
   `24` NMI edges. Supplying the complete `102`-edge schedule reaches the same
   inventory checkpoint and endpoint, then returns outer status `timing_debt`
@@ -50,7 +53,9 @@ checkpoint with no missing identity.
   and route traces remain ignored/private.
 
 This is a measured compact-route closure, not a gameplay-completion claim.
-The next proof is causal parity at the new `$00002C`/`$00A6E7` handoff:
+The optional public latch snapshot is an endpoint observation only; it does not
+replace a transient event proof. The next proof is causal parity at the new
+`$00002C`/`$00A6E7` handoff: a sanitized SA-1 `$2209` set/read/clear summary,
 ordered CPU/SA-1 micro-accesses, the remaining timestamped signal schedule,
 SPC acknowledgement timing, dynamic returns, and event-chain digests must
 still match before M3 can close.

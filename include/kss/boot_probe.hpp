@@ -138,6 +138,11 @@ struct BootProbeResult {
     std::size_t cpu_signals_processed{};
     std::optional<CpuAsyncResult> last_cpu_signal{};
     std::uint8_t sa1_poll_value{};
+    // Final SA-1 $2209 message-latch state at the bounded route endpoint.
+    // This is populated after first-frame/route execution; early fail-closed
+    // returns leave it disengaged so callers do not confuse an unobserved
+    // latch with a measured zero.
+    std::optional<std::uint8_t> sa1_snes_message_latch{};
     std::uint8_t apu_port0_output{};
     bool apu_cc_acknowledged{};
     BootProbeEventChainStatus event_chain_status{
