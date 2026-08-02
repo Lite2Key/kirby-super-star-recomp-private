@@ -28,6 +28,12 @@ proof. Its final live endpoints are S-CPU `$00002C` and SA-1 `$00A6E7`; the
 outer full-schedule probe reports explicit timing debt at that finite boundary.
 This closes the current reset-to-visible route corpus, not the whole game or
 its behavioral parity.
+The runtime now also exposes a value-free message-latch signature: the static
+prefix-24 route records 95 SA-1 `$2209` writes and 9,405 S-CPU `$2300` reads
+(`036824b1d673bf63`), while a separately seeded private Mesen witness at the
+same 24th-NMI clock neighborhood records 76 and 8,720 (`c9d5b52ab4d84ff1`).
+The signatures are deliberately treated as an open causal-parity gap until
+their boundary and ordering are reconciled.
 All 256 opcodes have
 architecture-tested execution semantics. With a runtime-only authentic IPL,
 the 254 runtime identities execute through the real SPC `$CC` acknowledgement

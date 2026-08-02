@@ -67,6 +67,11 @@ void test_sa1_control_and_reset_wait_release_effects() {
 
     write(bus, sa1, 0x002209, 0x0d);
     assert((bus.read8(scpu, 0x002300) & 0x0fU) == 0x0dU);
+    const auto message_summary = bus.sa1_message_latch_summary();
+    assert(message_summary.sa1_writes == 1U);
+    assert(message_summary.scpu_reads == 1U);
+    assert(message_summary.sequence_digest
+        != kss::Sa1MessageLatchSummary::kFnvOffsetBasis);
     write(bus, scpu, 0x002200, 0x8a);
     assert((bus.read8(sa1, 0x002301) & 0x8fU) == 0x8aU);
     write(bus, sa1, 0x00220b, 0x80);

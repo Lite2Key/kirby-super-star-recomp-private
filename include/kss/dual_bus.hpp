@@ -63,6 +63,7 @@ public:
     [[nodiscard]] std::span<const DmaPortWrite> dma_port_writes() const noexcept;
     [[nodiscard]] std::uint32_t wram_port_address() const noexcept;
     [[nodiscard]] const Sa1ControlState& sa1_control_state() const noexcept;
+    [[nodiscard]] Sa1MessageLatchSummary sa1_message_latch_summary() const noexcept;
     [[nodiscard]] const PpuFunctionalState& ppu_state() const noexcept;
     [[nodiscard]] std::span<const std::uint8_t> apu_input_ports() const noexcept;
     [[nodiscard]] std::span<const std::uint8_t> apu_output_ports() const noexcept;

@@ -282,6 +282,10 @@ const Sa1ControlState& RomBackedDualBus::sa1_control_state() const noexcept {
     return sa1_io_.state();
 }
 
+Sa1MessageLatchSummary RomBackedDualBus::sa1_message_latch_summary() const noexcept {
+    return sa1_io_.message_latch_summary();
+}
+
 const PpuFunctionalState& RomBackedDualBus::ppu_state() const noexcept {
     return snes_io_.ppu_state();
 }

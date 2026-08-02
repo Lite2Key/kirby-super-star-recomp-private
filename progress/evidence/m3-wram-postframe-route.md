@@ -52,13 +52,30 @@ checkpoint with no missing identity.
   no architectural state patched or rewound. Raw ROM, IPL, schedule, fixture,
   and route traces remain ignored/private.
 
+## Message-latch causal summary
+
+The route probe now exports a value-free summary of the message handoff: counts
+of SA-1 `$2209` writes, counts of S-CPU `$2300` reads, and an FNV-1a digest of
+the ordered four-bit values plus producer/consumer direction. It never exports
+the raw event stream. At the prefix-23 control boundary the static route has
+`94` writes and `9,400` reads (`e71e3383ca2592fb`); the decisive prefix-24
+handoff reaches `95` writes and `9,405` reads (`036824b1d673bf63`) at
+S-CPU `$00002C` / SA-1 `$00A6E7` with the final latch still `0`.
+
+A separate private Mesen witness, seeded from the same clean BWRAM fixture and
+cut at the corresponding 24th-NMI master-clock neighborhood, currently reports
+`76` writes and `8,720` reads with digest `c9d5b52ab4d84ff1`. These sanitized
+signatures are intentionally published as a parity target: they do not yet
+match, and the difference is the active causal-boundary investigation rather
+than a claim of transient parity.
+
 This is a measured compact-route closure, not a gameplay-completion claim.
 The optional public latch snapshot is an endpoint observation only; it does not
 replace a transient event proof. The next proof is causal parity at the new
-`$00002C`/`$00A6E7` handoff: a sanitized SA-1 `$2209` set/read/clear summary,
+`$00002C`/`$00A6E7` handoff: reconcile the two sanitized signatures, then close
 ordered CPU/SA-1 micro-accesses, the remaining timestamped signal schedule,
-SPC acknowledgement timing, dynamic returns, and event-chain digests must
-still match before M3 can close.
+SPC acknowledgement timing, dynamic returns, and event-chain digests before M3
+can close.
 
 ## Verification gates
 

@@ -8,6 +8,7 @@
 #include "kss/runtime_event_chain.hpp"
 #include "kss/sa1_frame_domain.hpp"
 #include "kss/scpu_access_boundary.hpp"
+#include "kss/sa1_registers.hpp"
 #include "kss/snes_frame_renderer.hpp"
 #include "kss/spc700.hpp"
 #include "kss/spc_exact_master.hpp"
@@ -143,6 +144,10 @@ struct BootProbeResult {
     // returns leave it disengaged so callers do not confuse an unobserved
     // latch with a measured zero.
     std::optional<std::uint8_t> sa1_snes_message_latch{};
+    // Value-free causal summary for SA-1 $2209 writes and S-CPU $2300 reads.
+    // The event stream remains private; only counts and an order digest leave
+    // the runtime boundary.
+    std::optional<Sa1MessageLatchSummary> sa1_message_latch_summary{};
     std::uint8_t apu_port0_output{};
     bool apu_cc_acknowledged{};
     BootProbeEventChainStatus event_chain_status{

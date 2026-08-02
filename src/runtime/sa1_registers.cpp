@@ -1,10 +1,13 @@
 #include "kss/sa1_registers.hpp"
 
+#include <cstdio>
+
 namespace kss {
 
 std::uint8_t Sa1RegisterFile::read(
     ProcessorId processor, std::uint16_t address, std::uint8_t open_bus) const noexcept {
     if (processor == ProcessorId::snes_cpu && address == 0x2300U) {
+        record_message_event(false, state_.snes_message);
         return state_.snes_message;
     }
     if (processor == ProcessorId::sa1 && address == 0x2301U) {
@@ -46,7 +49,10 @@ void Sa1RegisterFile::write(
         }
     } else {
         switch (address) {
-        case 0x2209: state_.snes_message = static_cast<std::uint8_t>(value & 0x0fU); break;
+        case 0x2209:
+            state_.snes_message = static_cast<std::uint8_t>(value & 0x0fU);
+            record_message_event(true, state_.snes_message);
+            break;
         case 0x220a: break; // enables are latched, but timing/interrupt delivery is not modeled here
         case 0x220b:
             if ((value & 0x80U) != 0U) state_.irq_requested = false;
@@ -67,5 +73,27 @@ bool Sa1RegisterFile::iram_write_enabled(
 }
 
 const Sa1ControlState& Sa1RegisterFile::state() const noexcept { return state_; }
+
+Sa1MessageLatchSummary Sa1RegisterFile::message_latch_summary() const noexcept {
+    return message_latch_summary_;
+}
+
+void Sa1RegisterFile::record_message_event(
+    bool sa1_write, std::uint8_t value) const noexcept {
+    if (sa1_write) {
+        ++message_latch_summary_.sa1_writes;
+    } else {
+        ++message_latch_summary_.scpu_reads;
+    }
+    const auto token = static_cast<std::uint8_t>(
+        (sa1_write ? 0x80U : 0U) | (value & 0x0fU));
+#if defined(KSS_MESSAGE_DEBUG_TRACE)
+    static std::uint32_t debug_index = 0;
+    std::fprintf(stderr, "KSS_STATIC_MESSAGE|%u|%c|%02X\n",
+        debug_index++, sa1_write ? 'W' : 'R', token);
+#endif
+    message_latch_summary_.sequence_digest ^= token;
+    message_latch_summary_.sequence_digest *= 1099511628211ULL;
+}
 
 } // namespace kss
