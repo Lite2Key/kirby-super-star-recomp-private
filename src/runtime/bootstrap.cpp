@@ -229,8 +229,8 @@ BootstrapExitCode run_bootstrap(
         errors << "Translated boot probe stopped before the expected development frontier\n";
     }
     if (!options.frame_output.empty()) {
-        if (probe.frame.status != FrameRenderStatus::rendered
-            || SnesFrameRenderer::write_bmp(probe.frame.frame, options.frame_output)
+        if (probe.first_frame.status != FrameRenderStatus::rendered
+            || SnesFrameRenderer::write_bmp(probe.first_frame.frame, options.frame_output)
                 != FrameWriteStatus::written) {
             errors << "Native first-frame surface could not be written\n";
         } else {

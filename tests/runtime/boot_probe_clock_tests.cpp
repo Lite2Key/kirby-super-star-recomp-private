@@ -191,6 +191,9 @@ void test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary() {
         == kss::GeneratedRunStatus::checkpoint_reached);
     assert(result.scpu_frame_observation.completed_blocks > 0U);
     assert(result.live_domains_reached_first_frame);
+    assert(result.first_frame_ppu_state);
+    assert(result.first_frame.status == kss::FrameRenderStatus::rendered);
+    assert(result.first_frame.frame.valid());
     assert(result.scpu_master_ready >= kss::kSnesFirstFrameMasterClock);
     assert(result.spc_master_ready >= kss::kSnesFirstFrameMasterClock);
     assert(result.scpu_first_frame_boundary);

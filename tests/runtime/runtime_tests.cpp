@@ -173,6 +173,9 @@ void test_translated_boot_probe_reaches_explicit_frontier() {
     assert(result.reset_domains_interleaved);
     assert(result.scpu.address() == 0x00d68eU);
     assert(result.sa1.address() == 0x008c58U);
+    assert(result.first_frame_ppu_state);
+    assert(result.first_frame.status == kss::FrameRenderStatus::rendered);
+    assert(result.first_frame.frame.valid());
     assert(result.frame.status == kss::FrameRenderStatus::rendered);
     assert(result.frame.frame.width == 256U && result.frame.frame.height == 239U);
     assert(result.frame.frame.valid());

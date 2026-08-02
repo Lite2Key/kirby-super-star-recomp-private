@@ -22,6 +22,17 @@ struct PpuFunctionalState {
     std::uint16_t bg3_hscroll{};
     std::uint16_t bg3_vscroll{};
     std::uint16_t fixed_color{};
+    // Mode 7 uses write-twice 16-bit registers. These raw values preserve the
+    // hardware's two's-complement bit patterns; the renderer applies the
+    // mode-specific signed/fixed-point interpretation at sample time.
+    std::uint16_t mode7_a{};
+    std::uint16_t mode7_b{};
+    std::uint16_t mode7_c{};
+    std::uint16_t mode7_d{};
+    std::uint16_t mode7_center_x{};
+    std::uint16_t mode7_center_y{};
+    std::uint16_t mode7_hofs{};
+    std::uint16_t mode7_vofs{};
     // Renderer-visible state is owned here so a render depends only on one
     // self-contained functional snapshot, never on the register file or bus.
     std::array<std::uint8_t, 0x10000> vram{};
@@ -62,6 +73,7 @@ private:
     PpuFunctionalState ppu_{};
     bool cgram_high_{};
     std::uint8_t bg_scroll_latch_{};
+    std::uint8_t mode7_latch_{};
     std::uint16_t oam_address_{};
     std::uint8_t oam_write_latch_{};
     SnesControllerPorts controllers_{};

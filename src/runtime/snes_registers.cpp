@@ -109,15 +109,51 @@ void SnesRegisterFile::write(std::uint16_t address, std::uint8_t value) noexcept
             ppu_.fixed_color = static_cast<std::uint16_t>((ppu_.fixed_color & ~0x7c00U) | (component << 10U));
         break;
     }
+    case 0x211b:
+        ppu_.mode7_a = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
+        mode7_latch_ = value;
+        break;
+    case 0x211c:
+        ppu_.mode7_b = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
+        mode7_latch_ = value;
+        break;
+    case 0x211d:
+        ppu_.mode7_c = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
+        mode7_latch_ = value;
+        break;
+    case 0x211e:
+        ppu_.mode7_d = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
+        mode7_latch_ = value;
+        break;
+    case 0x211f:
+        ppu_.mode7_center_x = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
+        mode7_latch_ = value;
+        break;
+    case 0x2120:
+        ppu_.mode7_center_y = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
+        mode7_latch_ = value;
+        break;
     case 0x210d: // BG1HOFS: shared latch, including the three retained fine-scroll bits.
         ppu_.bg1_hscroll = static_cast<std::uint16_t>((static_cast<std::uint16_t>(value) << 8U)
             | (bg_scroll_latch_ & 0xf8U) | ((ppu_.bg1_hscroll >> 8U) & 0x07U));
+        ppu_.mode7_hofs = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
         bg_scroll_latch_ = value;
+        mode7_latch_ = value;
         break;
     case 0x210e: // BG1VOFS
         ppu_.bg1_vscroll = static_cast<std::uint16_t>(
             (static_cast<std::uint16_t>(value) << 8U) | bg_scroll_latch_);
+        ppu_.mode7_vofs = static_cast<std::uint16_t>(
+            (static_cast<std::uint16_t>(value) << 8U) | mode7_latch_);
         bg_scroll_latch_ = value;
+        mode7_latch_ = value;
         break;
     case 0x210f: // BG2HOFS
         ppu_.bg2_hscroll = static_cast<std::uint16_t>((static_cast<std::uint16_t>(value) << 8U)

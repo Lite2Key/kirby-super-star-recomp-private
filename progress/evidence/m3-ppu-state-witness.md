@@ -7,10 +7,17 @@ are committed here.
 
 ## Endpoint state
 
-The route-only prefix-24 probe now carries a runtime-only copy of the final
-functional PPU snapshot alongside the render result. That separates an absent
-video payload from a renderer limitation without widening the public artifact
-boundary.
+The route-only prefix-24 probe now carries two runtime-only copies: one at the
+exact first-frame boundary, and one at the final bounded route endpoint. The
+first snapshot is captured before route continuation, so the native
+"first-frame" surface cannot silently become a later diagnostic state. The
+endpoint snapshot still separates an absent video payload from a renderer
+limitation without widening the public artifact boundary.
+
+The exact first-frame boundary remains the forced-blank event at master clock
+`306,900`; its public render is therefore an intentionally black, valid frame.
+The later endpoint is the populated Mode 7 witness described below and is not
+being presented as first-frame parity.
 
 - `ppu_present=1`: the route reached a populated functional PPU snapshot.
 - `forced_blank=0`, brightness `1`: the endpoint is not the reset/forced-blank
@@ -20,14 +27,19 @@ boundary.
 - Main-screen latches: `$212C=11`, `$212D=00`, `$212E=00`, `$212F=00`.
 - Non-zero private payload counts: `15,144` VRAM bytes, `314` CGRAM bytes,
   and `128` OAM bytes.
-- The renderer therefore reports `unsupported_visible_mode` rather than
-  silently returning a black frame. This is an honest visual blocker, not a
-  missing-state diagnosis.
+- The bounded renderer now has a synthetic-tested Mode 7 BG1 path, including
+  interleaved map/pixel addressing, signed 13-bit offsets, matrix truncation,
+  and the `$211A` wrap/fill modes. The full route still reports
+  `unsupported_feature` because `$212C=11` enables OBJ and the endpoint's
+  sprite-limit chronology is not yet proven. That is an honest remaining
+  composition blocker, not a missing-state diagnosis; a private BG1-only
+  preview is used only for inspection and is not parity evidence.
 
 The private state dump also confirms that the final register stream includes
 Mode 7 matrix/center-register writes. The current public snapshot retains the
-raw PPU register latches for evidence, while exact transient write ordering and
-Mode 7 latch semantics remain a separate parity task.
+raw PPU register latches for evidence. Mode 7 write-twice latch semantics are
+now implemented and synthetic-tested; exact transient write ordering and
+later visible-frame timing remain separate parity tasks.
 
 ## Boundary interpretation
 
@@ -46,15 +58,16 @@ state, but it does not prove causal pixel parity at that later boundary.
 
 ## Next bounded proof
 
-The next safe step is to preserve the public state witness and add exact Mode 7
-register-latch semantics plus a private exploratory renderer. Only after that
-surface is covered by synthetic tests and a causal route witness will it be
-promoted to the visible-frame milestone. No private image payload is a release
-artifact.
+The next safe step is to preserve the public state witness and close Mode 7
+composition around the enabled OBJ path, then extend the route witness to the
+later visible boundary. Only after that surface is covered by synthetic tests
+and a causal route witness will it be promoted to the visible-frame milestone.
+No private image payload is a release artifact.
 
 ## Verification gates
 
-- Public Windows native build: passed after adding the optional PPU snapshot.
+- Public Windows native build: passed after adding the exact first-frame
+  PPU snapshot/render pair and bounded Mode 7 path.
 - Public Windows native suite: `25 / 25` passed.
 - Private generated Windows suite: `25 / 25` passed.
-- Python suite before this evidence-only update: `227 passed`.
+- Python suite: `227 passed`.

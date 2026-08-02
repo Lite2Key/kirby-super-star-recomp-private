@@ -122,6 +122,25 @@ void test_apu_boot_ports_and_ppu_storage_effects() {
     write(bus, scpu, 0x002132, 0x40); // green=0
     write(bus, scpu, 0x002132, 0x9f); // blue=31
     assert(bus.ppu_state().fixed_color == 0x7c1f);
+
+    // Mode 7 matrix/center/offset registers are write-twice, low byte first,
+    // and share their latch across the Mode 7 register family and BG1 scroll.
+    write(bus, scpu, 0x00210d, 0x34); write(bus, scpu, 0x00210d, 0x12);
+    write(bus, scpu, 0x00210e, 0x78); write(bus, scpu, 0x00210e, 0x56);
+    assert(bus.ppu_state().mode7_hofs == 0x1234);
+    assert(bus.ppu_state().mode7_vofs == 0x5678);
+    write(bus, scpu, 0x00211b, 0x00); write(bus, scpu, 0x00211b, 0xff);
+    write(bus, scpu, 0x00211c, 0x00); write(bus, scpu, 0x00211c, 0x01);
+    write(bus, scpu, 0x00211d, 0x00); write(bus, scpu, 0x00211d, 0xff);
+    write(bus, scpu, 0x00211e, 0x00); write(bus, scpu, 0x00211e, 0x01);
+    write(bus, scpu, 0x00211f, 0x00); write(bus, scpu, 0x00211f, 0x20);
+    write(bus, scpu, 0x002120, 0x00); write(bus, scpu, 0x002120, 0x30);
+    assert(bus.ppu_state().mode7_a == 0xff00);
+    assert(bus.ppu_state().mode7_b == 0x0100);
+    assert(bus.ppu_state().mode7_c == 0xff00);
+    assert(bus.ppu_state().mode7_d == 0x0100);
+    assert(bus.ppu_state().mode7_center_x == 0x2000);
+    assert(bus.ppu_state().mode7_center_y == 0x3000);
 }
 
 void test_first_end_frame_forced_blank_surface() {
@@ -188,6 +207,63 @@ kss::PpuFunctionalState synthetic_mode1() {
     set_color(state, 49, 0x001f); // palette 3 color 1: red
     set_color(state, 50, 0x03e0); // palette 3 color 2: green
     return state;
+}
+
+kss::PpuFunctionalState synthetic_mode7() {
+    kss::PpuFunctionalState state;
+    state.brightness = 15;
+    state.registers[0x05] = 0x07; // Mode 7.
+    state.registers[0x1a] = 0x00; // Wrap, no flip.
+    state.registers[0x2c] = 0x01; // BG1 main screen.
+    state.mode7_a = 0x0100;       // Identity matrix.
+    state.mode7_d = 0x0100;
+    state.mode7_b = 0;
+    state.mode7_c = 0;
+    state.mode7_center_x = 0;
+    state.mode7_center_y = 0;
+    state.mode7_hofs = 0;
+    state.mode7_vofs = 0;
+
+    // Mode 7 stores the 128x128 map in even VRAM bytes and chunky 8bpp tile
+    // data in the interleaved odd bytes. Map tile 1 covers the first 8x8
+    // sample region; the first source pixel is palette index 3.
+    state.vram[0] = 1;
+    state.vram[2] = 1;
+    state.vram[1U + 64U * 2U + 16U] = 3;
+    set_color(state, 3, 0x001f); // red
+    return state;
+}
+
+void test_mode7_identity_and_interleaved_vram() {
+    auto state = synthetic_mode7();
+    auto result = kss::SnesFrameRenderer::render(state);
+    assert(result.status == kss::FrameRenderStatus::rendered && result.frame.valid());
+    assert((pixel(result.frame,0,0) == std::array<std::uint8_t,4>{255,0,0,255}));
+
+    // A transparent Mode 7 source pixel falls back to backdrop color 0.
+    state.vram[1U + 64U * 2U + 16U] = 0;
+    result = kss::SnesFrameRenderer::render(state);
+    assert((pixel(result.frame,0,0) == std::array<std::uint8_t,4>{0,0,0,255}));
+
+    // +512 is a valid positive 10-bit source coordinate. A sign test on bit
+    // 9 would incorrectly turn it into -512 before the Mode 7 sample.
+    state = synthetic_mode7();
+    state.mode7_hofs = 0x0200;
+    state.vram[128] = 2; // source x=512, tile x=64 in the 128x128 map.
+    state.vram[1U + 64U * 2U * 2U + 16U] = 4;
+    set_color(state, 4, 0x03e0); // green
+    result = kss::SnesFrameRenderer::render(state);
+    assert((pixel(result.frame,0,0) == std::array<std::uint8_t,4>{0,255,0,255}));
+
+    // Fill mode uses tile 0 outside the 1024x1024 surface; transparent fill
+    // leaves the backdrop visible instead.
+    state = synthetic_mode7(); state.registers[0x1a] = 0x80;
+    state.mode7_hofs = 0x1fff; // signed -1, forcing an outside sample at x=0.
+    result = kss::SnesFrameRenderer::render(state);
+    assert(result.status == kss::FrameRenderStatus::rendered);
+    state.registers[0x1a] = 0xc0;
+    result = kss::SnesFrameRenderer::render(state);
+    assert(result.status == kss::FrameRenderStatus::rendered);
 }
 
 void test_synthetic_mode1_bg1_tiles_palette_transparency_and_scroll() {
@@ -590,6 +666,7 @@ int main() {
     test_sa1_control_and_reset_wait_release_effects();
     test_apu_boot_ports_and_ppu_storage_effects();
     test_first_end_frame_forced_blank_surface();
+    test_mode7_identity_and_interleaved_vram();
     test_synthetic_mode1_bg1_tiles_palette_transparency_and_scroll();
     test_mode1_backdrop_and_fail_closed_features();
     test_mode1_bg2_bg3_palette_bases_scroll_flips_and_priority();

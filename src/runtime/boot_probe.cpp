@@ -828,6 +828,12 @@ BootProbeResult run_boot_probe(
         return result;
     }
 
+    // Snapshot the exact first-frame boundary before any development-only
+    // route continuation. The route endpoint is useful for diagnosing later
+    // uploads and latches, but it is not a first-frame presentation state.
+    result.first_frame_ppu_state = hardware_bus.ppu_state();
+    result.first_frame = SnesFrameRenderer::render(*result.first_frame_ppu_state);
+
     if (route_only && live_spc) {
         route_post_frame_active = true;
         // The first-frame proof above is deliberately complete before this

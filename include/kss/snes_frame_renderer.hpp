@@ -44,9 +44,10 @@ struct FrameRenderResult {
     RgbaFrame frame;
 };
 
-// Deterministic functional renderer for forced blank and Mode 1 BG/OBJ
-// main/subscreen composition, windows, color math, large maps/tiles and
-// per-BG mosaic. Interlace, overscan and pseudo-hires fail closed.
+// Deterministic functional renderer for forced blank, Mode 1 BG/OBJ and the
+// bounded Mode 7 BG1 path. Mode 1 supports main/subscreen composition,
+// windows, color math, large maps/tiles and per-BG mosaic. Interlace,
+// overscan, pseudo-hires and unsupported Mode 7 extensions fail closed.
 class SnesFrameRenderer {
 public:
     [[nodiscard]] static FrameRenderResult render(const PpuFunctionalState& state) {
@@ -63,19 +64,99 @@ public:
         if (state.forced_blank) { fill(0, 0, 0); return {FrameRenderStatus::rendered, std::move(frame)}; }
 
         const auto& r = state.registers;
-        if ((r[0x05] & 0x07U) != 1U) return {};
+        const auto mode = static_cast<std::uint8_t>(r[0x05] & 0x07U);
+        if (mode != 1U && mode != 7U) return {};
         // BG4 and special scan modes are deferred. BGMODE bit 3 is
-        // supported: it raises high-priority BG3 tiles above BG1/BG2.
-        if ((r[0x05] & 0x80U) != 0U
-            || (r[0x06] & 0x80U) != 0U || r[0x33] != 0U
-            || ((r[0x2c] | r[0x2d] | r[0x2e] | r[0x2f]) & 0x08U) != 0U
-            || (r[0x0b] & 0x88U) != 0U || (r[0x0c] & 0x88U) != 0U) {
+        // supported for Mode 1: it raises high-priority BG3 tiles above
+        // BG1/BG2. Mode 7's tile-size/name-base bits are ignored by hardware.
+        if ((mode == 1U && ((r[0x05] & 0x80U) != 0U
+                || (r[0x06] & 0x80U) != 0U
+                || ((r[0x2c] | r[0x2d] | r[0x2e] | r[0x2f]) & 0x08U) != 0U
+                || (r[0x0b] & 0x88U) != 0U || (r[0x0c] & 0x88U) != 0U))
+            || r[0x33] != 0U
+            || (mode == 7U && ((r[0x06] & 0x80U) != 0U
+                || (r[0x30] & 0x01U) != 0U
+                || (r[0x2c] & 0x06U) != 0U
+                || (r[0x2d] & 0x06U) != 0U))) {
             return {FrameRenderStatus::unsupported_feature, {}};
         }
         const auto raw_color = [&state](std::uint8_t index) {
             const auto address = static_cast<std::size_t>(index) * 2U;
             return static_cast<std::uint16_t>(state.cgram[address]
                 | (static_cast<std::uint16_t>(state.cgram[address + 1U]) << 8U));
+        };
+        const auto mode7_pixel = [&state, &r](
+            std::uint16_t screen_x, std::uint16_t screen_y) -> std::uint8_t {
+            const auto sign_extend_13 = [](std::uint16_t raw) {
+                const auto value = static_cast<std::int32_t>(raw & 0x1fffU);
+                return (value & 0x1000) != 0 ? value - 0x2000 : value;
+            };
+            const auto clip_10_signed = [](std::int32_t value) {
+                return (value & 0x2000) != 0
+                    ? value | ~0x3ff : value & 0x3ff;
+            };
+            const auto matrix_a = static_cast<std::int32_t>(
+                static_cast<std::int16_t>(state.mode7_a));
+            const auto matrix_b = static_cast<std::int32_t>(
+                static_cast<std::int16_t>(state.mode7_b));
+            const auto matrix_c = static_cast<std::int32_t>(
+                static_cast<std::int16_t>(state.mode7_c));
+            const auto matrix_d = static_cast<std::int32_t>(
+                static_cast<std::int16_t>(state.mode7_d));
+            const auto center_x = sign_extend_13(state.mode7_center_x);
+            const auto center_y = sign_extend_13(state.mode7_center_y);
+            const auto hofs = sign_extend_13(state.mode7_hofs);
+            const auto vofs = sign_extend_13(state.mode7_vofs);
+            const auto select = r[0x1a];
+            const auto repeat = static_cast<std::uint8_t>(select >> 6U) == 1U
+                ? 0U : static_cast<std::uint8_t>(select >> 6U);
+            const auto start_y = (select & 0x02U) != 0U
+                ? 255 - (static_cast<std::int32_t>(screen_y) + 1)
+                : static_cast<std::int32_t>(screen_y) + 1;
+            const auto screen_coordinate_x = (select & 0x01U) != 0U
+                ? 255 - static_cast<std::int32_t>(screen_x)
+                : static_cast<std::int32_t>(screen_x);
+            const auto yy = clip_10_signed(vofs - center_y);
+            const auto xx = clip_10_signed(hofs - center_x);
+            const auto bb = ((matrix_b * start_y) & ~63)
+                + ((matrix_b * yy) & ~63) + center_x * 256;
+            const auto dd = ((matrix_d * start_y) & ~63)
+                + ((matrix_d * yy) & ~63) + center_y * 256;
+            const auto aa = matrix_a * screen_coordinate_x
+                + ((matrix_a * xx) & ~63);
+            const auto cc = matrix_c * screen_coordinate_x
+                + ((matrix_c * xx) & ~63);
+            auto source_x = static_cast<std::int32_t>((aa + bb) >> 8U);
+            auto source_y = static_cast<std::int32_t>((cc + dd) >> 8U);
+            const auto outside = [source_x, source_y] {
+                return ((source_x | source_y) & ~0x3ff) != 0;
+            };
+            std::uint16_t map_address{};
+            std::uint16_t pixel_address{};
+            if (repeat == 0U) {
+                source_x &= 0x3ff;
+                source_y &= 0x3ff;
+                map_address = static_cast<std::uint16_t>(
+                    ((source_y & ~7) << 5) + ((source_x >> 2) & ~1));
+                const auto tile = state.vram[map_address];
+                pixel_address = static_cast<std::uint16_t>(1U
+                    + static_cast<std::uint16_t>(tile) * 128U
+                    + ((source_y & 7) << 4) + ((source_x & 7) << 1));
+            } else if (!outside()) {
+                map_address = static_cast<std::uint16_t>(
+                    ((source_y & ~7) << 5) + ((source_x >> 2) & ~1));
+                const auto tile = state.vram[map_address];
+                pixel_address = static_cast<std::uint16_t>(1U
+                    + static_cast<std::uint16_t>(tile) * 128U
+                    + ((source_y & 7) << 4) + ((source_x & 7) << 1));
+            } else if (repeat == 3U) {
+                // Repeat mode 3 fills outside the 1024x1024 map from tile 0.
+                pixel_address = static_cast<std::uint16_t>(1U
+                    + ((source_y & 7) << 4) + ((source_x & 7) << 1));
+            } else {
+                return 0;
+            }
+            return state.vram[pixel_address];
         };
         const auto color = [&state](std::uint16_t raw) {
             const auto scale = [brightness = state.brightness](std::uint8_t component) {
@@ -96,8 +177,14 @@ public:
             std::uint8_t source{}; // BG1-3=0-2, OBJ1=3, OBJ2=4, backdrop/fixed=5.
             bool opaque{};
         };
-        const auto layer_pixel = [&state, &r, &raw_color](std::uint8_t layer,
+        const auto layer_pixel = [&state, &r, &raw_color, &mode7_pixel, mode](std::uint8_t layer,
             std::uint16_t screen_x, std::uint16_t screen_y) -> LayerPixel {
+            if (mode == 7U) {
+                if (layer != 0U) return {};
+                const auto index = mode7_pixel(screen_x, screen_y);
+                if (index == 0U) return {};
+                return {raw_color(index), 6U, 0U, true};
+            }
             const std::array<std::uint16_t,3> hscroll{
                 state.bg1_hscroll,state.bg2_hscroll,state.bg3_hscroll};
             const std::array<std::uint16_t,3> vscroll{
