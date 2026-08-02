@@ -115,10 +115,9 @@ struct BootProbeResult {
     std::optional<SpcExactAdvanceResult> spc_first_frame_boundary{};
     CpuContext scpu{};
     CpuContext sa1{};
-    // Runtime-only PPU snapshot at the exact first-frame boundary. This is
-    // intentionally captured before any opt-in route continuation so the
-    // native "first-frame" surface cannot silently become a later endpoint.
-    std::optional<PpuFunctionalState> first_frame_ppu_state{};
+    // Runtime-only render at the exact first-frame boundary. The source PPU
+    // snapshot is intentionally kept local so the result remains bounded;
+    // this surface cannot silently become a later route endpoint.
     FrameRenderResult first_frame{};
     // Runtime-only final PPU snapshot for bounded diagnostics. This is kept
     // separate from the first-frame render so a route probe can distinguish

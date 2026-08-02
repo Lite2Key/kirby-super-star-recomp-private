@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-02T04:50:03Z",
-    "commit": "e3ed2a52755580a7f54bccafafc1e7797db01209",
+    "generated_at": "2026-08-02T04:56:08Z",
+    "commit": "8e8c49117664536e36dbf34437dbce8dfee031fb",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -65,7 +65,7 @@
         },
         {
           "id": "m3.ppu-state-witness",
-          "label": "Bounded PPU state witness and exact first-frame capture",
+          "label": "Bounded PPU state witness and exact first-frame render",
           "path": "progress/evidence/m3-ppu-state-witness.md"
         },
         {

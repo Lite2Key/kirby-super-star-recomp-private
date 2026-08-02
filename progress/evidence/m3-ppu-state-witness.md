@@ -7,12 +7,12 @@ are committed here.
 
 ## Endpoint state
 
-The route-only prefix-24 probe now carries two runtime-only copies: one at the
-exact first-frame boundary, and one at the final bounded route endpoint. The
-first snapshot is captured before route continuation, so the native
-"first-frame" surface cannot silently become a later diagnostic state. The
-endpoint snapshot still separates an absent video payload from a renderer
-limitation without widening the public artifact boundary.
+The route-only prefix-24 probe now carries an exact first-frame render and a
+separate runtime-only final route snapshot. The first-frame source state is
+captured before route continuation, so the native "first-frame" surface cannot
+silently become a later diagnostic state. The endpoint snapshot still
+separates an absent video payload from a renderer limitation without widening
+the public artifact boundary.
 
 The exact first-frame boundary remains the forced-blank event at master clock
 `306,900`; its public render is therefore an intentionally black, valid frame.
@@ -67,7 +67,7 @@ No private image payload is a release artifact.
 ## Verification gates
 
 - Public Windows native build: passed after adding the exact first-frame
-  PPU snapshot/render pair and bounded Mode 7 path.
+  render and bounded Mode 7 path.
 - Public Windows native suite: `25 / 25` passed.
 - Private generated Windows suite: `25 / 25` passed.
 - Python suite: `227 passed`.

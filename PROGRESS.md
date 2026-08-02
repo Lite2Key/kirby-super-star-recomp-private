@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-08-02T04:08:22Z` | commit `cd5b1186536a0abce313ad18b924e37c82014334` | tree `clean`
+Snapshot: `2026-08-02T04:56:08Z` | commit `8e8c49117664536e36dbf34437dbce8dfee031fb` | tree `dirty`
 
 ## Milestone map
 
@@ -61,6 +61,7 @@ Snapshot: `2026-08-02T04:08:22Z` | commit `cd5b1186536a0abce313ad18b924e37c82014
 - `m3.first-frame-frontier` [First-frame oracle, generated frontier, and reset DMA proof](progress/evidence/m3-first-frame-frontier.md)
 - `m3.first-visible-route` [Compact first-visible route and repeat-stable visual oracle](analysis/coverage/first-visible-route-coverage.json)
 - `m3.local-verification` [227 Python and 25 native tests](progress/evidence/m3-cpu-hardware-runtime.md)
+- `m3.ppu-state-witness` [Bounded PPU state witness and exact first-frame render](progress/evidence/m3-ppu-state-witness.md)
 - `m3.wram-postframe-route` [Private WRAM witness closure and bounded post-frame route probe](progress/evidence/m3-wram-postframe-route.md)
 - `recompiler.opcode-matrix` [Complete opcode metadata tests](progress/evidence/recompiler-tests.md)
 - `runtime.rom-validation` [External ROM identity validation](progress/evidence/rom-validation.md)
