@@ -101,6 +101,15 @@ than a claim that the two timestamps are identical hardware phases. It places
 the large deficit at the upstream SA-1/S-CPU handoff, before the steady-state
 branch cadence.
 
+Two additional private-only scoped A/Bs bracketed that rejected result. Adding
+`+4` master clocks to the taken `$0017` poll branch preserved endpoint `$A6E7`
+and reduced the static summary to `95 / 8,740` with digest
+`df2e09856381b4a1`, but its measured cadence was still `+56` and the digest
+did not match Mesen. Adding `+5` produced `95 / 8,585` with digest
+`cdc199690daee9b7`, cadence `+57`, and moved the endpoint to `$A6E6`. Both
+experiments were removed and rejected; they show that count convergence alone
+is not a safe timing model.
+
 This is a measured compact-route closure, not a gameplay-completion claim.
 The optional public latch snapshot is an endpoint observation only; it does not
 replace a transient event proof. The next proof is causal parity at the new
