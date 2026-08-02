@@ -117,6 +117,12 @@ Mesen ordering hypothesis. It produced the same `2,273 / 2,273` endpoint,
 cadence as the baseline. The hold was therefore removed: the remaining drift
 is not explained by that single release-versus-first-poll ordering seam.
 
+Repeating the experiment at the narrower `$89FB` boundary without charging any
+synthetic wait was also an exact baseline match (`95 / 9,405`, digest
+`036824b1d673bf63`, endpoint `$00A6E7`). That makes the result explicitly
+ordering-neutral: changing only the dispatch point does not move the public
+route signature.
+
 A narrower private-only A/B then held immediately before the `$89FB` `STZ
 $3010` and inserted the evidence-bound 18-master-clock pre-write wait (so the
 8-master-clock instruction completion would land 26 clocks after the first

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-02T04:02:46Z",
-    "commit": "85045d098f0f687dd03cde74aaa4bbcca5cd00e2",
+    "generated_at": "2026-08-02T04:04:24Z",
+    "commit": "a82acf1ad16d1e983a6674b93b30d21367e860a6",
     "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -1423,6 +1423,11 @@
       "route_probe_release_hold_ab_sequence_digest": "036824b1d673bf63",
       "route_probe_release_hold_ab_cadence_master": 52,
       "route_probe_release_hold_ab_rejected": 1,
+      "route_probe_release_write_order_ab_writes": 95,
+      "route_probe_release_write_order_ab_reads": 9405,
+      "route_probe_release_write_order_ab_sequence_digest": "036824b1d673bf63",
+      "route_probe_release_write_order_ab_sa1_endpoint": "00A6E7",
+      "route_probe_release_write_order_ab_rejected": 1,
       "route_probe_release_write_align_ab_writes": 95,
       "route_probe_release_write_align_ab_reads": 9408,
       "route_probe_release_write_align_ab_sequence_digest": "a6d1b234569d0fcd",
