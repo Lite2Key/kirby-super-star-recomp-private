@@ -110,6 +110,13 @@ did not match Mesen. Adding `+5` produced `95 / 8,585` with digest
 experiments were removed and rejected; they show that count convergence alone
 is not a safe timing model.
 
+A third private-only A/B held the released SA-1 at the `$8C5B` whole-instruction
+boundary until the first static `$2300` poll completion, matching the observed
+Mesen ordering hypothesis. It produced the same `2,273 / 2,273` endpoint,
+`95 / 9,405` message summary, digest `036824b1d673bf63`, and `+52` poll
+cadence as the baseline. The hold was therefore removed: the remaining drift
+is not explained by that single release-versus-first-poll ordering seam.
+
 This is a measured compact-route closure, not a gameplay-completion claim.
 The optional public latch snapshot is an endpoint observation only; it does not
 replace a transient event proof. The next proof is causal parity at the new

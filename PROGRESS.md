@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-08-02T03:50:51Z` | commit `b5078d768a16a8224457019d3c0d8f524b31493a` | tree `clean`
+Snapshot: `2026-08-02T03:58:31Z` | commit `9a0b6ec48040aef6d609f3a81f891b9870ce5137` | tree `dirty`
 
 ## Milestone map
 
