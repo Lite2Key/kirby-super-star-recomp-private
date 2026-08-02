@@ -387,6 +387,33 @@ void test_post_frame_cpu_signal_is_timing_debt_without_execution() {
     assert(result.cpu_signals_processed == 0U && !result.last_cpu_signal);
 }
 
+void test_route_only_consumes_post_frame_cpu_signal_at_boundary() {
+    const auto rom = synthetic_upload_rom();
+    const auto ipl = ipl_with({
+        0xe8, 0xaa, 0xc4, 0xf4,
+        0xe8, 0xbb, 0xc4, 0xf5,
+        0xe4, 0xf4, 0x68, 0xcc, 0xd0, 0xfa,
+        0xc4, 0xf4,
+        0xe4, 0xf4, 0xc4, 0xf4, 0x2f, 0xfa,
+    });
+    constexpr std::array signals{
+        kss::BootProbeCpuSignal{kss::kSnesFirstFrameMasterClock + 1U,
+            kss::CpuAsyncSignal::nmi},
+    };
+    kss::BootProbeTimingEvidence evidence{ipl, {}, signals};
+    evidence.continue_route_after_first_frame = true;
+    evidence.post_frame_route_block_budget = 1U;
+    const auto result = kss::run_boot_probe(rom, evidence);
+    assert(result.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(result.cpu_signals_processed == 1U && result.last_cpu_signal);
+    assert(result.last_cpu_signal->status == kss::CpuAsyncStatus::serviced);
+    // The synthetic ROM has a zero native NMI vector, so the first post-frame
+    // dispatch fails closed after proving that the signal itself was applied.
+    assert(result.post_frame_route_observation.status
+        == kss::GeneratedRunStatus::unknown_block);
+    assert(result.scpu.address() == 0U);
+}
+
 } // namespace
 
 int main() {
@@ -405,4 +432,5 @@ int main() {
     test_post_frame_spc_phase_is_timing_debt_without_execution();
     test_opt_in_cpu_signal_is_applied_before_same_timestamp_frame();
     test_post_frame_cpu_signal_is_timing_debt_without_execution();
+    test_route_only_consumes_post_frame_cpu_signal_at_boundary();
 }

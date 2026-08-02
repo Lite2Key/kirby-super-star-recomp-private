@@ -21,30 +21,35 @@ The ordinary first-frame recorder therefore remains clamped to master clock
 `306900`, while the route-only probe may retire whole CPU, SA-1, and SPC
 instructions after that boundary.
 
-The authorized private probe currently reports:
+The authorized private probe currently reports (with the clean Mesen BWRAM
+fixture supplied only at runtime):
 
-- status `expected_frontier_reached`;
-- inventory `2,273`, executed `388`, missing `1,885` identities;
+- status `generated_block_failed_closed` at the next explicit S-CPU handoff;
+- inventory `2,273`, with `702` unique identities dispatched and `1,571`
+  inventory identities still untouched by this bounded continuation (all
+  `2,273` generated functions remain registered; this is not a static
+  generation gap);
 - `4,096` pre-frame upload blocks and a bounded `4,194,304` post-frame route
-  budget, ending at the explicit step limit;
-- the route executes `388` unique identities, reducing the missing set from
-  `1,919` at the prior checkpoint to `1,885` without changing the static
-  inventory;
-- post-frame SA-1 handoff now follows the generated `$8C5D/$8C60` tail after
-  the strict first-frame `$8C58/$8C5B` poll; the bounded route reaches S-CPU
-  `$0014` and SA-1 `$8A01`;
+  budget, ending at the finite route limit/stop boundary;
+- three timestamped NMI edges are consumed at whole S-CPU boundaries, and the
+  route reaches S-CPU `$00CCB7` while the SA-1 remains in the generated
+  `$008CC0` poll loop;
+- a clean Mesen BWRAM capture and the private 8 KiB SRAM snapshot are
+  byte-identical. Direct Mesen seeding reaches the same SA-1 `$008CC0`
+  frontier, while the recomp route's next independent blocker is the S-CPU
+  `$00CCB7` handoff;
 - the SPC reaches uploaded RAM and continues through the authentic IPL-driven
-  protocol (`5,198,846` SPC cycles at the latest bounded endpoint; final
-  F4=`0x72`), with no architectural state patched or rewound.
+  protocol with no architectural state patched or rewound. The fixture and
+  all raw route traces remain ignored/private.
 - a clean private generator/build rerun with the authorized ROM and IPL
   reproduces the same status, counts, endpoint registers, and SPC cycle total;
   the generated route output remains ignored and unpublished.
 
 This is a measured continuation frontier, not a gameplay-completion claim.
-The upload counter/latch ordering is now evidenced by the private Mesen trace;
-the next proof is to carry the same causal route beyond the SA-1 `$8A01` /
-S-CPU `$0014` dynamic-return boundary instead of treating the bounded frontier
-as completion.
+The upload counter/latch ordering and post-frame NMI timing are now evidenced
+by the private Mesen trace; the next proof is to carry the same causal route
+beyond the S-CPU `$00CCB7` / SA-1 `$008CC0` handoff instead of treating the
+bounded frontier as completion.
 
 ## Verification gates
 

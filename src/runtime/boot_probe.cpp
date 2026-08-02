@@ -534,6 +534,42 @@ BootProbeResult run_boot_probe(
         }
         return true;
     };
+
+    // Route-only continuation may cross later frame boundaries.  The public
+    // first-frame contract keeps CPU signals in the coordinator event loop
+    // below; the opt-in route lane instead consumes explicitly supplied,
+    // evidence-backed post-frame signals at the next whole S-CPU boundary.
+    // This is how the private KSS witness reaches the native NMI handler at
+    // $81B1 without fabricating a message/status byte or rewinding a CPU.
+    std::vector<bool> route_cpu_signal_consumed(timing.cpu_signals.size(), false);
+    const auto service_route_cpu_signals = [&]() noexcept {
+        if (!route_only) return true;
+        for (std::size_t index = 0; index < timing.cpu_signals.size(); ++index) {
+            const auto& point = timing.cpu_signals[index];
+            if (point.at <= kSnesFirstFrameMasterClock
+                || route_cpu_signal_consumed[index]
+                || point.at > clocks.ready_at(ClockDomain::scpu)) {
+                continue;
+            }
+            if (result.scpu.address() == 0x0014U) {
+                // The measured NMI lands in the BIT/BPL wait pair.  If the
+                // previous whole block has just returned to BIT, defer the
+                // edge one block so the BIT executes before vector entry.
+                continue;
+            }
+            const auto serviced = service_lifted_async_signal(
+                result.scpu, bus, point.signal);
+            result.last_cpu_signal = serviced;
+            ++result.cpu_signals_processed;
+            route_cpu_signal_consumed[index] = true;
+            if (serviced.status == CpuAsyncStatus::ignored_stopped
+                || !account_new_scpu_accesses()) {
+                return false;
+            }
+            flush_cpu_writes(clocks.ready_at(ClockDomain::scpu));
+        }
+        return true;
+    };
     const auto run_interleaved_until = [&](BlockKey checkpoint,
         std::size_t max_blocks, std::size_t minimum_blocks = 0U) noexcept {
         GeneratedRunResult run{};
@@ -542,6 +578,9 @@ BootProbeResult run_boot_probe(
             return run;
         }
         for (std::size_t step = 0; step < max_blocks; ++step) {
+            // Route-only CPU signals are serviced after the current whole
+            // block below.  A due NMI must not preempt the block at its
+            // starting PC; Mesen's witness recognizes it after BIT $2300.
             if (!advance_sa1_to(clocks.ready_at(ClockDomain::scpu))) {
                 run.status = GeneratedRunStatus::generated_block_failed_closed;
                 return run;
@@ -601,6 +640,10 @@ BootProbeResult run_boot_probe(
                     });
             }
             flush_cpu_writes(clocks.ready_at(ClockDomain::scpu));
+            if (!service_route_cpu_signals()) {
+                run.status = GeneratedRunStatus::generated_block_failed_closed;
+                return run;
+            }
             if (!advance_sa1_to(clocks.ready_at(ClockDomain::scpu))) {
                 run.status = GeneratedRunStatus::generated_block_failed_closed;
                 return run;
@@ -824,7 +867,15 @@ BootProbeResult run_boot_probe(
         result.status = BootProbeStatus::spc_provision_failed;
         return result;
     }
-    for (const auto& point : timing.cpu_signals) {
+    for (std::size_t index = 0; index < timing.cpu_signals.size(); ++index) {
+        const auto& point = timing.cpu_signals[index];
+        if (point.at > kSnesFirstFrameMasterClock
+            && route_only && route_cpu_signal_consumed[index]) {
+            // The route lane already applied this signal at an architectural
+            // S-CPU boundary.  Do not enqueue it a second time after the
+            // bounded continuation has finished.
+            continue;
+        }
         if (point.at > kSnesFirstFrameMasterClock) {
             result.timing_status = CoordinatorStatus::timing_debt;
             result.status = BootProbeStatus::timing_debt;
