@@ -91,16 +91,21 @@ void test_native_message_poll_microphase_oracle() {
 
     const auto after_bit = recorder.accesses();
     assert(after_bit.size() == 5U);
-    assert(after_bit[0] == kss::ScpuMicroAccess{
-        0x0014U, kss::BusAccessKind::opcode, kss::BusAccessDirection::read, false});
-    assert(after_bit[1] == kss::ScpuMicroAccess{
-        0x0015U, kss::BusAccessKind::operand, kss::BusAccessDirection::read, false});
-    assert(after_bit[2] == kss::ScpuMicroAccess{
-        0x0016U, kss::BusAccessKind::operand, kss::BusAccessDirection::read, false});
-    assert(after_bit[3] == kss::ScpuMicroAccess{
-        0x2300U, kss::BusAccessKind::data, kss::BusAccessDirection::read, false});
-    assert(after_bit[4] == kss::ScpuMicroAccess{
-        0x2301U, kss::BusAccessKind::data, kss::BusAccessDirection::read, false});
+    const std::array expected_bit_accesses{
+        kss::ScpuMicroAccess{0x0014U, kss::BusAccessKind::opcode,
+            kss::BusAccessDirection::read, false},
+        kss::ScpuMicroAccess{0x0015U, kss::BusAccessKind::operand,
+            kss::BusAccessDirection::read, false},
+        kss::ScpuMicroAccess{0x0016U, kss::BusAccessKind::operand,
+            kss::BusAccessDirection::read, false},
+        kss::ScpuMicroAccess{0x2300U, kss::BusAccessKind::data,
+            kss::BusAccessDirection::read, false},
+        kss::ScpuMicroAccess{0x2301U, kss::BusAccessKind::data,
+            kss::BusAccessDirection::read, false},
+    };
+    for (std::size_t index = 0; index < expected_bit_accesses.size(); ++index) {
+        assert(after_bit[index] == expected_bit_accesses[index]);
+    }
 
     // With the latch still zero, BEQ takes the two-byte backward branch.
     kss::observe_generated_instruction_fetches(
@@ -113,10 +118,12 @@ void test_native_message_poll_microphase_oracle() {
 
     const auto accesses = recorder.accesses();
     assert(accesses.size() == 7U);
-    assert(accesses[5] == kss::ScpuMicroAccess{
-        0x0017U, kss::BusAccessKind::opcode, kss::BusAccessDirection::read, false});
-    assert(accesses[6] == kss::ScpuMicroAccess{
-        0x0018U, kss::BusAccessKind::operand, kss::BusAccessDirection::read, false});
+    const auto expected_branch_opcode = kss::ScpuMicroAccess{
+        0x0017U, kss::BusAccessKind::opcode, kss::BusAccessDirection::read, false};
+    const auto expected_branch_operand = kss::ScpuMicroAccess{
+        0x0018U, kss::BusAccessKind::operand, kss::BusAccessDirection::read, false};
+    assert(accesses[5] == expected_branch_opcode);
+    assert(accesses[6] == expected_branch_operand);
 
     // This is the current public contract: bus cycles only, with no invented
     // wait penalty.  A future scoped microphase model must change this oracle
