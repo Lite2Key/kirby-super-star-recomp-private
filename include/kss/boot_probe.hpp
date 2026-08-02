@@ -115,6 +115,11 @@ struct BootProbeResult {
     std::optional<SpcExactAdvanceResult> spc_first_frame_boundary{};
     CpuContext scpu{};
     CpuContext sa1{};
+    // Runtime-only final PPU snapshot for bounded diagnostics. This is kept
+    // separate from the rendered frame so a route probe can distinguish
+    // missing video payload/state from an unsupported visible mode without
+    // serializing VRAM, CGRAM, OAM, or private trace data.
+    std::optional<PpuFunctionalState> ppu_state{};
     FrameRenderResult frame{};
     CoordinatorStatus timing_status{CoordinatorStatus::timing_debt};
     MasterClock scpu_master_ready{};

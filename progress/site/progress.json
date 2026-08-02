@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-02T04:08:22Z",
-    "commit": "cd5b1186536a0abce313ad18b924e37c82014334",
-    "dirty": false,
+    "generated_at": "2026-08-02T04:18:52Z",
+    "commit": "d283d5677ff938c01100ab27c2fdd35389abf75b",
+    "dirty": true,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
     "evidence": {
@@ -62,6 +62,11 @@
           "id": "m3.local-verification",
           "label": "227 Python and 25 native tests",
           "path": "progress/evidence/m3-cpu-hardware-runtime.md"
+        },
+        {
+          "id": "m3.ppu-state-witness",
+          "label": "Bounded PPU state witness and Mode 7 render blocker",
+          "path": "progress/evidence/m3-ppu-state-witness.md"
         },
         {
           "id": "m3.wram-postframe-route",

@@ -878,7 +878,8 @@ BootProbeResult run_boot_probe(
     // transfer-counter state.
     if (live_spc) result.apu_port0_output = hardware_bus.apu_output_ports()[0];
 
-    result.frame = SnesFrameRenderer::render(hardware_bus.ppu_state());
+    result.ppu_state = hardware_bus.ppu_state();
+    result.frame = SnesFrameRenderer::render(*result.ppu_state);
     DomainAdvanceResult scpu_timing{CoordinatorStatus::accepted, 0,
         clocks.ready_at(ClockDomain::scpu)};
     result.scpu_accesses_recorded = timed_bus.accesses().size();
