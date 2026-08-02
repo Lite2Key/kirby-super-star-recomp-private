@@ -117,6 +117,15 @@ Mesen ordering hypothesis. It produced the same `2,273 / 2,273` endpoint,
 cadence as the baseline. The hold was therefore removed: the remaining drift
 is not explained by that single release-versus-first-poll ordering seam.
 
+A narrower private-only A/B then held immediately before the `$89FB` `STZ
+$3010` and inserted the evidence-bound 18-master-clock pre-write wait (so the
+8-master-clock instruction completion would land 26 clocks after the first
+`$2300` completion). It preserved inventory coverage but changed the endpoint
+to SA-1 `$00A6E6`, the summary to `95 / 9,408`, and the digest to
+`a6d1b234569d0fcd`; it was removed and rejected. The measured write witness is
+useful for diagnosis, but this single alignment cannot be promoted to a timing
+rule without the adjacent S-CPU poll cadence and later route state proving it.
+
 This is a measured compact-route closure, not a gameplay-completion claim.
 The optional public latch snapshot is an endpoint observation only; it does not
 replace a transient event proof. The next proof is causal parity at the new
