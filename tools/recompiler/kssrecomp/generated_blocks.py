@@ -34,6 +34,21 @@ def _cpp_key(identity: Mapping[str, Any]) -> str:
     return f"BlockKey::make({pid}, 0x{pc:06X}U, {str(e).lower()}, {str(m).lower()}, {str(x).lower()})"
 
 
+def _has_runtime_successor(instruction: Mapping[str, Any]) -> bool:
+    """Return whether the next identity is derived from runtime state.
+
+    RTI/RTS/RTL restore a return address from the stack; indirect jumps and
+    calls can likewise derive their target from memory/register state.  A
+    generated block must not freeze those edges to the subset seen in one
+    trace.  The dispatcher remains fail-closed when the computed identity is
+    not registered on the next dispatch.
+    """
+    flow = instruction.get("flow")
+    if flow in {"return", "interrupt", "interrupt_return"}:
+        return True
+    return flow in {"jump", "call"} and instruction.get("target") is None
+
+
 def select_blocks(document: Mapping[str, Any], max_blocks_per_processor: int) -> list[Mapping[str, Any]]:
     if document.get("schema_version") != 1:
         raise GeneratedBlocksError("unsupported lifted reset CFG schema version")
@@ -62,6 +77,23 @@ def select_blocks(document: Mapping[str, Any], max_blocks_per_processor: int) ->
         outgoing[source].append(target)
 
     selected: list[Mapping[str, Any]] = []
+    selection_policy = document.get("source", {}).get(
+        "selection_policy", "entry-reachable-decoded"
+    )
+    if selection_policy == "all-observed-decoded":
+        for processor in ("scpu", "sa1"):
+            candidates = sorted(
+                (block for block in blocks
+                 if block["identity"]["processor"] == processor
+                 and block.get("status") == "decoded"
+                 and block.get("instruction") is not None),
+                key=lambda block: _identity_key(block["identity"]),
+            )
+            selected.extend(candidates[:max_blocks_per_processor])
+        selected.sort(key=lambda block: _identity_key(block["identity"]))
+        return selected
+    if selection_policy != "entry-reachable-decoded":
+        raise GeneratedBlocksError(f"unsupported selection policy: {selection_policy}")
     for processor in ("scpu", "sa1"):
         try:
             entry = _identity_key(regions[processor]["entry"])
@@ -95,6 +127,9 @@ def render(
     if not registration_name.replace("_", "").isalnum() or not registration_name[0].isalpha():
         raise GeneratedBlocksError("registration_name must be a C++ identifier fragment")
     blocks = select_blocks(document, max_blocks_per_processor)
+    selection_policy = document.get("source", {}).get(
+        "selection_policy", "entry-reachable-decoded"
+    )
     outgoing: dict[tuple[str, int, bool, bool, bool], list[Mapping[str, Any]]] = {}
     for edge in document["edges"]:
         outgoing.setdefault(_identity_key(edge["source"]), []).append(edge["target"])
@@ -127,11 +162,19 @@ namespace kss::generated {
             "    if (cpu.block_key() != expected) { cpu.stopped = true; return; }",
             "    const LiftedInstruction instruction{",
             f"        0x{raw[0]:02X}, {{{', '.join(f'0x{x:02X}' for x in operands)}}}, {len(raw) - 1}}};",
+            "    observe_generated_instruction_fetches(",
+            "        bus, cpu.processor, expected.address, instruction.operand_count);",
         ])
         if identity["processor"] == "sa1":
             source.extend([
+                "    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {",
+                "        cpu.cycles += sa1_reset_release_origin_cycles();",
+                "    }",
                 "    const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);",
+                "    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);",
                 "    const auto mvn_wait = lookup_sa1_reset_mvn_wait(",
+                "        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);",
+                "    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(",
                 "        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);",
             ])
         source.extend([
@@ -143,12 +186,20 @@ namespace kss::generated {
         if identity["processor"] == "sa1":
             source.extend([
                 "    if (measured) { cpu.cycles += measured->observed_wait_cycles; }",
+                "    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }",
                 "    if (mvn_wait) { cpu.cycles += *mvn_wait; }",
+                "    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }",
             ])
         successors = sorted(outgoing.get(_identity_key(identity), []), key=_identity_key)
-        if successors:
+        runtime_successor = _has_runtime_successor(instruction)
+        if successors and not runtime_successor:
             condition = " && ".join(f"cpu.block_key() != {_cpp_key(target)}" for target in successors)
             source.append(f"    if ({condition}) {{ cpu.stopped = true; }}")
+        elif not runtime_successor and selection_policy == "all-observed-decoded":
+            # All observed nodes are registered independently, so merely
+            # relying on the next dispatch to miss is unsafe: a leaf could
+            # compute an unobserved transition into another registered node.
+            source.append("    cpu.stopped = true;")
         source.extend(["}", ""])
     source.extend(["} // namespace", "", f"bool register_{registration_name}_blocks(CheckedDispatcher& dispatcher) {{"])
     if blocks:
@@ -178,6 +229,15 @@ namespace kss::generated {
         "identity_policy": "processor-pc24-emulation-m8-x8",
         "failure_policy": "stop-on-lift-failure-omit-unresolved",
     }
+    route_counts: dict[str, int] = {}
+    for block in blocks:
+        for route in block.get("routes", []):
+            route_counts[route] = route_counts.get(route, 0) + 1
+    if route_counts:
+        manifest["route_provenance"] = {
+            "policy": "coverage-route-ids-per-registered-identity",
+            "registered_blocks_by_route": dict(sorted(route_counts.items())),
+        }
     return header, "\n".join(source), manifest
 
 

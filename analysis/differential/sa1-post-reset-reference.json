@@ -1,0 +1,393 @@
+{
+  "schema_version": 1,
+  "source_format": "kss-sa1-post-reset-reference-v1",
+  "processor": "sa1",
+  "boundary": "after-reset-reference-through-first-end-frame",
+  "claim_scope": "all listed identities have Mesen execution-order reference evidence; only architectural_slice identities also have per-instruction state/write evidence",
+  "private_source_sha256": {
+    "execution_trace": "eb8b670f2e4a14ab0f0deac0bdf1352cfe937598976e65068e68858110462a27",
+    "architectural_slice": "3c83cdd6206382cf5b1fac2ecec35bee6cbb592bf8b22c75fbad1e9e83b1dd1c"
+  },
+  "identity_route": {
+    "observed_identity_count": 20,
+    "event_records": 14488,
+    "identity_chain_sha256": "b59bacef6fa58eb07f2cd35d8a5e66e081fd697c7819fe58def75198a9b9e06d",
+    "identities": [
+      {
+        "processor": "sa1",
+        "pc": 35878,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35881,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35884,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35887,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35890,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35891,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35894,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35895,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35898,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35901,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35904,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35907,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35910,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35913,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35916,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35919,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35922,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35925,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35928,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35931,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      }
+    ]
+  },
+  "architectural_slice": {
+    "state_verified_count": 14,
+    "state_records": 16,
+    "write_records": 16,
+    "state_chain_sha256": "70a8b7f4ecc77a1ff7c58fc4efa5e33405e8219d3fa06f17f7f53cc4707b63e8",
+    "write_chain_sha256": "d1081b9315b0f46405d1a4d02f19705967bdde371d0777d30907d40573f04c5a",
+    "identities": [
+      {
+        "processor": "sa1",
+        "pc": 35894,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35895,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35898,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35901,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35904,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35907,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35910,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35913,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35916,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35919,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35922,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35925,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35928,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35931,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      }
+    ]
+  },
+  "identity_order_only_remaining": {
+    "identity_order_only_count": 6,
+    "reason": "existing private trace has identity/order but no per-instruction state records",
+    "identities": [
+      {
+        "processor": "sa1",
+        "pc": 35878,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35881,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35884,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35887,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35890,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      },
+      {
+        "processor": "sa1",
+        "pc": 35891,
+        "mode": {
+          "emulation": false,
+          "m8": false,
+          "x8": false
+        }
+      }
+    ]
+  }
+}

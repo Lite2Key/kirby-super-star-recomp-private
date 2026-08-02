@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "boundary": "live_scpu_spc_then_scheduled_first_frame",
+  "master_clock": 306900,
+  "probe_status": "expected_frontier_reached",
+  "capture_fidelity": "cooperative-reset-whole-instruction-cpu-and-architectural-spc-cycles",
+  "data_boundary": "sanitized-digests-and-counts-only",
+  "full_first_frame_parity_proven": false,
+  "chains": {
+    "cpu_writes": {"runtime_records": 26906, "reference_records": 26906, "delta": 0, "runtime_sha256": "9ba9b54500f04889bf4e0cc53bd8aa9128025370c63af12e9595fef665f93605", "matches": false},
+    "scpu_writes": {"runtime_records": 16902, "reference_records": 16902, "delta": 0, "runtime_sha256": "45c9380460e2f895fbdab31e5ccab2f28ae5d4509221fbb0d1dc8034e2334629", "matches": false},
+    "sa1_writes": {"runtime_records": 10004, "reference_records": 10004, "delta": 0, "runtime_sha256": "3a51501b5be5fb4350d8479e8d72d0f713951d36c22f99b133ddfa143c5fa451", "matches": false},
+    "ppu_register_writes": {"runtime_records": 54, "reference_records": 54, "delta": 0, "runtime_sha256": "c1aef4ef534bfbd499ed84e3334a85afcb46f45a067f34d3e154d9f682cf4e66", "matches": true},
+    "dma_register_writes": {"runtime_records": 23, "reference_records": 23, "delta": 0, "runtime_sha256": "34ba9f97600006a202486a7acf158ae57bd8d059838610d6ffa113484ed73e7d", "matches": false},
+    "spc_ports": {"runtime_records": 463, "reference_records": 462, "delta": 1, "runtime_sha256": "5d5f9216faa4d6517c46cc321d4d2402407dd170302a1e417a133b56c0bdb336", "matches": false}
+  },
+  "cross_domain_order_records": 27369,
+  "spc_directions": {
+    "cpu_to_spc": {"runtime_records": 308, "reference_records": 308, "delta": 0},
+    "spc_to_cpu": {"runtime_records": 155, "reference_records": 154, "delta": 1}
+  },
+  "hard_gaps": [
+    "Reset DMA observation now records all 8229 WMDATA port writes and all 8229 corresponding physical-WRAM side effects; CPU and S-CPU counts now match the reference exactly.",
+    "CPU write cycles remain retirement stamps, so equal-count SA-1 and DMA subsets do not yet match cycle-and-ordinal digests; the PPU subset matches in both count and ordered digest.",
+    "The first-frame SPC chain now has an exact 462-event prefix and one trailing SPC acknowledgement; exact SPC microphase scheduling and digest parity remain unproven."
+  ]
+}

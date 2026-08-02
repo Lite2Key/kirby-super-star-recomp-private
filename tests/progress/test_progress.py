@@ -3,6 +3,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest import mock
 from pathlib import Path
 
@@ -36,22 +37,42 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(machine["schema_version"], 1)
             self.assertEqual(len(machine["block_map"]["processors"]["scpu"]["blocks"]), 214)
             self.assertEqual(len(machine["block_map"]["processors"]["sa1"]["blocks"]), 40)
+            self.assertEqual(machine["block_map"]["execution_count"], 254)
+            self.assertEqual(machine["block_map"]["observed_count"], 254)
+            self.assertEqual(len(machine["workstreams"]), 7)
+            self.assertEqual(machine["boundary_sync"]["target_master"], 306900)
+            summary = (out / "summary.svg").read_text(encoding="utf-8")
+            ET.fromstring(summary)
+            self.assertEqual(summary.count('class="identity"'), 2273)
+            self.assertEqual(summary.count('class="checkpoint"'), 42)
+            self.assertIn("Runtime execution</text>", summary)
+            latest_route = self.manifest["trends"][-1]
+            self.assertIn(
+                f"{latest_route['route_probe_executed']} / {latest_route['route_probe_inventory']}",
+                summary,
+            )
+            self.assertNotIn("<script", summary)
+            self.assertNotIn("<image", summary)
 
     def test_block_map_is_derived_from_sanitized_first_frame_artifacts(self):
         block_map = progress_build.load_block_map(ROOT)
         self.assertEqual(block_map["boundary"], "first-snes-end-frame")
+        self.assertEqual(block_map["execution_count"], 254)
+        self.assertEqual(block_map["observed_count"], 254)
         scpu = block_map["processors"]["scpu"]
         sa1 = block_map["processors"]["sa1"]
         self.assertEqual(scpu["counts"], {
             "observed": 214, "lifted": 214, "generated": 214,
-            "executed": 160, "reference_verified": 160,
+            "semantics_supported": 214,
+            "executed": 214, "reference_verified": 214,
         })
         self.assertEqual(sa1["counts"], {
             "observed": 40, "lifted": 40, "generated": 40,
-            "executed": 20, "reference_verified": 20,
+            "semantics_supported": 40,
+            "executed": 40, "reference_verified": 34,
         })
         self.assertEqual((scpu["evolving"], sa1["evolving"]), (54, 17))
-        self.assertEqual((scpu["frontier"], sa1["frontier"]), (33, 1))
+        self.assertEqual((scpu["frontier"], sa1["frontier"]), (0, 0))
         rendered = json.dumps(block_map)
         for forbidden in ("bytes_hex", "rom_offset", "opcode", "mnemonic", "operand"):
             self.assertNotIn(forbidden, rendered)
@@ -65,11 +86,68 @@ class ProgressTests(unittest.TestCase):
         ):
             self.assertIn(required, template)
 
+    def test_boundary_sync_map_is_derived_from_sanitized_audit(self):
+        sync = progress_build.load_boundary_sync(ROOT)
+        self.assertFalse(sync["full_parity_proven"])
+        self.assertEqual(
+            [(item["id"], item["value"], item["target"]) for item in sync["domains"]],
+            [("scpu", 306900, 306900), ("sa1", 306894, 306900),
+             ("spc", 306900, 306900)],
+        )
+        self.assertEqual(
+            [(item["id"], item["value"], item["target"]) for item in sync["chains"]],
+            [("cpu-writes", 26906, 26906), ("spc-ports", 463, 462),
+             ("ppu-events", 54, 54), ("dma-events", 23, 23)],
+        )
+        self.assertEqual(
+            [item["id"] for item in sync["chains"] if item["matches"]],
+            ["ppu-events"],
+        )
+        self.assertEqual(len(sync["sources"]), 8)
+        self.assertIn("sa1-first-endframe-domain.json", sync["sources"][1])
+
+    def test_boundary_sync_template_exposes_clock_and_event_gaps(self):
+        template = (ROOT / "progress" / "template.html").read_text(encoding="utf-8")
+        self.assertIn('id="boundary-sync"', template)
+        self.assertIn("Hardware-boundary synchronization", template)
+        self.assertIn("Event-chain proof", template)
+        self.assertIn("ordered digest", template)
+
+    def test_github_pages_workflow_publishes_only_the_rom_free_site(self):
+        workflow = (ROOT / ".github" / "workflows" / "progress-pages.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("actions/upload-pages-artifact@v3", workflow)
+        self.assertIn("actions/deploy-pages@v4", workflow)
+        self.assertIn("path: progress/site", workflow)
+        self.assertNotIn("path: .\n", workflow)
+
+    def test_workstream_atlas_has_explicit_remaining_checkpoints(self):
+        template = (ROOT / "progress" / "template.html").read_text(encoding="utf-8")
+        self.assertIn('id="workstream-atlas"', template)
+        self.assertIn('id="workstream-detail"', template)
+        self.assertIn('class="workstream-step', template)
+        remaining = [
+            checkpoint
+            for stream in self.manifest["workstreams"]
+            for checkpoint in stream["checkpoints"]
+            if checkpoint["status"] != "passed"
+        ]
+        self.assertGreater(len(remaining), 0)
+        self.assertIn('id="auto-refresh"', template)
+        self.assertIn("setTimeout(()=>location.reload(),30000)", template)
+
+    def test_invalid_workstream_checkpoint_status_is_rejected(self):
+        bad = copy.deepcopy(self.manifest)
+        bad["workstreams"][0]["checkpoints"][0]["status"] = "almost"
+        with self.assertRaisesRegex(progress_build.ManifestError, "checkpoint status"):
+            progress_build.validate_manifest(bad)
+
     def test_markdown_calls_out_evolving_denominators(self):
         output = progress_build.render_markdown(self.manifest)
         self.assertIn("not estimates of total project completion", output)
         self.assertIn("`evolving`", output)
-        self.assertIn("S-CPU control flow | observed mode-aware blocks | 214 / 214 | `evolving`", output)
+        self.assertIn("S-CPU control flow | observed mode-aware blocks | 1032 / 1032 | `evolving`", output)
 
     def test_duplicate_ids_are_rejected(self):
         bad = copy.deepcopy(self.manifest)

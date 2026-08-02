@@ -41,6 +41,14 @@ struct Sa1ResetBlockMoveTiming {
     }
 };
 
+// The SA-1 is released after the S-CPU has already advanced the shared master
+// timeline.  CpuContext::cycles is an absolute SA-1-domain cursor, so a context
+// that starts at the reset vector must include this measured pre-execution
+// hold exactly once.
+[[nodiscard]] constexpr std::uint32_t sa1_reset_release_origin_cycles() noexcept {
+    return 1454U;
+}
+
 // Returns a timing only when both PC and opcode match the measured prefix.
 // Unknown code is unsupported rather than assigned speculative timing.
 [[nodiscard]] std::optional<Sa1ResetTiming> lookup_sa1_reset_timing(
@@ -56,6 +64,32 @@ struct Sa1ResetBlockMoveTiming {
 
 // Evidence-bound per-iteration wait for the exact KSS reset MVN sequence.
 [[nodiscard]] std::optional<std::uint8_t> lookup_sa1_reset_mvn_wait(
+    std::uint32_t pc,
+    std::uint8_t opcode,
+    std::uint16_t a_before,
+    std::uint16_t x_before,
+    std::uint16_t y_before) noexcept;
+
+// Exact adjacent-identity deltas from the sanitized first-frame reference.
+// The return value is deliberately PC/opcode-bound; it is not a generic SA-1
+// wait-state table.
+[[nodiscard]] std::optional<Sa1ResetTiming> lookup_sa1_post_reset_timing(
+    std::uint32_t pc,
+    std::uint8_t opcode) noexcept;
+
+// Aggregate timing for the exact second MVN run ($8C2C -> $8C2F).  The
+// committed oracle proves the total but not a reusable arbitration cadence.
+[[nodiscard]] std::optional<Sa1ResetBlockMoveTiming>
+lookup_sa1_post_reset_block_move_timing(
+    std::uint32_t pc,
+    std::uint8_t opcode,
+    std::uint32_t iterations) noexcept;
+
+// Charges the aggregate-only second-MVN wait at its measured completion.  It
+// intentionally does not pretend the committed aggregate identifies which
+// individual iterations stalled.  This preserves the proven completion
+// timestamp while keeping intermediate arbitration an explicit future debt.
+[[nodiscard]] std::optional<std::uint32_t> lookup_sa1_post_reset_mvn_completion_wait(
     std::uint32_t pc,
     std::uint8_t opcode,
     std::uint16_t a_before,

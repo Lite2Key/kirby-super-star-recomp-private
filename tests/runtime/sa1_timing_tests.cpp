@@ -87,6 +87,58 @@ void test_exact_mvn_iteration_wait_sequence() {
     assert(!kss::lookup_sa1_reset_mvn_wait(0x008c21U, 0x54U, 0x07feU, 0x3000U, 0x3001U));
 }
 
+void test_reference_backed_post_reset_profile() {
+    assert(kss::sa1_reset_release_origin_cycles() == 1454U);
+
+    struct PostResetReference {
+        std::uint32_t pc;
+        std::uint8_t opcode;
+        std::uint8_t total;
+    };
+    constexpr std::array reference{
+        PostResetReference{0x008c23U, 0xa2U, 5U},
+        PostResetReference{0x008c26U, 0xa0U, 6U},
+        PostResetReference{0x008c29U, 0xa9U, 6U},
+        PostResetReference{0x008c2fU, 0xa2U, 6U},
+        PostResetReference{0x008c32U, 0x9aU, 3U},
+        PostResetReference{0x008c33U, 0xa9U, 6U},
+        PostResetReference{0x008c36U, 0x5bU, 2U},
+        PostResetReference{0x008c37U, 0xa9U, 3U},
+        PostResetReference{0x008c3aU, 0x8dU, 6U},
+        PostResetReference{0x008c3dU, 0xa9U, 5U},
+        PostResetReference{0x008c40U, 0x8dU, 9U},
+        PostResetReference{0x008c43U, 0xa9U, 5U},
+        PostResetReference{0x008c46U, 0x8dU, 7U},
+        PostResetReference{0x008c49U, 0xa9U, 4U},
+        PostResetReference{0x008c4cU, 0x8dU, 6U},
+        PostResetReference{0x008c4fU, 0x8dU, 7U},
+        PostResetReference{0x008c52U, 0x8dU, 7U},
+        PostResetReference{0x008c55U, 0x8dU, 8U},
+    };
+    for (const auto& item : reference) {
+        const auto timing = kss::lookup_sa1_post_reset_timing(item.pc, item.opcode);
+        assert(timing && timing->total_cycles() == item.total);
+    }
+    assert(!kss::lookup_sa1_post_reset_timing(0x008c2cU, 0x54U));
+    assert(!kss::lookup_sa1_post_reset_timing(0x008c23U, 0xa0U));
+}
+
+void test_second_mvn_preserves_only_the_proven_completion_total() {
+    const auto timing = kss::lookup_sa1_post_reset_block_move_timing(
+        0x008c2cU, 0x54U, 7935U);
+    assert(timing);
+    assert(timing->base_cycles == 55545U);
+    assert(timing->observed_wait_cycles == 35175U);
+    assert(timing->total_cycles() == 90720U);
+
+    assert(!kss::lookup_sa1_post_reset_block_move_timing(0x008c2cU, 0x54U, 7934U));
+    assert(!kss::lookup_sa1_post_reset_mvn_completion_wait(
+        0x008c2cU, 0x54U, 1U, 0x7efdU, 0x7efeU));
+    const auto completion = kss::lookup_sa1_post_reset_mvn_completion_wait(
+        0x008c2cU, 0x54U, 0U, 0x7efeU, 0x7effU);
+    assert(completion && *completion == 35175U);
+}
+
 } // namespace
 
 int main() {
@@ -94,4 +146,6 @@ int main() {
     test_regions_and_strict_lookup();
     test_block_move_timing_is_bound_to_the_measured_run();
     test_exact_mvn_iteration_wait_sequence();
+    test_reference_backed_post_reset_profile();
+    test_second_mvn_preserves_only_the_proven_completion_total();
 }

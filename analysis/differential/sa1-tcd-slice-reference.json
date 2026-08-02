@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "source_format": "kss-sa1-tcd-slice-v1",
+  "source_sha256": "3c83cdd6206382cf5b1fac2ecec35bee6cbb592bf8b22c75fbad1e9e83b1dd1c",
+  "processor": "sa1",
+  "start_identity": {
+    "pc": 35894,
+    "opcode": 91,
+    "mode": "e0m0x0"
+  },
+  "stop_identity": {
+    "reason": "next_unsupported",
+    "pc": 35936,
+    "opcode": 92,
+    "mode": "e0m0x0"
+  },
+  "tcd_transition": {
+    "next_pc": 35895,
+    "base_cycles": 2,
+    "observed_wait_cycles": 0,
+    "observed_total_cycles": 2,
+    "writes": 0,
+    "effects": [
+      "direct_page_from_accumulator",
+      "negative_from_bit15",
+      "zero_from_16bit_zero"
+    ],
+    "preserved": [
+      "accumulator",
+      "index_x",
+      "index_y",
+      "stack_pointer",
+      "data_bank",
+      "carry",
+      "irq_disable",
+      "decimal",
+      "index_width",
+      "accumulator_width",
+      "overflow",
+      "emulation"
+    ],
+    "observed_changed_fields": [
+      "direct_page"
+    ],
+    "before_state_sha256": "cf51e7507d616b198b4913b47dc7c0f2612ba43139a0e5c13132ad5f20f9dd45",
+    "after_state_sha256": "17f33b0746fd083aec295ce0ed5b33d5e4bac6653bd92e8455d6c7fcf595aefa"
+  },
+  "slice": {
+    "state_records": 16,
+    "write_records": 16,
+    "write_regions": {
+      "sa1_iram": 16
+    },
+    "cycle_start": 112763,
+    "cycle_stop": 13855432,
+    "cycle_delta": 13742669,
+    "state_chain_sha256": "70a8b7f4ecc77a1ff7c58fc4efa5e33405e8219d3fa06f17f7f53cc4707b63e8",
+    "write_chain_sha256": "d1081b9315b0f46405d1a4d02f19705967bdde371d0777d30907d40573f04c5a"
+  },
+  "polling_boundary": {
+    "entry_pc": 35931,
+    "exit_pc": 35933,
+    "cycle_start": 112840,
+    "cycle_end": 13855427,
+    "cycle_delta": 13742587,
+    "interior_states_compacted": true
+  }
+}

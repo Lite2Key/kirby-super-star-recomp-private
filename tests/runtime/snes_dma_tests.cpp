@@ -8,11 +8,26 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 #ifdef _WIN32
 #include <crtdbg.h>
 #endif
 
 namespace {
+
+struct ObservedWrite {
+    kss::ProcessorId processor{};
+    std::uint32_t address{};
+    std::uint8_t value{};
+
+    friend constexpr bool operator==(const ObservedWrite&, const ObservedWrite&) = default;
+};
+
+void capture_write(void* context, kss::ProcessorId processor,
+    std::uint32_t address, std::uint8_t value) noexcept {
+    static_cast<std::vector<ObservedWrite>*>(context)->push_back(
+        {processor, address, value});
+}
 
 void write_register(kss::RomBackedDualBus& bus, std::uint16_t address, std::uint8_t value) {
     bus.write8(kss::ProcessorId::snes_cpu, address, value, kss::BusAccessKind::data);
@@ -42,6 +57,27 @@ void test_wram_port_registers_and_wrap() {
     set_wram_port(bus, 0x1ffff);
     write_register(bus, 0x2180, 0xa5);
     write_register(bus, 0x2180, 0x5a);
+    assert(bus.wram()[0x1ffff] == 0xa5 && bus.wram()[0] == 0x5a);
+    assert(bus.wram_port_address() == 1);
+}
+
+void test_wmdata_observer_reports_port_then_physical_wram() {
+    std::array<std::uint8_t, 0x10000> rom{};
+    kss::RomBackedDualBus bus(rom);
+    set_wram_port(bus, 0x1ffff);
+    std::vector<ObservedWrite> writes;
+    bus.set_cpu_write_sink(&writes, &capture_write);
+
+    write_register(bus, 0x2180, 0xa5);
+    write_register(bus, 0x2180, 0x5a);
+
+    const std::vector<ObservedWrite> expected{
+        {kss::ProcessorId::snes_cpu, 0x002180, 0xa5},
+        {kss::ProcessorId::snes_cpu, 0x7fffff, 0xa5},
+        {kss::ProcessorId::snes_cpu, 0x002180, 0x5a},
+        {kss::ProcessorId::snes_cpu, 0x7e0000, 0x5a},
+    };
+    assert(writes == expected);
     assert(bus.wram()[0x1ffff] == 0xa5 && bus.wram()[0] == 0x5a);
     assert(bus.wram_port_address() == 1);
 }
@@ -84,6 +120,8 @@ void test_reset_style_fixed_source_to_wram_port() {
     kss::RomBackedDualBus bus(rom);
     set_wram_port(bus, 0);
     configure_channel(bus, 1, 0x08, 0x80, 0x00fffe, 8);
+    std::vector<ObservedWrite> writes;
+    bus.set_cpu_write_sink(&writes, &capture_write);
     write_register(bus, 0x420b, 0x02);
 
     assert(bus.dma_transfers().size() == 1);
@@ -96,7 +134,16 @@ void test_reset_style_fixed_source_to_wram_port() {
         assert(bus.dma_port_writes()[index].ordinal == index);
         assert(bus.dma_port_writes()[index].address == 0x2180);
         assert(bus.wram()[index] == 0x6b);
+        const auto observed = 1U + index * 2U;
+        assert((writes[observed] == ObservedWrite{
+            kss::ProcessorId::snes_cpu, 0x002180, 0x6b}));
+        assert((writes[observed + 1U] == ObservedWrite{
+            kss::ProcessorId::snes_cpu,
+            static_cast<std::uint32_t>(0x7e0000U + index), 0x6b}));
     }
+    assert(writes.size() == 1U + 8U * 2U);
+    assert((writes.front() == ObservedWrite{
+        kss::ProcessorId::snes_cpu, 0x00420b, 0x02}));
 }
 
 void test_generated_scpu_reset_block_dma_summary() {
@@ -151,6 +198,7 @@ int main() {
     _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 #endif
     test_wram_port_registers_and_wrap();
+    test_wmdata_observer_reports_port_then_physical_wram();
     test_mode_order_and_channel_priority();
     test_reset_style_fixed_source_to_wram_port();
     test_generated_scpu_reset_block_dma_summary();

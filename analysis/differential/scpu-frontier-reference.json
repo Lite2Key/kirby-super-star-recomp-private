@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source_format": "kss-scpu-frontier-v1",
+  "source_sha256": "57f05f5dfdd7995870f553b1abbbc4e843c9b2392ce617c6bb0819ac3f2e5cc4",
+  "start_pc": 33138,
+  "end_pc": 54894,
+  "instruction_records": 16,
+  "state_records": 17,
+  "cycle_start": 21083,
+  "cycle_end": 21141,
+  "cycle_delta": 58,
+  "write_records": 11,
+  "stack_write_records": 7,
+  "direct_page_write_records": 4,
+  "state_chain_sha256": "324175505e528e496b6a1456697ad83d90511b2ec7e674d6c5d1af821f312080",
+  "write_chain_sha256": "3c6742f8d1a0f9f412c7bffd6f6ce7e2e3aa43e3dfd77f60dcc0ea87f7bc9777"
+}

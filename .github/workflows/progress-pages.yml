@@ -1,0 +1,62 @@
+name: Progress dashboard
+
+on:
+  push:
+    branches:
+      - main
+      - agent/m3-runtime-first-frame
+    paths:
+      - "progress/**"
+      - "analysis/**"
+      - "tools/progress/**"
+      - "tests/progress/**"
+      - ".github/workflows/progress-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Rebuild ROM-free dashboard
+        run: python tools/progress/build.py --evidence progress/progress.json --out progress/site --markdown PROGRESS.md
+      - name: Verify no prohibited assets are present
+        run: python scripts/check-asset-boundary.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kss-progress-dashboard
+          path: progress/site
+          if-no-files-found: error
+      - name: Note Pages availability
+        if: github.event.repository.has_pages != true
+        run: echo "::notice::GitHub Pages is not enabled; the downloadable dashboard artifact is still available from this run."
+      - uses: actions/configure-pages@v5
+        if: github.event.repository.has_pages == true
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event.repository.has_pages == true
+        with:
+          path: progress/site
+
+  deploy:
+    if: github.event.repository.has_pages == true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4

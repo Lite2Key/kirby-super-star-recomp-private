@@ -15,6 +15,18 @@
       "properties": {"scpu": {"type": "integer", "minimum": 0}, "sa1": {"type": "integer", "minimum": 0}}
     },
     "identity_policy": {"const": "processor-pc24-emulation-m8-x8"},
-    "failure_policy": {"const": "stop-on-lift-failure-omit-unresolved"}
+    "failure_policy": {"const": "stop-on-lift-failure-omit-unresolved"},
+    "route_provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["policy", "registered_blocks_by_route"],
+      "properties": {
+        "policy": {"const": "coverage-route-ids-per-registered-identity"},
+        "registered_blocks_by_route": {
+          "type": "object",
+          "propertyNames": {"pattern": "^[A-Za-z0-9_-]+$"},
+          "additionalProperties": {"type": "integer", "minimum": 1}
+        }
+      }
+    }
   }
 }

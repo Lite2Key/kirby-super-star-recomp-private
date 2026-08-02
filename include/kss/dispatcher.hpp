@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <unordered_map>
+#include <vector>
 
 namespace kss {
 
@@ -28,9 +29,16 @@ public:
     [[nodiscard]] DispatchStatus dispatch(CpuContext& cpu, Bus& bus, Scheduler& scheduler) const;
     [[nodiscard]] bool contains(BlockKey key) const noexcept;
     [[nodiscard]] std::size_t size() const noexcept;
+    [[nodiscard]] const std::vector<BlockKey>& registered_identities() const noexcept;
+
+    // Optional ROM-free coverage sink. Dispatch records each normalized
+    // processor+PC+mode identity once, before invoking the generated block.
+    void set_execution_identity_sink(std::vector<BlockKey>* sink) const noexcept;
 
 private:
     std::unordered_map<BlockKey, BlockFunction, BlockKeyHash> blocks_;
+    std::vector<BlockKey> registration_order_{};
+    mutable std::vector<BlockKey>* execution_identity_sink_{};
 };
 
 } // namespace kss

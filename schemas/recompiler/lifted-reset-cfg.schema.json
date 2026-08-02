@@ -13,7 +13,14 @@
         "mapping": { "const": "sa1-lorom" },
         "payload_size": { "type": "integer", "minimum": 32768 },
         "max_blocks_per_processor": { "type": "integer", "minimum": 1, "maximum": 4096 },
-        "byte_policy": { "const": "instruction-bytes-only-max-4-per-node" }
+        "byte_policy": { "const": "instruction-bytes-only-max-4-per-node" },
+        "wram_witness_policy": { "const": "private-sparse-bytes-v1" },
+        "dynamic_control_flow_policy": {
+          "enum": ["unresolved", "observed-successors-fail-closed"]
+        },
+        "selection_policy": {
+          "enum": ["entry-reachable-decoded", "all-observed-decoded"]
+        }
       }
     },
     "regions": {
@@ -21,7 +28,8 @@
       "properties": { "scpu": { "$ref": "#/$defs/region" }, "sa1": { "$ref": "#/$defs/region" } }
     },
     "blocks": { "type": "array", "items": { "$ref": "#/$defs/block" } },
-    "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } }
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } },
+    "async_edges": { "type": "array", "items": { "$ref": "#/$defs/async_edge" } }
   },
   "$defs": {
     "mode": {
@@ -67,14 +75,34 @@
       "properties": {
         "identity": { "$ref": "#/$defs/identity" },
         "rom_offset": { "type": ["integer", "null"], "minimum": 0 },
+        "memory_region": { "enum": ["wram"] },
         "status": { "enum": ["decoded", "unresolved"] },
         "instruction": { "oneOf": [{ "$ref": "#/$defs/instruction" }, { "type": "null" }] },
-        "unresolved_reason": { "type": ["string", "null"] }
+        "unresolved_reason": { "type": ["string", "null"] },
+        "routes": {
+          "type": "array", "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" }
+        },
+        "restored_modes": {
+          "type": "array", "uniqueItems": true,
+          "description": "Observed processor modes restored by polymorphic PLP/RTI status-stack instructions.",
+          "items": { "$ref": "#/$defs/mode" }
+        }
       }
     },
     "edge": {
       "type": "object", "additionalProperties": false, "required": ["source", "target"],
       "properties": { "source": { "$ref": "#/$defs/identity" }, "target": { "$ref": "#/$defs/identity" } }
+    },
+    "async_edge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source", "target", "kind", "vector"],
+      "properties": {
+        "source": { "$ref": "#/$defs/identity" },
+        "target": { "$ref": "#/$defs/identity" },
+        "kind": { "const": "asynchronous_interrupt" },
+        "vector": { "const": "native_nmi" }
+      }
     }
   }
 }

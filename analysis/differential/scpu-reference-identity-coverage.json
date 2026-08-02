@@ -1,0 +1,681 @@
+{
+  "schema_version": 1,
+  "claim_scope": "ROM-free MesenCE architectural-state reference-oracle identity coverage; this records oracle availability, not native state or timing parity",
+  "identity_policy": "processor-pc24-emulation-m8-x8",
+  "inventory_source": "analysis/cfg/first-frame-dual.trace-cfg.json",
+  "inventory_count": 214,
+  "baseline_reference_verified_count": 160,
+  "newly_reference_verified_count": 54,
+  "reference_verified_count": 214,
+  "proof_windows": [
+    {
+      "summary": "analysis/differential/reset-block-reference.json",
+      "identity_count": 160,
+      "new_identity_count": 160
+    },
+    {
+      "summary": "analysis/differential/scpu-frontier-reference.json",
+      "identity_count": 17,
+      "new_identity_count": 17
+    },
+    {
+      "summary": "analysis/differential/scpu-frontier2-reference.json",
+      "identity_count": 38,
+      "new_identity_count": 37
+    }
+  ],
+  "newly_reference_verified_identities": [
+    {
+      "processor": "scpu",
+      "pc": 33138,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54617,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54618,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54621,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54622,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54625,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54628,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54630,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54837,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54840,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54843,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54845,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54848,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54850,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54852,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54854,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54856,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54858,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54859,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54860,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54862,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54864,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54865,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54867,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54868,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54869,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54872,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54874,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54875,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54877,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54880,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54882,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54883,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54894,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier-reference.json",
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54895,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54897,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54899,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54900,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54901,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54902,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54904,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54905,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54906,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54909,
+      "mode": {
+        "emulation": false,
+        "m8": false,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54911,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54914,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54916,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54917,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54920,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54922,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54923,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54926,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54929,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    },
+    {
+      "processor": "scpu",
+      "pc": 54931,
+      "mode": {
+        "emulation": false,
+        "m8": true,
+        "x8": false
+      },
+      "proofs": [
+        "analysis/differential/scpu-frontier2-reference.json"
+      ]
+    }
+  ],
+  "remaining_unverified_identities": [],
+  "rom_bytes_included": false,
+  "private_values_included": false
+}

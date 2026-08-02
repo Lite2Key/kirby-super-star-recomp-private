@@ -9,148 +9,18 @@
   "generated_nodes": 254,
   "processors": {
     "sa1": {
-      "first_unsupported": {
-        "first_cycle": 112763,
-        "hits": 1,
-        "identity": {
-          "mode": {
-            "emulation": false,
-            "m8": false,
-            "x8": false
-          },
-          "pc": 35894,
-          "processor": "sa1"
-        },
-        "mnemonic": "TCD",
-        "opcode": 91
-      },
+      "first_unsupported": null,
       "new_nodes": 17,
       "reachable_nodes": 40,
       "unresolved_nodes": 0,
-      "unsupported_opcodes": [
-        {
-          "mnemonic": "TCD",
-          "nodes": 1,
-          "opcode": 91
-        }
-      ]
+      "unsupported_opcodes": []
     },
     "scpu": {
-      "first_unsupported": {
-        "first_cycle": 21083,
-        "hits": 1,
-        "identity": {
-          "mode": {
-            "emulation": false,
-            "m8": false,
-            "x8": false
-          },
-          "pc": 33138,
-          "processor": "scpu"
-        },
-        "mnemonic": "JSL",
-        "opcode": 34
-      },
+      "first_unsupported": null,
       "new_nodes": 54,
       "reachable_nodes": 214,
       "unresolved_nodes": 0,
-      "unsupported_opcodes": [
-        {
-          "mnemonic": "PHD",
-          "nodes": 1,
-          "opcode": 11
-        },
-        {
-          "mnemonic": "INC",
-          "nodes": 1,
-          "opcode": 26
-        },
-        {
-          "mnemonic": "JSR",
-          "nodes": 1,
-          "opcode": 32
-        },
-        {
-          "mnemonic": "JSL",
-          "nodes": 1,
-          "opcode": 34
-        },
-        {
-          "mnemonic": "ROL",
-          "nodes": 1,
-          "opcode": 42
-        },
-        {
-          "mnemonic": "PHA",
-          "nodes": 1,
-          "opcode": 72
-        },
-        {
-          "mnemonic": "TCD",
-          "nodes": 1,
-          "opcode": 91
-        },
-        {
-          "mnemonic": "PLA",
-          "nodes": 1,
-          "opcode": 104
-        },
-        {
-          "mnemonic": "ADC",
-          "nodes": 1,
-          "opcode": 105
-        },
-        {
-          "mnemonic": "BVS",
-          "nodes": 1,
-          "opcode": 112
-        },
-        {
-          "mnemonic": "TAX",
-          "nodes": 1,
-          "opcode": 170
-        },
-        {
-          "mnemonic": "LDA",
-          "nodes": 4,
-          "opcode": 183
-        },
-        {
-          "mnemonic": "INY",
-          "nodes": 6,
-          "opcode": 200
-        },
-        {
-          "mnemonic": "CMP",
-          "nodes": 1,
-          "opcode": 201
-        },
-        {
-          "mnemonic": "DEX",
-          "nodes": 1,
-          "opcode": 202
-        },
-        {
-          "mnemonic": "CMP",
-          "nodes": 2,
-          "opcode": 205
-        },
-        {
-          "mnemonic": "BNE",
-          "nodes": 4,
-          "opcode": 208
-        },
-        {
-          "mnemonic": "CPX",
-          "nodes": 1,
-          "opcode": 224
-        },
-        {
-          "mnemonic": "XBA",
-          "nodes": 3,
-          "opcode": 235
-        }
-      ]
+      "unsupported_opcodes": []
     }
   },
   "schema_version": 1,

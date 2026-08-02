@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "source_sha256", "processor", "start_identity", "stop_identity", "tcd_transition", "slice", "polling_boundary"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_format": { "const": "kss-sa1-tcd-slice-v1" },
+    "source_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "processor": { "const": "sa1" },
+    "start_identity": { "$ref": "#/$defs/identity" },
+    "stop_identity": {
+      "allOf": [
+        { "$ref": "#/$defs/identity" },
+        { "type": "object", "required": ["reason"], "properties": { "reason": { "const": "next_unsupported" } } }
+      ]
+    },
+    "tcd_transition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["next_pc", "base_cycles", "observed_wait_cycles", "observed_total_cycles", "writes", "effects", "preserved", "observed_changed_fields", "before_state_sha256", "after_state_sha256"],
+      "properties": {
+        "next_pc": { "const": 35895 },
+        "base_cycles": { "const": 2 },
+        "observed_wait_cycles": { "const": 0 },
+        "observed_total_cycles": { "const": 2 },
+        "writes": { "const": 0 },
+        "effects": { "type": "array", "minItems": 3, "uniqueItems": true, "items": { "type": "string" } },
+        "preserved": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+        "observed_changed_fields": { "const": ["direct_page"] },
+        "before_state_sha256": { "$ref": "#/$defs/sha256" },
+        "after_state_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "slice": {
+      "type": "object", "additionalProperties": false,
+      "required": ["state_records", "write_records", "write_regions", "cycle_start", "cycle_stop", "cycle_delta", "state_chain_sha256", "write_chain_sha256"],
+      "properties": {
+        "state_records": { "type": "integer", "minimum": 3 },
+        "write_records": { "type": "integer", "minimum": 0 },
+        "write_regions": {
+          "type": "object", "additionalProperties": false,
+          "required": ["sa1_iram"],
+          "properties": { "sa1_iram": { "type": "integer", "minimum": 0 } }
+        },
+        "cycle_start": { "type": "integer", "minimum": 0 },
+        "cycle_stop": { "type": "integer", "minimum": 1 },
+        "cycle_delta": { "type": "integer", "minimum": 1 },
+        "state_chain_sha256": { "$ref": "#/$defs/sha256" },
+        "write_chain_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "polling_boundary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["entry_pc", "exit_pc", "cycle_start", "cycle_end", "cycle_delta", "interior_states_compacted"],
+      "properties": {
+        "entry_pc": { "const": 35931 },
+        "exit_pc": { "const": 35933 },
+        "cycle_start": { "type": "integer", "minimum": 0 },
+        "cycle_end": { "type": "integer", "minimum": 1 },
+        "cycle_delta": { "type": "integer", "minimum": 1 },
+        "interior_states_compacted": { "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pc", "opcode", "mode"],
+      "properties": {
+        "pc": { "type": "integer", "minimum": 0, "maximum": 16777215 },
+        "opcode": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "mode": { "const": "e0m0x0" },
+        "reason": { "const": "next_unsupported" }
+      }
+    }
+  }
+}

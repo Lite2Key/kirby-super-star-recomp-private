@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "boundary": "first_end_frame",
+  "data_boundary": {
+    "policy": "sanitized-identities-counts-and-timing-only",
+    "rom_bytes_included": false,
+    "private_trace_records_included": false,
+    "architectural_state_values_included": false
+  },
+  "reference": {
+    "target_master_clock": 306900,
+    "target_sa1_cycle": 153450
+  },
+  "runtime_start": {
+    "ready_master_clock": 225694,
+    "sa1_cycle": 112847,
+    "identity": {
+      "processor": "sa1",
+      "pc": 35928,
+      "mode": "e0m0x0"
+    }
+  },
+  "whole_instruction_advance": {
+    "status": "target_inside_instruction",
+    "completed_blocks": 10150,
+    "completed_sa1_cycles": 40600,
+    "completed_master_clocks": 81200,
+    "ready_master_clock": 306894,
+    "sa1_cycle": 153447,
+    "identity": {"processor": "sa1", "pc": 35931, "mode": "e0m0x0"}
+  },
+  "residual": {
+    "master_clocks": 6,
+    "sa1_cycles": 3,
+    "next_whole_instruction_sa1_cycles": 5,
+    "reason": "the target lies inside the next modeled poll-load instruction"
+  },
+  "claims": {
+    "exact_boundary_reached": false,
+    "partial_instruction_fabricated": false,
+    "state_patched": false,
+    "hard_boundary": "whole_instruction_timing"
+  },
+  "sources": [
+    "analysis/differential/first-frame-parity-audit.json",
+    "include/kss/sa1_frame_domain.hpp",
+    "src/runtime/sa1_frame_domain.cpp",
+    "tests/runtime/sa1_frame_domain_tests.cpp"
+  ]
+}

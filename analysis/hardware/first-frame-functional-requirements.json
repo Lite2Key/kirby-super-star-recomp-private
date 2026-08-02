@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "boundary": "first-snes-end-frame",
+  "source_sha256": "b895c3cc948ebb8c3ca81fce9d26b820ab909aa2db600290a8c4d64c2a700c35",
+  "read_source_sha256": "801208973046ea5e5b7269e91cfcd1186c6942bf996740860beb368550132e44",
+  "value_policy": "counts-and-functional-requirements-only",
+  "observations": {
+    "scpu": {
+      "shared_iram_reads": 5144,
+      "shared_iram_writes": 6,
+      "sa1_control_writes": 14,
+      "apu_port_reads": 838,
+      "apu_port_writes": 308,
+      "ppu_register_writes": 54
+    },
+    "sa1": {
+      "shared_iram_reads": 8583,
+      "shared_iram_writes": 2062,
+      "sa1_control_writes": 6,
+      "apu_port_reads": 0,
+      "apu_port_writes": 0,
+      "ppu_register_writes": 0
+    }
+  },
+  "functional_requirements": [
+    "shared-sa1-iram-lower-2k-window",
+    "disconnected-upper-2k-iram-window",
+    "per-processor-iram-write-page-masks",
+    "sa1-reset-wait-vector-message-status-latches",
+    "spc-ipl-power-on-output-latches-and-separate-input-latches",
+    "ppu-forced-blank-brightness-vram-cgram-latches"
+  ],
+  "unresolved": [
+    "spc700-execution-and-port-acknowledgement",
+    "sa1-and-scpu-shared-bus-arbitration-stalls",
+    "ppu-dot-scanline-and-master-clock-timing",
+    "interrupt-delivery-scheduling"
+  ]
+}

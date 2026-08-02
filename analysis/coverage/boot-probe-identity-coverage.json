@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "claim_scope": "ROM-free generated-dispatch identity coverage only; not architectural-state, event, timing, or reference parity",
+  "boundary": "runtime-ipl-interleaved-through-complete-first-frame-identity-inventory",
+  "identity_policy": "processor-pc24-emulation-m8-x8",
+  "inventory_source": "analysis/coverage/first-frame-dual.json",
+  "inventory_count": 254,
+  "executed_count": 254,
+  "missing_count": 0,
+  "executed_definition": "all inventory_source identities except missing_identities",
+  "processors": {
+    "scpu": {"inventory": 214, "executed": 214, "missing": 0},
+    "sa1": {"inventory": 40, "executed": 40, "missing": 0}
+  },
+  "bounded_wait_observations": {
+    "sa1": {
+      "checkpoint": {"processor":"sa1","pc":35928,"mode":{"emulation":false,"m8":false,"x8":false}},
+      "completed_blocks": 2,
+      "result": "returned-to-same-identity",
+      "release_dependency": "peer-produced shared-I-RAM sign transition not present in bounded execution"
+    },
+    "scpu": {
+      "checkpoint": {"processor":"scpu","pc":54926,"mode":{"emulation":false,"m8":true,"x8":false}},
+      "completed_blocks": 20,
+      "result": "returned-to-same-identity",
+      "release_dependency": "SPC700 output-port acknowledgement and timing event not present in bounded execution"
+    }
+  },
+  "runtime_ipl_observation": {
+    "start_acknowledged": true,
+    "spc_instructions": 1828,
+    "spc_architectural_cycles": 7364,
+    "scpu_acknowledgement_route_blocks": 51,
+    "scpu_upload_blocks": 25,
+    "scpu_ready_master": 154442,
+    "final_scpu": {"processor":"scpu","pc":54875,"mode":{"emulation":false,"m8":true,"x8":false}},
+    "ipl_bytes_included": false,
+    "cartridge_values_included": false,
+    "patched_state": false
+  },
+  "missing_identities": []
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kss-recomp.invalid/schemas/recompiler/wram-witness.schema.json",
+  "title": "Private executable-WRAM byte witness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "format", "processor", "address_space", "blocks"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "format": { "const": "kss-wram-witness-v1" },
+    "processor": { "const": "scpu" },
+    "address_space": { "const": "cpu24-bank00-wram" },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/block" }
+    }
+  },
+  "$defs": {
+    "mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emulation", "m8", "x8"],
+      "properties": {
+        "emulation": { "const": false },
+        "m8": { "const": false },
+        "x8": { "const": false }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["processor", "pc", "mode", "bytes_hex"],
+      "properties": {
+        "processor": { "const": "scpu" },
+        "pc": { "type": "integer", "minimum": 0, "maximum": 8191 },
+        "mode": { "$ref": "#/$defs/mode" },
+        "bytes_hex": { "type": "string", "pattern": "^(?:[0-9A-F]{2}){1,4}$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "source_sha256", "start_pc", "end_pc", "instruction_records", "state_records", "cycle_start", "cycle_end", "cycle_delta", "write_records", "stack_write_records", "direct_page_write_records", "state_chain_sha256", "write_chain_sha256"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source_format": {"const": "kss-scpu-frontier2-v1"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "start_pc": {"const": 54894},
+    "end_pc": {"const": 54874},
+    "instruction_records": {"const": 73},
+    "state_records": {"const": 74},
+    "cycle_start": {"const": 21141},
+    "cycle_end": {"const": 21387},
+    "cycle_delta": {"const": 246},
+    "write_records": {"const": 7},
+    "stack_write_records": {"const": 1},
+    "direct_page_write_records": {"const": 0},
+    "state_chain_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "write_chain_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

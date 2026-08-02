@@ -29,7 +29,27 @@ public:
         std::uint32_t address,
         std::uint8_t value,
         BusAccessKind kind = BusAccessKind::data) = 0;
+
+    // Generated instructions carry decoded bytes and therefore do not read
+    // those bytes through read8(). Timing observers use this value-free hook
+    // to retain the real opcode/operand fetch addresses in execution order.
+    virtual void observe_generated_fetch(
+        ProcessorId, std::uint32_t, BusAccessKind) noexcept {}
 };
+
+inline void observe_generated_instruction_fetches(
+    Bus& bus,
+    ProcessorId processor,
+    std::uint32_t instruction_address,
+    std::uint8_t operand_count) noexcept {
+    const auto bank = instruction_address & 0x00ff'0000U;
+    const auto pc = instruction_address & 0x0000'ffffU;
+    bus.observe_generated_fetch(processor, bank | pc, BusAccessKind::opcode);
+    for (std::uint32_t index = 1; index <= operand_count; ++index) {
+        bus.observe_generated_fetch(
+            processor, bank | ((pc + index) & 0xffffU), BusAccessKind::operand);
+    }
+}
 
 [[nodiscard]] inline std::uint16_t read16_bank_wrapped(
     Bus& bus,

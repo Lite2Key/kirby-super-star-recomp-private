@@ -1,16 +1,20 @@
 #include "kss/alu.hpp"
 #include "kss/bootstrap.hpp"
+#include "kss/boot_probe.hpp"
 #include "kss/bus.hpp"
 #include "kss/deterministic_scheduler.hpp"
 #include "kss/dispatcher.hpp"
 #include "kss/dual_bus.hpp"
 #include "kss/rom_validation.hpp"
+#include "kss/snes_timing.hpp"
 
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -134,6 +138,49 @@ void test_scheduler_order() {
     assert(first->payload == 1);
     assert(second->payload == 2);
     assert(first->sequence < second->sequence);
+}
+
+void test_snes_master_clock_contract() {
+    static_assert(kss::kSnesFirstFrameMasterClock == 306900U);
+    static_assert(kss::sa1_cycles_to_master(153450U)
+        == kss::kSnesFirstFrameMasterClock);
+
+    assert(kss::snes_bus_cycle_master_clocks(0x001fff, false) == 8U);
+    assert(kss::snes_bus_cycle_master_clocks(0x008000, true) == 8U);
+    assert(kss::snes_bus_cycle_master_clocks(0x400000, true) == 8U);
+
+    assert(kss::snes_bus_cycle_master_clocks(0x002100, false) == 6U);
+    assert(kss::snes_bus_cycle_master_clocks(0x004016, false) == 12U);
+    assert(kss::snes_bus_cycle_master_clocks(0x004200, false) == 6U);
+
+    assert(kss::snes_bus_cycle_master_clocks(0x808000, false) == 8U);
+    assert(kss::snes_bus_cycle_master_clocks(0x808000, true) == 6U);
+    assert(kss::snes_bus_cycle_master_clocks(0xc00000, false) == 8U);
+    assert(kss::snes_bus_cycle_master_clocks(0xc00000, true) == 6U);
+}
+
+void test_translated_boot_probe_reaches_explicit_frontier() {
+    // Instruction bytes are generated code, so a value-neutral synthetic ROM
+    // is sufficient to exercise the causal shared-I-RAM boot synchronization.
+    std::vector<std::uint8_t> rom(kss::kExpectedRomSize);
+    const auto result = kss::run_boot_probe(rom);
+    assert(result.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(result.timing_status == kss::CoordinatorStatus::accepted);
+    assert(result.scpu_setup.completed_blocks == 160U);
+    assert(result.sa1_initialization.completed_blocks == 10018U);
+    assert(result.scpu_frontier.completed_blocks == 16U);
+    assert(result.scpu_sa1_interleave.completed_blocks > 18U);
+    assert(result.reset_domains_interleaved);
+    assert(result.scpu.address() == 0x00d68eU);
+    assert(result.sa1.address() == 0x008c58U);
+    assert(result.first_frame.status == kss::FrameRenderStatus::rendered);
+    assert(result.first_frame.frame.valid());
+    assert(result.frame.status == kss::FrameRenderStatus::rendered);
+    assert(result.frame.frame.width == 256U && result.frame.frame.height == 239U);
+    assert(result.frame.frame.valid());
+    assert(result.first_frame_event_seen);
+    assert(result.scpu_accesses_recorded > 0U && result.scpu_master_ready > 0U);
+    assert(result.master_now == kss::kSnesFirstFrameMasterClock);
 }
 
 void test_checked_dispatch() {
@@ -347,6 +394,62 @@ void test_cli_usage() {
     const auto result = kss::runtime_cli(2, arguments, output, errors);
     assert(result == kss::BootstrapExitCode::usage_error);
     assert(errors.str().find("unknown argument") != std::string::npos);
+
+    const char* missing_save_path[] = {"kss-runtime", "--save"};
+    output.str({});
+    errors.str({});
+    assert(kss::runtime_cli(2, missing_save_path, output, errors)
+        == kss::BootstrapExitCode::usage_error);
+    assert(errors.str().find("--save requires a path") != std::string::npos);
+
+    const char* missing_ipl_path[] = {"kss-runtime", "--spc-ipl"};
+    output.str({});
+    errors.str({});
+    assert(kss::runtime_cli(2, missing_ipl_path, output, errors)
+        == kss::BootstrapExitCode::usage_error);
+    assert(errors.str().find("--spc-ipl requires a path") != std::string::npos);
+
+    const char* save_override[] = {
+        "kss-runtime", "--rom", "definitely-missing.sfc", "--save", "slot-a.srm"};
+    output.str({});
+    errors.str({});
+    assert(kss::runtime_cli(5, save_override, output, errors)
+        == kss::BootstrapExitCode::rom_rejected);
+    assert(errors.str().find("unknown argument") == std::string::npos);
+}
+
+void test_external_spc_ipl_loader_requires_exact_hardware_size() {
+    const auto path = std::filesystem::temp_directory_path()
+        / "kss-runtime-external-spc-ipl-test.bin";
+    std::error_code error;
+    std::filesystem::remove(path, error);
+
+    std::array<std::uint8_t, kss::apu::Spc700Core::kIplSize> expected{};
+    for (std::size_t index = 0; index < expected.size(); ++index) {
+        expected[index] = static_cast<std::uint8_t>(index);
+    }
+    {
+        std::ofstream output_file(path, std::ios::binary);
+        output_file.write(reinterpret_cast<const char*>(expected.data()),
+            static_cast<std::streamsize>(expected.size()));
+    }
+    const auto accepted = kss::load_spc_ipl(path);
+    assert(accepted.ok());
+    assert(accepted.file_size == expected.size());
+    assert(accepted.bytes == expected);
+
+    {
+        std::ofstream output_file(path, std::ios::binary | std::ios::trunc);
+        output_file.write(reinterpret_cast<const char*>(expected.data()),
+            static_cast<std::streamsize>(expected.size() - 1U));
+    }
+    const auto short_image = kss::load_spc_ipl(path);
+    assert(short_image.status == kss::SpcIplLoadStatus::wrong_file_size);
+    assert(short_image.file_size == expected.size() - 1U);
+
+    std::filesystem::remove(path, error);
+    assert(kss::load_spc_ipl(path).status
+        == kss::SpcIplLoadStatus::file_not_found);
 }
 
 } // namespace
@@ -357,6 +460,8 @@ int main() {
     test_address_space_contracts();
     test_rom_backed_dual_bus();
     test_scheduler_order();
+    test_snes_master_clock_contract();
+    test_translated_boot_probe_reaches_explicit_frontier();
     test_checked_dispatch();
     test_alu_binary_arithmetic_exhaustive();
     test_alu_decimal_valid_values_exhaustive();
@@ -364,5 +469,6 @@ int main() {
     test_alu_logical_shift_and_memory_ops();
     test_sha256_vectors();
     test_cli_usage();
+    test_external_spc_ipl_loader_requires_exact_hardware_size();
     return 0;
 }

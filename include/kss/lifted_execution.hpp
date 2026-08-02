@@ -29,9 +29,35 @@ struct LiftResult {
     std::uint8_t instruction_cycles{};
 };
 
+enum class CpuAsyncSignal : std::uint8_t {
+    irq,
+    nmi,
+    reset,
+};
+
+enum class CpuAsyncStatus : std::uint8_t {
+    serviced,
+    woke_masked,
+    masked,
+    ignored_stopped,
+};
+
+struct CpuAsyncResult {
+    CpuAsyncStatus status{CpuAsyncStatus::masked};
+    std::uint8_t entry_cycles{};
+};
+
 [[nodiscard]] LiftResult execute_lifted(
     CpuContext& cpu,
     Bus& bus,
     const LiftedInstruction& instruction) noexcept;
+
+// Applies an already-arbitrated asynchronous CPU signal. This owns the
+// architectural wake/stack/vector transition, but not signal scheduling,
+// edge detection, or IRQ source lifetime.
+[[nodiscard]] CpuAsyncResult service_lifted_async_signal(
+    CpuContext& cpu,
+    Bus& bus,
+    CpuAsyncSignal signal) noexcept;
 
 } // namespace kss

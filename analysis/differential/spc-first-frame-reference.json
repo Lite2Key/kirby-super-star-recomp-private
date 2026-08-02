@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "source_format": "kss-spc-first-frame-v1",
+  "source_sha256": "3f1e008a63be3ac63ddb533358973dba58d14592f6d274f5d9d7b14bf74c8b99",
+  "boundary": "first_snes_end_frame",
+  "clocks": {
+    "master": 306900,
+    "spc_counter_start": 16,
+    "spc_counter_end": 29298,
+    "spc_counter_delta": 29282,
+    "counter_unit": "mesen_spc_cycle_counter"
+  },
+  "execution": {
+    "records": 3661,
+    "unique_pcs": 24,
+    "first_pc": 65477,
+    "final_pc": 65500,
+    "opcodes": [
+      {
+        "opcode": 29,
+        "records": 239
+      },
+      {
+        "opcode": 47,
+        "records": 1
+      },
+      {
+        "opcode": 93,
+        "records": 1
+      },
+      {
+        "opcode": 120,
+        "records": 936
+      },
+      {
+        "opcode": 126,
+        "records": 152
+      },
+      {
+        "opcode": 143,
+        "records": 2
+      },
+      {
+        "opcode": 186,
+        "records": 2
+      },
+      {
+        "opcode": 196,
+        "records": 1
+      },
+      {
+        "opcode": 198,
+        "records": 239
+      },
+      {
+        "opcode": 203,
+        "records": 151
+      },
+      {
+        "opcode": 208,
+        "records": 1480
+      },
+      {
+        "opcode": 215,
+        "records": 151
+      },
+      {
+        "opcode": 218,
+        "records": 1
+      },
+      {
+        "opcode": 221,
+        "records": 1
+      },
+      {
+        "opcode": 228,
+        "records": 151
+      },
+      {
+        "opcode": 235,
+        "records": 2
+      },
+      {
+        "opcode": 252,
+        "records": 151
+      }
+    ],
+    "bootstrap_required_before_hook": [
+      205,
+      189,
+      232
+    ],
+    "state_chain_sha256": "c0a430d56bc0ab041a62d9ab06af52d148341c403ca026f3169eff2c53ccceef",
+    "final_state_sha256": "2646fcc92e6841307241821e831b5728c45d2fc678d250cad9b83c0c3c967c1f"
+  },
+  "ports": {
+    "records": 462,
+    "by_direction_and_index": [
+      {
+        "direction": "cpu_to_spc",
+        "index": 0,
+        "records": 153
+      },
+      {
+        "direction": "cpu_to_spc",
+        "index": 1,
+        "records": 153
+      },
+      {
+        "direction": "cpu_to_spc",
+        "index": 2,
+        "records": 1
+      },
+      {
+        "direction": "cpu_to_spc",
+        "index": 3,
+        "records": 1
+      },
+      {
+        "direction": "spc_to_cpu",
+        "index": 0,
+        "records": 153
+      },
+      {
+        "direction": "spc_to_cpu",
+        "index": 1,
+        "records": 1
+      }
+    ],
+    "chain_sha256": "088a8bedbc716630f85c402207d2499b90a44c7b0716f754ed8b506df9d7293c"
+  }
+}

@@ -10,15 +10,25 @@ void block_sa1_008bf4_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x78, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF5U, true, true, true)) { cpu.stopped = true; }
 }
 
@@ -27,15 +37,25 @@ void block_sa1_008bf5_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x18, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF6U, true, true, true)) { cpu.stopped = true; }
 }
 
@@ -44,15 +64,25 @@ void block_sa1_008bf6_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xFB, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF7U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -61,15 +91,25 @@ void block_sa1_008bf7_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xE2, {0x20, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BF9U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -78,15 +118,25 @@ void block_sa1_008bf9_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x30, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BFCU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -95,15 +145,25 @@ void block_sa1_008bfc_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x09, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008BFFU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -112,15 +172,25 @@ void block_sa1_008bff_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xFF, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C01U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -129,15 +199,25 @@ void block_sa1_008c01_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x2A, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C04U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -146,15 +226,25 @@ void block_sa1_008c04_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x25, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C07U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -163,15 +253,25 @@ void block_sa1_008c07_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x80, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C09U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -180,15 +280,25 @@ void block_sa1_008c09_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x27, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C0CU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -197,15 +307,25 @@ void block_sa1_008c0c_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x0A, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C0FU, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -214,15 +334,25 @@ void block_sa1_008c0f_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x00, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C12U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -231,15 +361,25 @@ void block_sa1_008c12_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x00, 0x60, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C15U, false, true, true)) { cpu.stopped = true; }
 }
 
@@ -248,15 +388,25 @@ void block_sa1_008c15_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xC2, {0x30, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C17U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -265,15 +415,25 @@ void block_sa1_008c17_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x00, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C1AU, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -282,15 +442,25 @@ void block_sa1_008c1a_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA0, {0x01, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C1DU, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -299,15 +469,25 @@ void block_sa1_008c1d_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xFE, 0x07, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C20U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -316,15 +496,25 @@ void block_sa1_008c20_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x54, {0x00, 0x00, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C20U, false, false, false) && cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C23U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -333,15 +523,25 @@ void block_sa1_008c23_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x00, 0x60, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C26U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -350,15 +550,25 @@ void block_sa1_008c26_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA0, {0x01, 0x60, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C29U, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -367,15 +577,25 @@ void block_sa1_008c29_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xFE, 0x1E, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C2CU, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -384,15 +604,25 @@ void block_sa1_008c2c_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x54, {0x00, 0x00, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
+    if (expected.address == 0x008BF4U && cpu.cycles == 0U) {
+        cpu.cycles += sa1_reset_release_origin_cycles();
+    }
     const auto measured = lookup_sa1_reset_timing(expected.address, instruction.opcode);
+    const auto post_reset = lookup_sa1_post_reset_timing(expected.address, instruction.opcode);
     const auto mvn_wait = lookup_sa1_reset_mvn_wait(
+        expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
+    const auto post_reset_mvn_wait = lookup_sa1_post_reset_mvn_completion_wait(
         expected.address, instruction.opcode, cpu.a, cpu.x, cpu.y);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
     }
     if (measured) { cpu.cycles += measured->observed_wait_cycles; }
+    if (post_reset) { cpu.cycles += post_reset->observed_wait_cycles; }
     if (mvn_wait) { cpu.cycles += *mvn_wait; }
+    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }
     if (cpu.block_key() != BlockKey::make(ProcessorId::sa1, 0x008C2CU, false, false, false)) { cpu.stopped = true; }
 }
 
@@ -401,6 +631,8 @@ void block_scpu_008004_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x78, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -413,6 +645,8 @@ void block_scpu_008005_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x18, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -425,6 +659,8 @@ void block_scpu_008006_e1m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xFB, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -437,6 +673,8 @@ void block_scpu_008007_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xE2, {0x20, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -449,6 +687,8 @@ void block_scpu_008009_e0m1x1(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xC2, {0x10, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -461,6 +701,8 @@ void block_scpu_00800b_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0xFF, 0x1F, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -473,6 +715,8 @@ void block_scpu_00800e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9A, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -485,6 +729,8 @@ void block_scpu_00800f_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x4B, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -497,6 +743,8 @@ void block_scpu_008010_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xAB, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -509,6 +757,8 @@ void block_scpu_008011_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x00, 0x42, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -521,6 +771,8 @@ void block_scpu_008014_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xF4, {0x00, 0x21, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -533,6 +785,8 @@ void block_scpu_008017_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x2B, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -545,6 +799,8 @@ void block_scpu_008018_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x8F, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -557,6 +813,8 @@ void block_scpu_00801a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x00, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -569,6 +827,8 @@ void block_scpu_00801c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x63, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -581,6 +841,8 @@ void block_scpu_00801e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x01, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -593,6 +855,8 @@ void block_scpu_008020_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x02, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -605,6 +869,8 @@ void block_scpu_008022_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x03, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -617,6 +883,8 @@ void block_scpu_008024_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x04, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -629,6 +897,8 @@ void block_scpu_008026_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x05, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -641,6 +911,8 @@ void block_scpu_008028_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x06, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -653,6 +925,8 @@ void block_scpu_00802a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0D, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -665,6 +939,8 @@ void block_scpu_00802c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0D, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -677,6 +953,8 @@ void block_scpu_00802e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0E, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -689,6 +967,8 @@ void block_scpu_008030_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0E, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -701,6 +981,8 @@ void block_scpu_008032_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0F, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -713,6 +995,8 @@ void block_scpu_008034_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0F, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -725,6 +1009,8 @@ void block_scpu_008036_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x10, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -737,6 +1023,8 @@ void block_scpu_008038_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x10, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -749,6 +1037,8 @@ void block_scpu_00803a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x11, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -761,6 +1051,8 @@ void block_scpu_00803c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x11, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -773,6 +1065,8 @@ void block_scpu_00803e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x12, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -785,6 +1079,8 @@ void block_scpu_008040_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x12, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -797,6 +1093,8 @@ void block_scpu_008042_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x13, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -809,6 +1107,8 @@ void block_scpu_008044_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x13, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -821,6 +1121,8 @@ void block_scpu_008046_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x14, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -833,6 +1135,8 @@ void block_scpu_008048_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x14, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -845,6 +1149,8 @@ void block_scpu_00804a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x80, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -857,6 +1163,8 @@ void block_scpu_00804c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x15, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -869,6 +1177,8 @@ void block_scpu_00804e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x16, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -881,6 +1191,8 @@ void block_scpu_008050_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x17, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -893,6 +1205,8 @@ void block_scpu_008052_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1A, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -905,6 +1219,8 @@ void block_scpu_008054_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1B, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -917,6 +1233,8 @@ void block_scpu_008056_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x01, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -929,6 +1247,8 @@ void block_scpu_008058_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x1B, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -941,6 +1261,8 @@ void block_scpu_00805a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1C, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -953,6 +1275,8 @@ void block_scpu_00805c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1C, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -965,6 +1289,8 @@ void block_scpu_00805e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1D, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -977,6 +1303,8 @@ void block_scpu_008060_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1D, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -989,6 +1317,8 @@ void block_scpu_008062_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1E, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1001,6 +1331,8 @@ void block_scpu_008064_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x1E, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1013,6 +1345,8 @@ void block_scpu_008066_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1F, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1025,6 +1359,8 @@ void block_scpu_008068_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x1F, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1037,6 +1373,8 @@ void block_scpu_00806a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x20, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1049,6 +1387,8 @@ void block_scpu_00806c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x20, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1061,6 +1401,8 @@ void block_scpu_00806e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x21, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1073,6 +1415,8 @@ void block_scpu_008070_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x23, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1085,6 +1429,8 @@ void block_scpu_008072_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x24, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1097,6 +1443,8 @@ void block_scpu_008074_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x25, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1109,6 +1457,8 @@ void block_scpu_008076_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x26, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1121,6 +1471,8 @@ void block_scpu_008078_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x27, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1133,6 +1485,8 @@ void block_scpu_00807a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x28, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1145,6 +1499,8 @@ void block_scpu_00807c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x29, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1157,6 +1513,8 @@ void block_scpu_00807e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x2A, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1169,6 +1527,8 @@ void block_scpu_008080_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x2B, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1181,6 +1541,8 @@ void block_scpu_008082_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x2E, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1193,6 +1555,8 @@ void block_scpu_008084_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x2F, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1205,6 +1569,8 @@ void block_scpu_008086_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x30, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1217,6 +1583,8 @@ void block_scpu_008088_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x30, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1229,6 +1597,8 @@ void block_scpu_00808a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x31, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1241,6 +1611,8 @@ void block_scpu_00808c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xE0, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1253,6 +1625,8 @@ void block_scpu_00808e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x32, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1265,6 +1639,8 @@ void block_scpu_008090_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x33, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1277,6 +1653,8 @@ void block_scpu_008092_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xF4, {0x00, 0x42, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1289,6 +1667,8 @@ void block_scpu_008095_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x2B, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1301,6 +1681,8 @@ void block_scpu_008096_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xFF, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1313,6 +1695,8 @@ void block_scpu_008098_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x85, {0x01, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1325,6 +1709,8 @@ void block_scpu_00809a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x02, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1337,6 +1723,8 @@ void block_scpu_00809c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x03, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1349,6 +1737,8 @@ void block_scpu_00809e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x04, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1361,6 +1751,8 @@ void block_scpu_0080a0_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x05, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1373,6 +1765,8 @@ void block_scpu_0080a2_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x06, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1385,6 +1779,8 @@ void block_scpu_0080a4_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x07, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1397,6 +1793,8 @@ void block_scpu_0080a6_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x08, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1409,6 +1807,8 @@ void block_scpu_0080a8_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x09, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1421,6 +1821,8 @@ void block_scpu_0080aa_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0A, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1433,6 +1835,8 @@ void block_scpu_0080ac_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0B, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1445,6 +1849,8 @@ void block_scpu_0080ae_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0C, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1457,6 +1863,8 @@ void block_scpu_0080b0_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x64, {0x0D, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1469,6 +1877,8 @@ void block_scpu_0080b2_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xF4, {0x00, 0x37, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1481,6 +1891,8 @@ void block_scpu_0080b5_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x2B, {0x00, 0x00, 0x00}, 0};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1493,6 +1905,8 @@ void block_scpu_0080b6_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x20, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1505,6 +1919,8 @@ void block_scpu_0080b8_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x00, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1517,6 +1933,8 @@ void block_scpu_0080bb_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x01, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1529,6 +1947,8 @@ void block_scpu_0080be_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xA0, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1541,6 +1961,8 @@ void block_scpu_0080c0_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x02, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1553,6 +1975,8 @@ void block_scpu_0080c3_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x20, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1565,6 +1989,8 @@ void block_scpu_0080c6_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x01, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1577,6 +2003,8 @@ void block_scpu_0080c8_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x21, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1589,6 +2017,8 @@ void block_scpu_0080cb_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x02, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1601,6 +2031,8 @@ void block_scpu_0080cd_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x22, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1613,6 +2045,8 @@ void block_scpu_0080d0_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x03, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1625,6 +2059,8 @@ void block_scpu_0080d2_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x23, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1637,6 +2073,8 @@ void block_scpu_0080d5_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x24, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1649,6 +2087,8 @@ void block_scpu_0080d8_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x05, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1661,6 +2101,8 @@ void block_scpu_0080da_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x28, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1673,6 +2115,8 @@ void block_scpu_0080dd_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x80, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1685,6 +2129,8 @@ void block_scpu_0080df_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x26, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1697,6 +2143,8 @@ void block_scpu_0080e2_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xFF, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1709,6 +2157,8 @@ void block_scpu_0080e4_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x29, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1721,6 +2171,8 @@ void block_scpu_0080e7_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x00, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1733,6 +2185,8 @@ void block_scpu_0080ea_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x01, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1745,6 +2199,8 @@ void block_scpu_0080ed_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0xF4, 0x8B, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1757,6 +2213,8 @@ void block_scpu_0080f0_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x03, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1769,6 +2227,8 @@ void block_scpu_0080f3_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x00, 0x22, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1781,6 +2241,8 @@ void block_scpu_0080f6_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x00, 0x00, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1793,6 +2255,8 @@ void block_scpu_0080f9_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x81, 0x21, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1805,6 +2269,8 @@ void block_scpu_0080fc_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x83, 0x21, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1817,6 +2283,8 @@ void block_scpu_0080ff_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x08, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1829,6 +2297,8 @@ void block_scpu_008101_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x10, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1841,6 +2311,8 @@ void block_scpu_008104_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0xFE, 0xFF, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1853,6 +2325,8 @@ void block_scpu_008107_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x12, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1865,6 +2339,8 @@ void block_scpu_00810a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x14, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1877,6 +2353,8 @@ void block_scpu_00810d_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x80, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1889,6 +2367,8 @@ void block_scpu_00810f_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x11, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1901,6 +2381,8 @@ void block_scpu_008112_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x00, 0x20, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1913,6 +2395,8 @@ void block_scpu_008115_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x15, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1925,6 +2409,8 @@ void block_scpu_008118_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x02, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1937,6 +2423,8 @@ void block_scpu_00811a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x0B, 0x42, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1949,6 +2437,8 @@ void block_scpu_00811d_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x0E, 0x00, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1961,6 +2451,8 @@ void block_scpu_008120_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x81, 0x21, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1973,6 +2465,8 @@ void block_scpu_008123_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x83, 0x21, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1985,6 +2479,8 @@ void block_scpu_008126_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x10, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -1997,6 +2493,8 @@ void block_scpu_008129_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x8C, 0x81, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2009,6 +2507,8 @@ void block_scpu_00812c_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x12, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2021,6 +2521,8 @@ void block_scpu_00812f_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x9C, {0x14, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2033,6 +2535,8 @@ void block_scpu_008132_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x80, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2045,6 +2549,8 @@ void block_scpu_008134_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x11, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2057,6 +2563,8 @@ void block_scpu_008137_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x17, 0x00, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2069,6 +2577,8 @@ void block_scpu_00813a_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x15, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2081,6 +2591,8 @@ void block_scpu_00813d_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x02, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2093,6 +2605,8 @@ void block_scpu_00813f_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x0B, 0x42, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2105,6 +2619,8 @@ void block_scpu_008142_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x26, 0x00, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2117,6 +2633,8 @@ void block_scpu_008145_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x81, 0x21, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2129,6 +2647,8 @@ void block_scpu_008148_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0xA3, 0x81, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2141,6 +2661,8 @@ void block_scpu_00814b_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x12, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2153,6 +2675,8 @@ void block_scpu_00814e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA2, {0x0E, 0x00, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2165,6 +2689,8 @@ void block_scpu_008151_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8E, {0x15, 0x43, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2177,6 +2703,8 @@ void block_scpu_008154_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x02, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2189,6 +2717,8 @@ void block_scpu_008156_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x0B, 0x42, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2201,6 +2731,8 @@ void block_scpu_008159_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x7E, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2213,6 +2745,8 @@ void block_scpu_00815b_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x14, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2225,6 +2759,8 @@ void block_scpu_00815e_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0x80, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2237,6 +2773,8 @@ void block_scpu_008160_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x5F, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2249,6 +2787,8 @@ void block_scpu_008163_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0xA2, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2261,6 +2801,8 @@ void block_scpu_008166_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xA9, {0xFF, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2273,6 +2815,8 @@ void block_scpu_008168_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x8D, {0x93, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2285,6 +2829,8 @@ void block_scpu_00816b_e0m1x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xC2, {0x20, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2297,6 +2843,8 @@ void block_scpu_00816d_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0xAD, {0x00, 0x30, 0x00}, 2};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;
@@ -2309,6 +2857,8 @@ void block_scpu_008170_e0m0x0(CpuContext& cpu, Bus& bus, Scheduler&) {
     if (cpu.block_key() != expected) { cpu.stopped = true; return; }
     const LiftedInstruction instruction{
         0x10, {0xFB, 0x00, 0x00}, 1};
+    observe_generated_instruction_fetches(
+        bus, cpu.processor, expected.address, instruction.operand_count);
     if (execute_lifted(cpu, bus, instruction).status != LiftStatus::executed) {
         cpu.stopped = true;
         return;

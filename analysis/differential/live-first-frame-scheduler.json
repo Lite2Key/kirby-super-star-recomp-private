@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "boundary": "first_end_frame",
+  "data_boundary": {
+    "policy": "sanitized-identities-counts-and-timing-only",
+    "rom_bytes_included": false,
+    "spc_ipl_bytes_included": false,
+    "private_trace_records_included": false,
+    "patched_state": false
+  },
+  "reference": {
+    "target_master_clock": 306900,
+    "scpu_pc_at_boundary": 54873
+  },
+  "runtime": {
+    "status": "expected_frontier_reached",
+    "master_now": 306900,
+    "first_frame_event_seen": true,
+    "apu_cc_acknowledged": true,
+    "executed_generated_identities": 254,
+    "sa1": {
+      "ready_master_clock": 225694,
+      "identity_pc": 35928,
+      "reference_first_identity_master_clock": 225664,
+      "reset_release_master_clock": 2908,
+      "first_instruction_completion_master_clock": 2912,
+      "interleaved_reset_scpu_blocks": 8538,
+      "reset_domain_switches": 11410,
+      "interleaved_through_reset_and_mvn": true,
+      "interleaved_through_frame": true,
+      "frame_observation": {
+        "start_master_clock": 225694,
+        "ready_master_clock": 306894,
+        "target_master_clock": 306900,
+        "status": "target_inside_instruction",
+        "completed_blocks": 10150,
+        "completed_sa1_cycles": 40600,
+        "residual_master_clocks": 6,
+        "residual_sa1_cycles": 3
+      }
+    },
+    "scpu": {
+      "ready_master_clock": 306934,
+      "overshoot_master_clocks": 34,
+      "identity_pc": 54880,
+      "post_inventory_blocks": 3826,
+      "exact_boundary": {
+        "block_identity_pc": 54877,
+        "access_index": 0,
+        "access_start_master_clock": 306898,
+        "elapsed_master_clocks": 2,
+        "sequencer_pc": 54878
+      }
+    },
+    "spc": {
+      "ready_master_clock": 307015,
+      "overshoot_master_clocks": 115,
+      "instructions": 3662,
+      "architectural_cycles": 14638,
+      "exact_boundary": {
+        "architectural_entry_master_clock": 306869,
+        "architectural_entry_cycles": 14631,
+        "pending_instruction_cycles": 7,
+        "elapsed_master_clocks": 31,
+        "completion_master_clock": 307015,
+        "entry_rational_remainder": 110632,
+        "completion_rational_remainder": 947536
+      }
+    }
+  },
+  "claims": {
+    "live_scpu_and_spc_cover_boundary": true,
+    "exact_master_event_processed": true,
+    "exact_scpu_state_parity_proven": false,
+    "exact_spc_state_parity_proven": false,
+    "full_first_frame_parity_proven": false,
+    "cooperative_reset_schedule_proven": true,
+    "hard_boundary": "post_reset_sa1_polling_whole_instruction_residual_and_cross_domain_event_order"
+  },
+  "residual": {
+    "reason": "reset, both MVNs, and the post-reset SA-1 poll now run cooperatively through the first-frame boundary; the remaining hard gaps are a six-master-clock whole-instruction SA-1 residual, exact S-CPU/SPC architectural parity, and cross-domain event digests",
+    "required_proof": "resolve the SA-1 residual without fabricating a partial instruction, close reference-ordered S-CPU/SPC event parity, and extend execution beyond the 254-identity first-frame runtime frontier"
+  },
+  "sources": [
+    "analysis/differential/first-frame-reference.json",
+    "analysis/coverage/boot-probe-identity-coverage.json",
+    "include/kss/boot_probe.hpp",
+    "src/runtime/boot_probe.cpp",
+    "include/kss/scpu_access_boundary.hpp",
+    "include/kss/spc_exact_master.hpp",
+    "tests/runtime/boot_probe_clock_tests.cpp"
+  ]
+}
