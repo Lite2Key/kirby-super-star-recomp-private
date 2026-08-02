@@ -46,7 +46,11 @@ class ProgressTests(unittest.TestCase):
             self.assertEqual(summary.count('class="identity"'), 2273)
             self.assertEqual(summary.count('class="checkpoint"'), 42)
             self.assertIn("Runtime execution</text>", summary)
-            self.assertIn("388 / 2273", summary)
+            latest_route = self.manifest["trends"][-1]
+            self.assertIn(
+                f"{latest_route['route_probe_executed']} / {latest_route['route_probe_inventory']}",
+                summary,
+            )
             self.assertNotIn("<script", summary)
             self.assertNotIn("<image", summary)
 

@@ -87,3 +87,42 @@ def test_all_observed_leaf_blocks_stop_before_disconnected_registered_nodes() ->
         for block in document["blocks"]
     )
     assert source.count("    cpu.stopped = true;\n}") == expected
+
+
+def test_runtime_return_does_not_freeze_to_trace_successors() -> None:
+    scpu = {
+        "processor": "scpu", "pc": 0x84A1,
+        "mode": {"emulation": False, "m8": False, "x8": False},
+    }
+    sa1 = {
+        "processor": "sa1", "pc": 0x8BF4,
+        "mode": {"emulation": True, "m8": True, "x8": True},
+    }
+    document = {
+        "schema_version": 1,
+        "source": {"selection_policy": "all-observed-decoded"},
+        "regions": {"scpu": {"entry": scpu}, "sa1": {"entry": sa1}},
+        "blocks": [
+            {
+                "identity": scpu,
+                "status": "decoded",
+                "instruction": {
+                    "opcode": 0x40, "bytes_hex": "40", "flow": "interrupt_return",
+                    "target": None,
+                },
+            },
+            {
+                "identity": sa1,
+                "status": "decoded",
+                "instruction": {
+                    "opcode": 0xE2, "bytes_hex": "E220", "flow": "next",
+                    "target": None,
+                },
+            },
+        ],
+        "edges": [],
+    }
+    source = render(document, max_blocks_per_processor=1)[1]
+    function = source.split("void block_scpu_0084a1", 1)[1].split("void block_sa1", 1)[0]
+    assert "0x40" in function
+    assert "cpu.block_key() !=" not in function.split("if (execute_lifted", 1)[-1]

@@ -34,6 +34,21 @@ def _cpp_key(identity: Mapping[str, Any]) -> str:
     return f"BlockKey::make({pid}, 0x{pc:06X}U, {str(e).lower()}, {str(m).lower()}, {str(x).lower()})"
 
 
+def _has_runtime_successor(instruction: Mapping[str, Any]) -> bool:
+    """Return whether the next identity is derived from runtime state.
+
+    RTI/RTS/RTL restore a return address from the stack; indirect jumps and
+    calls can likewise derive their target from memory/register state.  A
+    generated block must not freeze those edges to the subset seen in one
+    trace.  The dispatcher remains fail-closed when the computed identity is
+    not registered on the next dispatch.
+    """
+    flow = instruction.get("flow")
+    if flow in {"return", "interrupt", "interrupt_return"}:
+        return True
+    return flow in {"jump", "call"} and instruction.get("target") is None
+
+
 def select_blocks(document: Mapping[str, Any], max_blocks_per_processor: int) -> list[Mapping[str, Any]]:
     if document.get("schema_version") != 1:
         raise GeneratedBlocksError("unsupported lifted reset CFG schema version")
@@ -176,10 +191,11 @@ namespace kss::generated {
                 "    if (post_reset_mvn_wait) { cpu.cycles += *post_reset_mvn_wait; }",
             ])
         successors = sorted(outgoing.get(_identity_key(identity), []), key=_identity_key)
-        if successors:
+        runtime_successor = _has_runtime_successor(instruction)
+        if successors and not runtime_successor:
             condition = " && ".join(f"cpu.block_key() != {_cpp_key(target)}" for target in successors)
             source.append(f"    if ({condition}) {{ cpu.stopped = true; }}")
-        elif selection_policy == "all-observed-decoded":
+        elif not runtime_successor and selection_policy == "all-observed-decoded":
             # All observed nodes are registered independently, so merely
             # relying on the next dispatch to miss is unsafe: a leaf could
             # compute an unobserved transition into another registered node.

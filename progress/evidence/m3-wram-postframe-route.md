@@ -24,20 +24,21 @@ instructions after that boundary.
 The authorized private probe currently reports (with the clean Mesen BWRAM
 fixture supplied only at runtime):
 
-- status `generated_block_failed_closed` at the next explicit S-CPU handoff;
-- inventory `2,273`, with `702` unique identities dispatched and `1,571`
+- status `expected_frontier_reached` after the finite route budget;
+- inventory `2,273`, with `1,959` unique identities dispatched and `314`
   inventory identities still untouched by this bounded continuation (all
   `2,273` generated functions remain registered; this is not a static
   generation gap);
 - `4,096` pre-frame upload blocks and a bounded `4,194,304` post-frame route
-  budget, ending at the finite route limit/stop boundary;
-- three timestamped NMI edges are consumed at whole S-CPU boundaries, and the
-  route reaches S-CPU `$00CCB7` while the SA-1 remains in the generated
-  `$008CC0` poll loop;
+  budget, ending at the explicit step limit with both modeled CPUs running;
+- all twelve supplied timestamped NMI edges are consumed at whole S-CPU
+  boundaries, and the route reaches S-CPU `$008A56` while the SA-1 remains in
+  the generated `$008CC0` poll loop;
 - a clean Mesen BWRAM capture and the private 8 KiB SRAM snapshot are
   byte-identical. Direct Mesen seeding reaches the same SA-1 `$008CC0`
-  frontier, while the recomp route's next independent blocker is the S-CPU
-  `$00CCB7` handoff;
+  frontier. The generator now treats the `$0084A1` RTI as a runtime-derived
+  return instead of freezing it to the bootstrap trace's return set, allowing
+  the measured `$00CCB7` NMI return and subsequent route dispatch;
 - the SPC reaches uploaded RAM and continues through the authentic IPL-driven
   protocol with no architectural state patched or rewound. The fixture and
   all raw route traces remain ignored/private.
@@ -46,10 +47,10 @@ fixture supplied only at runtime):
   the generated route output remains ignored and unpublished.
 
 This is a measured continuation frontier, not a gameplay-completion claim.
-The upload counter/latch ordering and post-frame NMI timing are now evidenced
-by the private Mesen trace; the next proof is to carry the same causal route
-beyond the S-CPU `$00CCB7` / SA-1 `$008CC0` handoff instead of treating the
-bounded frontier as completion.
+The upload counter/latch ordering, post-frame NMI timing, and runtime-return
+dispatch are now evidenced by the private Mesen trace; the next proof is to
+extend the route beyond the remaining `$008A56`/`$008CC0` polling frontier
+instead of treating the bounded continuation as completion.
 
 ## Verification gates
 
