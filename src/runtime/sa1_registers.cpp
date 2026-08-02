@@ -1,7 +1,5 @@
 #include "kss/sa1_registers.hpp"
 
-#include <cstdio>
-
 namespace kss {
 
 std::uint8_t Sa1RegisterFile::read(
@@ -87,11 +85,6 @@ void Sa1RegisterFile::record_message_event(
     }
     const auto token = static_cast<std::uint8_t>(
         (sa1_write ? 0x80U : 0U) | (value & 0x0fU));
-#if defined(KSS_MESSAGE_DEBUG_TRACE)
-    static std::uint32_t debug_index = 0;
-    std::fprintf(stderr, "KSS_STATIC_MESSAGE|%u|%c|%02X\n",
-        debug_index++, sa1_write ? 'W' : 'R', token);
-#endif
     message_latch_summary_.sequence_digest ^= token;
     message_latch_summary_.sequence_digest *= 1099511628211ULL;
 }

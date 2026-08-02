@@ -34,6 +34,11 @@ prefix-24 route records 95 SA-1 `$2209` writes and 9,405 S-CPU `$2300` reads
 same 24th-NMI clock neighborhood records 76 and 8,720 (`c9d5b52ab4d84ff1`).
 The signatures are deliberately treated as an open causal-parity gap until
 their boundary and ordering are reconciled.
+The first private ordering divergence is now localized to static event 1567:
+Mesen is still polling zero when the static route emits its next SA-1 set. The
+write streams stay aligned through NMI 20, then the static continuation advances
+19 writes and 684 reads beyond the seeded Mesen witness, so the next work is
+poll-loop/route timing reconciliation rather than changing latch masking.
 All 256 opcodes have
 architecture-tested execution semantics. With a runtime-only authentic IPL,
 the 254 runtime identities execute through the real SPC `$CC` acknowledgement

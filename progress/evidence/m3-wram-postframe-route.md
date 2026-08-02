@@ -69,6 +69,17 @@ signatures are intentionally published as a parity target: they do not yet
 match, and the difference is the active causal-boundary investigation rather
 than a claim of transient parity.
 
+The private event alignment narrows the gap further. The first ordering
+divergence is static event `1567`: the static route emits an SA-1 set token
+(`0x81`) while Mesen is still reading the zero latch. Before the first NMI,
+Mesen has `1 / 1,895` writes/reads versus static `1 / 1,566`; after NMI 3 the
+same write count is at `11`, but Mesen has `8,130` reads versus static `8,729`.
+The streams remain write-aligned through NMI 20 (`76` writes), then the static
+route continues with `19` additional writes and `684` additional reads through
+the prefix-24 endpoint while the Mesen witness remains at `76 / 8,721`.
+This points to pre-NMI polling and later route timing/control-flow drift, not a
+masking error in the `$2209` latch itself.
+
 This is a measured compact-route closure, not a gameplay-completion claim.
 The optional public latch snapshot is an endpoint observation only; it does not
 replace a transient event proof. The next proof is causal parity at the new
