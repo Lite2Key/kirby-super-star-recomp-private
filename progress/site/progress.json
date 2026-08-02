@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "snapshot": {
-    "generated_at": "2026-08-02T00:50:00Z",
-    "commit": "b00d81acdde10896a3c021acbc5e4bedee53c084",
+    "generated_at": "2026-08-02T01:11:14Z",
+    "commit": "83c46cf8147fb8f05056a3d24a4c9024d9efb094",
     "dirty": false,
     "rom_id": "kss-usa-rev0-sha256:4e095fbb...c4a62",
     "toolchain_manifest_hash": "sha256:0e0c5ca1abd3cc24a6816069860776709969afef29b3e1c8998fb06f0e6eb468",
@@ -160,7 +160,7 @@
       "id": "M3",
       "name": "Reset to first frame",
       "status": "in_progress",
-      "summary": "Static generation now covers all 2273 identities in the compact reset-to-visible corpus, including 15 executable S-CPU WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities; a bounded route-only continuation reaches 388 identities after the first frame and follows the generated post-frame SA-1 handoff, while the remaining CPU/SA-1 route is still open.",
+      "summary": "Static generation now covers all 2273 identities in the compact reset-to-visible corpus, including 15 executable S-CPU WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities; a clean-BWRAM route-only continuation reaches 702 unique identities, consumes three measured NMI edges, and reaches SA-1 $008CC0 / S-CPU $00CCB7 while the remaining 1571 inventory identities are still unexecuted.",
       "gate": "Hardware events and the fixed first-frame checkpoint match.",
       "evidence": [
         {
@@ -499,7 +499,7 @@
       "name": "S-CPU control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-visible route exposes 1032 S-CPU identities; all now lift and generate safely, including 15 executable-WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities, and the bounded private continuation reaches 388 through the post-frame SA-1 handoff before the next dynamic-return boundary.",
+      "summary": "The first-visible route exposes 1032 S-CPU identities; all now lift and generate safely, including 15 executable-WRAM identities decoded from private witnesses. The first-frame runtime executes 254 identities, and the clean-BWRAM continuation reaches the S-CPU $00CCB7 handoff after three measured NMI services; full route execution remains open.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -546,7 +546,7 @@
       "name": "SA-1 control flow",
       "group": "analysis",
       "status": "in_progress",
-      "summary": "The first-visible route exposes 1241 SA-1 identities; all 1241 now lift and generate safely, while the runtime poll domain reaches the first-frame boundary with a six-master-clock residual.",
+      "summary": "The first-visible route exposes 1241 SA-1 identities; all 1241 now lift and generate safely. The clean-BWRAM route reaches the generated SA-1 $008CC0 poll loop after the first frame, with state and timing parity beyond that handoff still open.",
       "metrics": [
         {
           "label": "observed mode-aware blocks",
@@ -623,7 +623,7 @@
       "name": "Deterministic scheduler",
       "group": "runtime",
       "status": "in_progress",
-      "summary": "The boot probe records generated S-CPU micro-accesses, uses exact SA-1 2:1 conversion, and cooperatively schedules reset plus both MVNs at whole-instruction boundaries. An explicit route-only mode lets SPC continue past the first-frame event boundary; CPU/SA-1 continuation remains a separate handshake phase.",
+      "summary": "The boot probe records generated S-CPU micro-accesses, uses exact SA-1 2:1 conversion, and cooperatively schedules reset plus both MVNs at whole-instruction boundaries. Route-only mode now consumes timestamped post-frame NMI edges at measured whole-S-CPU boundaries while keeping the remaining CPU/SA-1 handshake explicit.",
       "metrics": [
         {
           "label": "synchronization classes",
@@ -692,7 +692,7 @@
       "name": "Differential validator",
       "group": "validation",
       "status": "in_progress",
-      "summary": "Reset and post-reset slices pass; the first-visible oracle is repeat-stable; PPU parity and CPU/S-CPU/SA-1/DMA counts are exact. SPC has an exact 462-event prefix plus one trailing acknowledgement, while ordered digests and full route execution remain active.",
+      "summary": "Reset and post-reset slices pass; the first-visible oracle is repeat-stable; PPU parity and CPU/S-CPU/SA-1/DMA counts are exact. The clean-BWRAM route now reaches SA-1 $008CC0 / S-CPU $00CCB7 with three NMI services, while ordered digests and full route execution remain active.",
       "metrics": [
         {
           "label": "passing required scenarios",
@@ -839,7 +839,7 @@
     {
       "id": "post-first-frame-route-expansion",
       "severity": "technical",
-      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation now covers all 2273. A real private route probe inventories all 2273, executes 388, and misses 1885 after a bounded 4194304-block continuation that follows the post-frame SA-1 handoff to SA-1 $8A01 and S-CPU $0014; the next dynamic-return boundary remains open.",
+      "summary": "The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation covers all 2273. A clean-BWRAM private route probe dispatches 702 unique identities after a bounded 4194304-block continuation, reaches SA-1 $008CC0 and S-CPU $00CCB7 after three NMI services, and leaves 1571 inventory identities untouched; the next S-CPU handoff remains open.",
       "owner": "analysis/recompiler"
     },
     {
@@ -850,9 +850,9 @@
     }
   ],
   "next_proof": {
-    "title": "Close the S-CPU/SPC upload handshake",
+    "title": "Close the post-frame S-CPU/SA-1 handoff",
     "acceptance": [
-      "Advance the opt-in CPU/SA-1 route beyond the 388-identity bounded frontier and reduce the 1885 missing identities using a new causal route scenario",
+      "Advance the opt-in CPU/SA-1 route beyond the S-CPU $00CCB7 / SA-1 $008CC0 frontier and reduce the 1571 untouched inventory identities using a new causal route scenario",
       "Resolve the one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle",
       "Close ordered CPU, SA-1, DMA, PPU, and SPC digest parity without patching architectural state"
     ],
@@ -1075,6 +1075,53 @@
       "route_probe_final_apu_port0": 114,
       "route_probe_spc_cycles": 5198846,
       "route_probe_postfrontier_executed": 34,
+      "upload_handshake_block": 1,
+      "passing_scenarios": 0,
+      "open_divergences": 2,
+      "first_visible_route_capture": 1,
+      "first_visible_route_events": 4571378,
+      "first_visible_route_edges": 2440,
+      "async_nmi_edges": 21,
+      "cooperative_reset_scheduler": 1,
+      "sa1_frame_ready_master": 306894,
+      "sa1_frame_residual_master": 6,
+      "ppu_event_chain_parity": 1,
+      "cpu_write_count_delta": 0,
+      "scpu_write_count_delta": 0,
+      "sa1_write_count_delta": 0,
+      "dma_write_count_delta": 0,
+      "spc_event_count": 463,
+      "spc_reference_prefix": 462,
+      "standard_native_tests": 25,
+      "private_native_tests": 25,
+      "python_tests": 226
+    },
+    {
+      "at": "2026-08-02T01:08:32Z",
+      "verified_blocks": 248,
+      "executed_blocks": 254,
+      "observed_blocks": 2273,
+      "generated_blocks": 2273,
+      "new_route_blocks_remaining": 0,
+      "runtime_route_blocks_remaining": 1571,
+      "private_wram_witnesses": 15,
+      "wram_unresolved_blocks": 0,
+      "post_frame_route_mode": 1,
+      "route_probe_inventory": 2273,
+      "route_probe_executed": 702,
+      "route_probe_unexecuted": 1571,
+      "route_probe_missing": 0,
+      "route_probe_upload_blocks": 4096,
+      "route_probe_upload_status": 4,
+      "route_probe_post_blocks": 1098173,
+      "route_probe_post_status": 3,
+      "route_probe_scpu_pc": "00CCB7",
+      "route_probe_sa1_pc": "008CC0",
+      "route_probe_scpu_stopped": 1,
+      "route_probe_sa1_stopped": 0,
+      "route_probe_nmi_services": 3,
+      "route_probe_clean_bwram_fixture": 1,
+      "route_probe_endpoint_match": 1,
       "upload_handshake_block": 1,
       "passing_scenarios": 0,
       "open_divergences": 2,

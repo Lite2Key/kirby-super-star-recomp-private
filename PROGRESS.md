@@ -2,7 +2,7 @@
 
 > This is a ROM-free evidence snapshot. Counts marked `evolving` are discovered inventories, not estimates of total project completion.
 
-Snapshot: `2026-08-02T00:50:00Z` | commit `b00d81acdde10896a3c021acbc5e4bedee53c084` | tree `clean`
+Snapshot: `2026-08-02T01:11:14Z` | commit `83c46cf8147fb8f05056a3d24a4c9024d9efb094` | tree `clean`
 
 ## Milestone map
 
@@ -74,15 +74,15 @@ Snapshot: `2026-08-02T00:50:00Z` | commit `b00d81acdde10896a3c021acbc5e4bedee53c
 
 ## Next executable proof
 
-**Close the S-CPU/SPC upload handshake** - owner: `runtime/validation`
+**Close the post-frame S-CPU/SA-1 handoff** - owner: `runtime/validation`
 
-- [ ] Advance the opt-in CPU/SA-1 route beyond the 388-identity bounded frontier and reduce the 1885 missing identities using a new causal route scenario
+- [ ] Advance the opt-in CPU/SA-1 route beyond the S-CPU $00CCB7 / SA-1 $008CC0 frontier and reduce the 1571 untouched inventory identities using a new causal route scenario
 - [ ] Resolve the one trailing SPC-to-CPU acknowledgement with a master-clock/microphase oracle
 - [ ] Close ordered CPU, SA-1, DMA, PPU, and SPC digest parity without patching architectural state
 
 ## Active blockers
 
-- **technical** `post-first-frame-route-expansion`: The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation now covers all 2273. A real private route probe inventories all 2273, executes 388, and misses 1885 after a bounded 4194304-block continuation that follows the post-frame SA-1 handoff to SA-1 $8A01 and S-CPU $0014; the next dynamic-return boundary remains open. (owner: analysis/recompiler)
+- **technical** `post-first-frame-route-expansion`: The compact reset-to-visible corpus contains 2273 identities and 2440 edges, and static generation covers all 2273. A clean-BWRAM private route probe dispatches 702 unique identities after a bounded 4194304-block continuation, reaches SA-1 $008CC0 and S-CPU $00CCB7 after three NMI services, and leaves 1571 inventory identities untouched; the next S-CPU handoff remains open. (owner: analysis/recompiler)
 - **technical** `shared-first-endframe-parity`: Cooperative reset/MVN and post-reset SA-1 scheduling reach the first frame; reset-DMA side effects and PPU parity are exact, and CPU/S-CPU/SA-1/DMA counts match. The remaining work is the post-frame CPU/SA-1 upload handshake, one trailing SPC acknowledgement, and ordered digest parity. (owner: runtime/validation)
 
 Regenerate the interactive dashboard with:
