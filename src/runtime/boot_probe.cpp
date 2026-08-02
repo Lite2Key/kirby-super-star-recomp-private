@@ -858,8 +858,9 @@ BootProbeResult run_boot_probe(
                 result.post_frame_route_observation.status = one.status;
                 break;
             }
-            if (result.executed_block_identities.size()
-                == result.inventory_block_identities.size()) {
+            if (!timing.continue_route_past_identity_frontier
+                && result.executed_block_identities.size()
+                    == result.inventory_block_identities.size()) {
                 result.post_frame_route_observation.status =
                     GeneratedRunStatus::checkpoint_reached;
                 break;

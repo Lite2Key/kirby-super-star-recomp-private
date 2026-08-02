@@ -63,6 +63,11 @@ struct BootProbeTimingEvidence {
     // raise it to cross a measured upload phase without permitting an
     // unbounded loop.
     std::size_t post_frame_route_block_budget{4'096U};
+    // Route diagnostics normally close once every registered identity has
+    // been observed. A private, evidence-backed continuation may opt past
+    // that inventory frontier to expose the next unknown target or measured
+    // timing handoff; the finite block budget still applies.
+    bool continue_route_past_identity_frontier{};
 };
 
 enum class BootProbeEventChainStatus : std::uint8_t {

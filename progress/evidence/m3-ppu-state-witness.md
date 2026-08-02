@@ -50,6 +50,13 @@ The same route still reaches `2,273 / 2,273` compact identity blocks after
 Mesen witness remains a distinct `76 / 8,720` signature with `+58` cadence;
 that unresolved handoff is still upstream of a full visible-frame proof.
 
+The route-only continuation now has an explicit diagnostic mode that may pass
+the `2,273 / 2,273` identity frontier instead of treating coverage as a time
+boundary. With the private prefix-31 witness, that mode consumes NMI 28 and
+fails closed at the next unregistered S-CPU target `$00D0FF` (post-route
+status `unknown_block`) at approximately master `37,495,688`. This is a
+useful next lift target, not a claim of visible-frame parity.
+
 The first end-frame PPU event chain remains exact at `54 / 54`, but it is the
 forced-blank boundary at master clock `306,900`. The HALKEN visible-frame
 reference is later at master clock `38,545,064` with `3,032` non-black pixels.
@@ -58,10 +65,11 @@ state, but it does not prove causal pixel parity at that later boundary.
 
 ## Next bounded proof
 
-The next safe step is to preserve the public state witness and close Mode 7
-composition around the enabled OBJ path, then extend the route witness to the
-later visible boundary. Only after that surface is covered by synthetic tests
-and a causal route witness will it be promoted to the visible-frame milestone.
+The next safe step is to lift and privately validate the `$00D0FF` handoff,
+replay through the next measured NMI boundary, and then close Mode 7
+composition around the enabled OBJ path. Only after those surfaces are
+covered by synthetic tests and a causal route witness will they be promoted to
+the visible-frame milestone.
 No private image payload is a release artifact.
 
 ## Verification gates

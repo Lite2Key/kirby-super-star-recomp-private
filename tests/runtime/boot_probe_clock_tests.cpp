@@ -304,6 +304,29 @@ void test_post_frame_route_only_microphase_is_separate_from_event_capture() {
         }));
 }
 
+void test_post_frame_route_can_continue_past_identity_frontier() {
+    const auto ipl = ipl_with({
+        0xe8, 0xaa, 0xc4, 0xf4,
+        0xe8, 0xbb, 0xc4, 0xf5,
+        0xe4, 0xf4, 0x68, 0xcc, 0xd0, 0xfa,
+        0xc4, 0xf4,
+        0xe4, 0xf4, 0xc4, 0xf4, 0x2f, 0xfa,
+    });
+    // This separate test keeps the large BootProbeResult off the stack frame
+    // that already exercises the recorder and ordinary route continuation.
+    kss::BootProbeTimingEvidence evidence{ipl};
+    evidence.continue_route_after_first_frame = true;
+    evidence.continue_route_past_identity_frontier = true;
+    evidence.post_frame_route_block_budget = 1U;
+    const auto result = kss::run_boot_probe(synthetic_upload_rom(), evidence);
+    assert(result.status == kss::BootProbeStatus::expected_frontier_reached);
+    assert(result.post_frame_route_observation.completed_blocks <= 1U);
+    assert(result.post_frame_route_observation.status
+        == kss::GeneratedRunStatus::step_limit
+        || result.post_frame_route_observation.status
+            == kss::GeneratedRunStatus::unknown_block);
+}
+
 void test_runtime_event_chain_observes_live_causal_path() {
     const auto ipl = ipl_with({
         0xe8, 0xaa, 0xc4, 0xf4,
@@ -435,6 +458,7 @@ int main() {
     test_runtime_ipl_executes_reused_upload_blocks_to_frame_boundary();
     test_post_frame_route_opt_in_keeps_event_chain_first_frame_bounded();
     test_post_frame_route_only_microphase_is_separate_from_event_capture();
+    test_post_frame_route_can_continue_past_identity_frontier();
     test_runtime_event_chain_observes_live_causal_path();
     test_spc_requires_runtime_ipl_and_fails_closed();
     test_post_frame_spc_phase_is_timing_debt_without_execution();
