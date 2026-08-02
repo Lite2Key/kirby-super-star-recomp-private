@@ -62,6 +62,8 @@ hardware-boundary map showing each clock domain and event chain against the
 first `endFrame` target. Striped regions are measured work still remaining;
 they are not an estimate of whole-game completion. See [PROGRESS.md](PROGRESS.md)
 for the Git-safe summary.
+See [platform-support.md](docs/platform-support.md) for the current Windows/
+Linux support boundary and staged native-package roadmap.
 
 On Windows, double-click `show-progress.cmd` to regenerate and open the interactive dashboard.
 
